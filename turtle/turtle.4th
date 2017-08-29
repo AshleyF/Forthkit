@@ -1,5 +1,9 @@
 ( turtle graphics )
 
+3.14159265359 const pi
+pi 180 / const d2r
+: deg2rad d2r * ;
+
 var x var y
 
 : go y ! x ! ;
@@ -132,3 +136,4 @@ update
     ;
 
 : move move2 ;
+

@@ -1,5 +1,9 @@
 ( pixel graphics library using Unicode Braile characters )
 
+: repeat 0 do ; ( TODO: move to prelude )
+: 2dup dup dup ; ( TODO: move to prelude )
+: +! dup @ rot + swap ! ;
+
 160 const width
 160 const height
 
@@ -22,4 +26,5 @@ canvas-size const dots ( after canvas )
 
 : <cr> 10 emit ; ( *nix style -- change as needed )
 : newline-as-appropriate i 80 mod 0 = if <cr> then ;
-: show canvas-size 0 do newline-as-appropriate i m@ emit loop flush ;
+: show canvas-size repeat newline-as-appropriate i m@ emit loop flush ;
+

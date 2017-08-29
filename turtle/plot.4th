@@ -58,7 +58,7 @@ var x var y
   show ;
 
 : draw plot move plot ;
-: n  repeat  0 -1 draw loop ;
+: n 0 do 0 -1 draw loop ;
 : s  repeat  0  1 draw loop ;
 : e  repeat  1  0 draw loop ;
 : w  repeat -1  0 draw loop ;
@@ -98,3 +98,4 @@ var x var y
   26 repeat reset loop show ;
 
 dead-pix
+
