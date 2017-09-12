@@ -1,4 +1,5 @@
 ( test plotting with pixels )
+( requires: pixels.4th )
 
 var x var y
 

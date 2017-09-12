@@ -1,8 +1,5 @@
 ( pixel graphics library using Unicode Braile characters )
-
-: repeat 0 do ; ( TODO: move to prelude )
-: 2dup dup dup ; ( TODO: move to prelude )
-: +! dup @ rot + swap ! ;
+( requires: prelude.4th )
 
 160 const width
 160 const height

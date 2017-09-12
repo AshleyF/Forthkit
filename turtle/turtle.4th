@@ -1,4 +1,5 @@
 ( turtle graphics )
+( requires: pixels.4th )
 
 3.14159265359 const pi
 pi 180 / const d2r
