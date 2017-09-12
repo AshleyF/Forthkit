@@ -5,199 +5,204 @@ import operator, math, struct
 setrecursionlimit(100000)
 
 class Forth:
-  def __init__(_):
-    _.index = 0
-    _.variables = {}
-    _.memory = [0] * 32 * 1024
-    _.stack = []
-    _.dictionary = {
-      'dup'  : lambda: _.x_xx(lambda x: (x,x)),
-      'drop' : lambda: _.x_(lambda _: None),
-      'swap' : lambda: _.xx_xx(lambda x,y: (y,x)),
-      'over' : lambda: _.xx_xxx(lambda x,y: (x,y,x)),
-      'rot'  : lambda: _.xxx_xxx(lambda x,y,z: (y,z,x)),
-      '-rot' : lambda: _.xxx_xxx(lambda x,y,z: (z,x,y)),
-      '+'    : lambda: _.xx_x(operator.add),
-      '-'    : lambda: _.xx_x(operator.sub),
-      '*'    : lambda: _.xx_x(operator.mul),
-      '/'    : lambda: _.xx_x(operator.div),
-      'mod'  : lambda: _.xx_x(operator.mod),
-      'acos' : lambda: _.x_x(math.acos),
-      'asin' : lambda: _.x_x(math.asin),
-      'atan' : lambda: _.x_x(math.atan),
-      'cos'  : lambda: _.x_x(math.cos),
-      'sin'  : lambda: _.x_x(math.sin),
-      'tan'  : lambda: _.x_x(math.tan),
-      'int'  : lambda: _.x_x(int),
-      'float': lambda: _.x_x(float),
-      '>>'   : lambda: _.xx_x(operator.rshift),
-      '<<'   : lambda: _.xx_x(operator.lshift),
-      '='    : lambda: _.xx_b(operator.eq),
-      '<>'   : lambda: _.xx_b(operator.ne),
-      '>'    : lambda: _.xx_b(operator.gt),
-      '>='   : lambda: _.xx_b(operator.ge),
-      '<'    : lambda: _.xx_b(operator.lt),
-      '<='   : lambda: _.xx_b(operator.le),
-      'and'  : lambda: _.xx_x(operator.and_),
-      'or'   : lambda: _.xx_x(operator.or_),
-      'xor'  : lambda: _.xx_x(operator.xor),
-      'not'  : lambda: _.x_x(operator.inv),
-      'm@'   : lambda: _.x_x(lambda x: _.memory[x]),
-      'm!'   : lambda: _.xx_(_.memoryStore),
-      '@'    : lambda: _.x_x(lambda x: _.variables[x]),
-      '!'    : lambda: _.xx_(_.variableStore),
-      '.'    : lambda: stdout.write('%f ' % _.pop()),
-      '.s'   : lambda: stdout.write('%s ' % _.stack),
-      '.m'   : lambda: stdout.write('%s ' % _.memory[_.pop():_.pop()]),
-      'emit' : lambda: _.x_(lambda x:stdout.write(unichr(x))),
+  def __init__(self):
+    self.index = 0
+    self.variables = {}
+    self.memory = [0] * 32 * 1024
+    self.stack = []
+    self.dictionary = {
+      'dup'  : lambda: self.x_xx(lambda x: (x,x)),
+      'drop' : lambda: self.x_(lambda _: None),
+      'swap' : lambda: self.xx_xx(lambda x,y: (y,x)),
+      'over' : lambda: self.xx_xxx(lambda x,y: (x,y,x)),
+      'rot'  : lambda: self.xxx_xxx(lambda x,y,z: (y,z,x)),
+      '-rot' : lambda: self.xxx_xxx(lambda x,y,z: (z,x,y)),
+      '+'    : lambda: self.xx_x(operator.add),
+      '-'    : lambda: self.xx_x(operator.sub),
+      '*'    : lambda: self.xx_x(operator.mul),
+      '/'    : lambda: self.xx_x(operator.div),
+      'mod'  : lambda: self.xx_x(operator.mod),
+      'acos' : lambda: self.x_x(math.acos),
+      'asin' : lambda: self.x_x(math.asin),
+      'atan' : lambda: self.x_x(math.atan),
+      'cos'  : lambda: self.x_x(math.cos),
+      'sin'  : lambda: self.x_x(math.sin),
+      'tan'  : lambda: self.x_x(math.tan),
+      'int'  : lambda: self.x_x(int),
+      'float': lambda: self.x_x(float),
+      '>>'   : lambda: self.xx_x(operator.rshift),
+      '<<'   : lambda: self.xx_x(operator.lshift),
+      '='    : lambda: self.xx_b(operator.eq),
+      '<>'   : lambda: self.xx_b(operator.ne),
+      '>'    : lambda: self.xx_b(operator.gt),
+      '>='   : lambda: self.xx_b(operator.ge),
+      '<'    : lambda: self.xx_b(operator.lt),
+      '<='   : lambda: self.xx_b(operator.le),
+      'and'  : lambda: self.xx_x(operator.and_),
+      'or'   : lambda: self.xx_x(operator.or_),
+      'xor'  : lambda: self.xx_x(operator.xor),
+      'not'  : lambda: self.x_x(operator.inv),
+      'm@'   : lambda: self.x_x(lambda x: self.memory[x]),
+      'm!'   : lambda: self.xx_(self.memoryStore),
+      '@'    : lambda: self.x_x(lambda x: self.variables[x]),
+      '!'    : lambda: self.xx_(self.variableStore),
+      '.'    : lambda: stdout.write('%f ' % self.pop()),
+      '.s'   : lambda: stdout.write('%s ' % self.stack),
+      '.m'   : lambda: stdout.write('%s ' % self.memory[self.pop():self.pop()]),
+      'emit' : lambda: self.x_(lambda x:stdout.write(unichr(x))),
       'flush': lambda: lambda: stdout.flush(),
-      'dump' : _.dump,
-      'sym'  : _.symbol,
-      '('    : _.comment,
-      'if'   : _.doif,
-      'else' : _.doelse,
-      'then' : _.dothen,
-      'do'   : _.doloop,
-      'i'    : lambda: _.push(_.index),
-      'const': _.constant,
-      'var'  : _.variable,
-      ':'    : _.define,
-      '\''   : lambda: _._x(_.find),
-      '['    : _.anonymous,
-      'call' : lambda: _.x_(_.call),
+      'dump' : self.dump,
+      'sym'  : self.symbol,
+      '('    : self.comment,
+      'if'   : self.doif,
+      'else' : self.doelse,
+      'then' : self.dothen,
+      'do'   : self.doloop,
+      'i'    : lambda: self.push(self.index),
+      'const': self.constant,
+      'var'  : self.variable,
+      ':'    : self.define,
+      '\''   : lambda: self._x(self.find),
+      '['    : self.anonymous,
+      'call' : lambda: self.x_(self.call),
       'exit' : lambda: exit(0),
-      'debug': lambda: _.debug() }
-    _.names = _.dictionary.keys()
+      'debug': lambda: self.debug() }
+    self.names = self.dictionary.keys()
 
-  def push(_, x): _.stack.append(x)
-  def push2(_, (x, y)): _.push(x); _.push(y)
-  def push3(_, (x, y, z)): _.push(x); _.push(y); _.push(z)
+  def push(self, x): self.stack.append(x)
+  def push2(self, (x, y)):
+    self.push(x)
+    self.push(y)
+  def push3(self, (x, y, z)):
+    self.push(x)
+    self.push(y)
+    self.push(z)
 
-  def pop(_):
-    if len(_.stack) == 0:
+  def pop(self):
+    if len(self.stack) == 0:
       raise Exception("Stack empty")
-    _.stack, val = _.stack[:-1], _.stack[-1]
+    self.stack, val = self.stack[:-1], self.stack[-1]
     return val
 
-  def flip2(_, f, x, y): return f(y, x)
-  def flip3(_, f, x, y, z): return f(z, y, x)
-  def x_x(_, f): _.push(f(_.pop()))
-  def xx_x(_, f): _.push(_.flip2(f, _.pop(), _.pop()))
-  def xx_b(_, f): _.push( -1 if _.flip2(f,_.pop(),_.pop()) else 0)
-  def xx_xx(_, f): _.push2(_.flip2(f, _.pop(), _.pop()))
-  def x_xx(_, f): _.push2(f(_.pop()))
-  def xx_xxx(_, f): _.push3(_.flip2(f, _.pop(), _.pop()))
-  def xxx_xxx(_, f): _.push3(_.flip3(f, _.pop(), _.pop(), _.pop()))
-  def x_(_, f): f(_.pop())
-  def _x(_, f): _.push(f())
-  def xx_(_, f): _.flip2(f, _.pop(), _.pop())
+  def flip2(self, f, x, y): return f(y, x)
+  def flip3(self, f, x, y, z): return f(z, y, x)
+  def x_x(self, f): self.push(f(self.pop()))
+  def xx_x(self, f): self.push(self.flip2(f, self.pop(), self.pop()))
+  def xx_b(self, f): self.push( -1 if self.flip2(f,self.pop(),self.pop()) else 0)
+  def xx_xx(self, f): self.push2(self.flip2(f, self.pop(), self.pop()))
+  def x_xx(self, f): self.push2(f(self.pop()))
+  def xx_xxx(self, f): self.push3(self.flip2(f, self.pop(), self.pop()))
+  def xxx_xxx(self, f): self.push3(self.flip3(f, self.pop(), self.pop(), self.pop()))
+  def x_(self, f): f(self.pop())
+  def _x(self, f): self.push(f())
+  def xx_(self, f): self.flip2(f, self.pop(), self.pop())
 
-  def memoryStore(_, val, addr): _.memory[addr] = val
-  def variableStore(_, val, addr): _.variables[addr] = val
+  def memoryStore(self, val, addr): self.memory[addr] = val
+  def variableStore(self, val, addr): self.variables[addr] = val
 
-  def debug(_):
-    print 'STACK: %s' % _.stack
-    print 'MEMORY: %s' % _.memory[:1000]
+  def debug(self):
+    print 'STACK: %s' % self.stack
+    print 'MEMORY: %s' % self.memory[:1000]
 
-  def dump(_):
+  def dump(self):
     with open('boot.bin', 'wb') as f:
-      for m in _.memory:
+      for m in self.memory:
         f.write(struct.pack('h', m))
 
-  def symbol(_):
-    name = _.tokens.next()
-    for c in name[::-1]: _.push(ord(c))
-    _.push(len(name))
+  def symbol(self):
+    name = self.tokens.next()
+    for c in name[::-1]: self.push(ord(c))
+    self.push(len(name))
 
-  def comment(_):
-    while _.scan().next() != ')': pass
+  def comment(self):
+    while self.scan().next() != ')': pass
 
-  def doif(_):
+  def doif(self):
     term = ['else', 'then']
-    if _.pop() == 0:
-      while not _.scan().next() in term:
+    if self.pop() == 0:
+      while not self.scan().next() in term:
         pass
 
-  def doelse(_):
-    while _.scan().next() != 'then': pass
+  def doelse(self):
+    while self.scan().next() != 'then': pass
 
-  def dothen(_): pass
+  def dothen(self): pass
 
-  def doloop(_):
-    savedIndex = _.index # for loop nesting
-    _.index = _.pop()
-    end = _.pop()
-    code = list(takewhile(lambda t: t != 'loop', _.scan()))
-    savedTokens = _.tokens
-    _.tokens = (_ for _ in ())
-    while _.index < end:
-      _.execute(code)
-      _.index += 1
-    _.tokens = savedTokens
-    _.index = savedIndex
+  def doloop(self):
+    savedIndex = self.index # for loop nesting
+    self.index = self.pop()
+    end = self.pop()
+    code = list(takewhile(lambda t: t != 'loop', self.scan()))
+    savedTokens = self.tokens
+    self.tokens = (_ for _ in ())
+    while self.index < end:
+      self.execute(code)
+      self.index += 1
+    self.tokens = savedTokens
+    self.index = savedIndex
 
-  def constant(_):
-    name = _.tokens.next()
-    val = _.pop()
-    _.dictionary[name] = lambda: _.push(val)
+  def constant(self):
+    name = self.tokens.next()
+    val = self.pop()
+    self.dictionary[name] = lambda: self.push(val)
 
-  def variable(_):
-    name = _.tokens.next()
-    index = len(_.variables)
-    _.variables[index] = 0
-    _.dictionary[name] = lambda: _.push(index)
+  def variable(self):
+    name = self.tokens.next()
+    index = len(self.variables)
+    self.variables[index] = 0
+    self.dictionary[name] = lambda: self.push(index)
 
-  def define(_):
-    name = _.tokens.next()
-    code = list(takewhile(lambda t: t != ';', _.scan()))
-    _.dictionary[name] = (lambda: _.execute(code))
-    if not name in _.names: _.names.append([name])
+  def define(self):
+    name = self.tokens.next()
+    code = list(takewhile(lambda t: t != ';', self.scan()))
+    self.dictionary[name] = (lambda: self.execute(code))
+    if not name in self.names: self.names.append([name])
 
-  def anonymous(_):
-    code = list(takewhile(lambda t: t != ']', _.scan()))
-    _.names.append(code)
-    _.push(len(_.names) - 1)
+  def anonymous(self):
+    code = list(takewhile(lambda t: t != ']', self.scan()))
+    self.names.append(code)
+    self.push(len(self.names) - 1)
 
-  def find(_):
-    name = _.tokens.next()
-    i = _.names.index([name])
+  def find(self):
+    name = self.tokens.next()
+    i = self.names.index([name])
     return i
 
-  def call(_, i): _.execute(_.names[i])
+  def call(self, i): self.execute(self.names[i])
 
-  def input(_):
+  def input(self):
     for token in raw_input().split(): yield token
 
-  def read(_): _.tokens = _.input()
+  def read(self): self.tokens = self.input()
 
-  def scan(_):
+  def scan(self):
     while True:
-      for token in _.tokens:
+      for token in self.tokens:
         yield token
-      _.read()
+      self.read()
 
-  def number(_, token):
+  def number(self, token):
     try:
       return int(token)
     except ValueError:
       return float(token)
 
-  def evaluate(_):
+  def evaluate(self):
     try:
       while True:
-        token = _.tokens.next()
-        if token in _.dictionary:
-          _.dictionary[token]()
+        token = self.tokens.next()
+        if token in self.dictionary:
+          self.dictionary[token]()
         else:
           try:
-            _.push(_.number(token))
+            self.push(self.number(token))
           except ValueError:
             raise Exception("%s?" % token)
     except StopIteration: pass
 
-  def execute(_, code):
-    _.tokens = chain(code, _.tokens)
-    _.evaluate()
+  def execute(self, code):
+    self.tokens = chain(code, self.tokens)
+    self.evaluate()
 
 forth = Forth()
 
@@ -209,5 +214,7 @@ while True:
     forth.read()
     forth.evaluate()
     print 'ok'
-  except EOFError: print 'done'; exit()
+  except EOFError:
+    print 'done'
+    exit()
   except Exception, error: print error
