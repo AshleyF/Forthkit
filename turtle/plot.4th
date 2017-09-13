@@ -4,34 +4,7 @@
 var x var y
 
 : start clear 0 x ! 0 y ! ;
-: plot x @ y @ set ;
-: move y +! x +! ;
-
-: ` 1 0 move ;
-: # plot ` ;
-: \ 0 x ! 0 1 move ;
-
-: happy start
-  ` ` ` ` ` # # # # # # ` ` ` ` ` \
-  ` ` ` # # ` ` ` ` ` ` # # ` ` ` \
-  ` ` # ` ` ` ` ` ` ` ` ` ` # ` ` \
-  ` # ` ` ` ` ` ` ` ` ` ` ` ` # ` \
-  ` # ` ` ` # # ` ` # # ` ` ` # ` \
-  # ` ` ` ` # # ` ` # # ` ` ` ` # \
-  # ` ` ` ` ` ` ` ` ` ` ` ` ` ` # \
-  # ` ` ` ` ` ` ` ` ` ` ` ` ` ` # \
-  # ` ` ` ` ` ` ` ` ` ` ` ` ` ` # \
-  # ` ` ` ` ` ` ` ` ` ` ` ` ` ` # \
-  # ` ` # ` ` ` ` ` ` ` ` # ` ` # \
-  # ` ` ` # ` ` ` ` ` ` # ` ` ` # \
-  ` # ` ` ` # # # # # # ` ` ` # ` \
-  ` # ` ` ` ` ` ` ` ` ` ` ` ` # ` \
-  ` ` # ` ` ` ` ` ` ` ` ` ` # ` ` \
-  ` ` ` # # ` ` ` ` ` ` # # ` ` ` \
-  ` ` ` ` ` # # # # # # ` ` ` ` ` \
-  show ;
-
-: | 0 do 35 = if # else ` then loop \ ;
+: | 0 do 35 = if x @ y @ set then 1 x +! loop 0 x ! 1 y +! ;
 
 : turtle start
   sym ```````````````````````````````####`` |
@@ -58,45 +31,5 @@ var x var y
   sym `````````````###````````````````````` |
   show ;
 
-: draw plot move plot ;
-: n 0 do 0 -1 draw loop ;
-: s  repeat  0  1 draw loop ;
-: e  repeat  1  0 draw loop ;
-: w  repeat -1  0 draw loop ;
-: nw repeat -1 -1 draw loop ;
-: ne repeat  1 -1 draw loop ;
-: sw repeat -1  1 draw loop ;
-: se repeat  1  1 draw loop ;
-
-: N 1 n ;
-: S 1 s ;
-: E 1 e ;
-: W 1 w ;
-: m move ;
-
-: _ 7 0 m ;
-: 'I 5 e 2 w 6 s 2 e 5 w 2 e 6 n 6 0 m ;
-: 'S 6 1 m W N 4 w S W S E S 4 e S E S W S 4 w
-   N W 8 -5 m ;
-: 'E 6 s E 6 n 5 e 0 6 m 5 w 3 n 4 e 3 -3 m ;
-: 'D 6 s E 6 n 4 e 6 s 3 w 4 -1 m 4 n 2 -1 m ;
-: 'A 0 6 m 4 n 2 ne 2 e 2 se 4 s W 4 n 2 nw 2 sw
-   4 s 2 n 3 e 4 -4 m ;
-: 'P 6 s E 6 n 4 e S E S W S 3 w 6 -3 m ;
-: 'X 2 se S 2 sw S 3 ne 3 se N 2 nw N 2 ne W 2 sw
-   2 nw 7 0 m ;
-: 'L 6 s 6 n E 6 s 5 e 2 -6 m ;
-
-: 'SEE 'S 'E 'E ;
-: 'DEAD 'D 'E 'A 'D ;
-: 'PIXELS 'P 'I 'X 'E 'L 'S ;
-: pix start 'I _ 'SEE _ 'DEAD _ 'PIXELS show ;
-
-: dead-pix start 'I _ 'SEE _ 'DEAD _ 'PIXELS
-  2 2 3 5 19 3 20 4 23 5 24 1 31 2 31 3 47 5 51 3
-  54 0 55 4 63 2 67 6 71 2 76 4 85 5 86 2 95 5
-  96 0 105 2 109 5 110 0 117 1 118 5 129 6
-  26 repeat reset loop show ;
-
-dead-pix
+turtle
 
