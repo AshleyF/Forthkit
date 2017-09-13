@@ -1,5 +1,3 @@
-# Forthkit
+# Turtle Graphics
 
-Inspired by Lispkit, build your own Forth from scratch.
-
-* First, [write an interpreter (in Python)](interpreter/). Similar to Chuck Moore's first punch card interpreter.
+This is (or will be) a Turtle Graphics implementation in Forth, meant to run on the [interpreter](../interpreter/) and future VMs.
