@@ -1,5 +1,5 @@
 ( pixel graphics library using Unicode Braile characters )
-( requires: prelude.4th )
+( requires: prelude )
 
 160 const width
 160 const height
