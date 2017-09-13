@@ -8,7 +8,7 @@ To test the [`pixels` library](./pixels.4th), try: [`cat ../prelude.4th ./pixels
 
 You should see this little guy (assuming Unicode font supporting Braille and UTF-8 terminal):
 
-    ⠀⠀⠀ ⠀⣀⣠⠤⢤⠤⣀⠀⠀  ⢀⠔⠊⡉⠑⡄
+    ⠀⠀⠀ ⠀⣀⣠⠤⢤⠤⣀⠀⠀   ⢀⠔⠊⡉⠑⡄
     ⠀⠀⢀⠔⡫⡊⠉⡢⡊⠉⡢⡋⣢⣀⡎⠀⠀⠠⡤⠃
     ⠀⡔⠫⡹⡀⡸⡹⡀⡸⣉⠔⠉⢀⡰⠁⢀⠔⠉
     ⠀⠑⣄⣈⣉⣉⣉⣉⣉⣀⢤⠪⢅⣀⢔⠏
