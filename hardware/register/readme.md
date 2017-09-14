@@ -1,6 +1,6 @@
 # Register Machine
 
-Virtual "hardware" target machine.
+Virtual "hardware" target machine (VM in C).
 Build with [`sh ./build.sh](./build.sh).
 
 ## Instruction Set
@@ -62,3 +62,23 @@ Running the machine and typing `hello`:
     $ ./machine.exe
     hello
     HELLO
+
+## Assembler
+
+A [Forth-based assembler is provided](./assembler.4th), allowing the above program [to be expressed](./capitalize.4th) as:
+
+    0 const u
+    1 const c
+
+    label &start
+
+      32 u ldc,
+         c in,
+     c u c sub,
+         c out,
+    &start jump,
+
+This is a pretty nice assembly format, leaving all the power of Forth available as a "macro assembler."
+A new [`boot.bin`](./boot.bin) may be build with [`sh ./capitalize.sh`](./capitalize.sh).
+
+In addition to `label` to give names to addresses for backward jumps (most common), there are `leap` and `ahead` words to skip over code (likely for library routines).
