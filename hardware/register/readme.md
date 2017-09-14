@@ -20,21 +20,21 @@ Instructions are followed by zero to three operands - register indices, memory a
 | dec      | 7       | x   |     |     | x--              | Decrement register          |
 | add      | 8       | x   | y   | z   | x = y + z        | Addition                    |
 | sub      | 9       | x   | y   | z   | x = y - z        | Subtraction                 |
-| mul      | 10      | x   | y   | z   | x = y * z        | Multiplication              |
-| div      | 11      | x   | y   | z   | x = y / z        | Division                    |
-| mod      | 12      | x   | y   | z   | x = y % z        | Modulus                     |
-| and      | 13      | x   | y   | z   | x = y & z        | Logical/bitwise and         |
-| or       | 14      | x   | y   | z   | x = y | z        | Logical/bitwise or          |
-| xor      | 15      | x   | y   | z   | x = y ^ z        | Logical/bitwise xor         |
-| not      | 16      | x   | y   |     | x not y          | Logical/bitwise not         |
+| mul      | 10      | x   | y   | z   | x = y × z        | Multiplication              |
+| div      | 11      | x   | y   | z   | x = y ÷ z        | Division                    |
+| mod      | 12      | x   | y   | z   | x = y mod z      | Modulus                     |
+| and      | 13      | x   | y   | z   | x = y ∧ z        | Logical/bitwise and         |
+| or       | 14      | x   | y   | z   | x = y ∨ z        | Logical/bitwise or          |
+| xor      | 15      | x   | y   | z   | x = y ⊕ z        | Logical/bitwise xor         |
+| not      | 16      | x   | y   |     | x = ¬y           | Logical/bitwise not         |
 | shl      | 17      | x   | y   | z   | x = y << z       | Bitwise shift-left          |
 | shr      | 18      | x   | y   | z   | x = y >> z       | Bitwise shift-right         |
 | beq      | 19      | a   | x   | y   | pc = a if x = y  | Branch if equal             |
-| bne      | 20      | a   | x   | y   | pc = a if x != y | Branch if not equal         |
+| bne      | 20      | a   | x   | y   | pc = a if x ≠ y  | Branch if not equal         |
 | bgt      | 21      | a   | x   | y   | pc = a if x > y  | Branch if greater than      |
-| bge      | 22      | a   | x   | y   | pc = a if x >= y | Branch if greater or equal  |
+| bge      | 22      | a   | x   | y   | pc = a if x ≥ y | Branch if greater or equal  |
 | blt      | 23      | a   | x   | y   | pc = a if x < y  | Branch if less than         |
-| ble      | 24      | a   | x   | y   | pc = a if x <= y | Branch if less or equal     |
+| ble      | 24      | a   | x   | y   | pc = a if x ≤ y | Branch if less or equal     |
 | exec     | 25      | x   |     |     | pc = [x]         | Jump to address in register |
 | jump     | 26      | a   |     |     | pc = a           | Jump to address             |
 | call     | 27      | a   |     |     | push(pc), pc = a | Call address, save return   |
