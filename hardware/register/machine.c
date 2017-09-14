@@ -18,7 +18,6 @@ int main(void)
     fclose(file);
 
     short x;
-    short y;
 
     inline short next()
     {
