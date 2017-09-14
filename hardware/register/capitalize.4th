@@ -3,11 +3,13 @@
 0 const u
 1 const c
 
- 32 u ldc,
-    c in,
-c u c sub,
-    c out,
-    3 jump,
+label &start
 
-dump
+  32 u ldc,
+     c in,
+ c u c sub,
+     c out,
+&start jump,
+
+assemble
 
