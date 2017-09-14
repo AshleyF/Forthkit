@@ -22,7 +22,7 @@ Instructions are followed by zero to three operands - register indices, memory a
 | sub      | 9       | x   | y   | z   | x = y - z        | Subtraction                 |
 | mul      | 10      | x   | y   | z   | x = y * z        | Multiplication              |
 | div      | 11      | x   | y   | z   | x = y / z        | Division                    |
-| mod      | 12      | x   | y   | z   | x = y mod z      | Modulus                     |
+| mod      | 12      | x   | y   | z   | x = y % z        | Modulus                     |
 | and      | 13      | x   | y   | z   | x = y & z        | Logical/bitwise and         |
 | or       | 14      | x   | y   | z   | x = y | z        | Logical/bitwise or          |
 | xor      | 15      | x   | y   | z   | x = y ^ z        | Logical/bitwise xor         |
