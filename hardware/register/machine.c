@@ -130,36 +130,6 @@ int main(void)
                 break;
             case 29: // halt
                 return 0;
-            case 30: // debug
-                // TODO: remove
-                printf("Debug:\n  Reg: %04x %04x %04x %04x %04x %04x %04x\n  Stack: %04x %04x %04x %04x %04x %04x %04x %04x Return: %i %i %i %i %i %i %i %i\n", reg[0], reg[1], reg[2], reg[3], reg[4], reg[5], reg[6], mem[32767], mem[32766], mem[32765], mem[32764], mem[32763], mem[32762], mem[32761], mem[32760], mem[32255], mem[32254], mem[32253], mem[32252], mem[32251], mem[32250], mem[32249], mem[32248]);
-                break;
-            case 31: // dump
-                x = next();
-                y = next();
-                printf("Core dump (%04x - %04x)\n", x, y);
-                for (short addr = x; addr < y; addr += 16)
-                {
-                    printf("%04x  ", addr);
-                    for (short i = addr; i < addr + 16; i++)
-                    {
-                        printf("%04x ", mem[i]);
-                    }
-                    printf(" ");
-                    for (short i = addr; i < addr + 16; i++)
-                    {
-                        if (mem[i] > ' ' && mem[i] <= '~')
-                        {
-                            printf("%c", mem[i]);
-                        }
-                        else
-                        {
-                            printf(".");
-                        }
-                    }
-                    printf("\n");
-                }
-                break;
             default:
                 printf("Invalid instruction!");
                 return 1;
