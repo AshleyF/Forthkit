@@ -6,7 +6,7 @@ Inspired by Lispkit, build your own Forth from scratch.
 2) Play with it!
     * Write a [console Pixel library](./library/pixels/) (in Forth) using Unicode Braille characters
     * Use this to do [Turtle Graphics](./library/turtle/) (in Forth)!
-3) TODO: Make some "hardware" to target - a register-based VM (in C)
+3) Make [register-based "hardware"](./hardware/register/) (VM in C) to target
 4) TODO: Make an assembler for this "hardware" (in Forth)
 5) TODO: Use this assembler to build an outer interpreter (a bytecode image using Forth)
 6) TODO: Abandon the Python interpreter and bootstrap Forth to the new "hardware"
