@@ -12,6 +12,7 @@ Inspired by Lispkit, build your own Forth from scratch.
 6) TODO: Abandon the Python interpreter and bootstrap Forth to the new "hardware"
     * TODO: Port Turtle Graphics to this
 7) TODO: Build an inner interpreter and take away `call`/`ret` from the "hardware"
+    * TODO: Experiment with direct/indirect threading
     * TODO: Experiment with using the return stack for locals and loop counters
     * TODO: Implement remaining Forth control structures
 8) TODO: Make more new "hardware" - a stack machine this time
