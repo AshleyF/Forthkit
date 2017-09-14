@@ -1,7 +1,6 @@
 ( shared library )
 
 : 2dup over over ;
-: 3dup 2dup dup ;
 
 : 2drop drop drop ;
 : 3drop 2drop drop ;

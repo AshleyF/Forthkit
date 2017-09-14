@@ -1,6 +1,10 @@
 # Register Machine
 
 Virtual "hardware" target machine.
+Build with [`sh ./build.sh](./build.sh).
+
+## Instruction Set
+
 It is a register-based machine with 32 register cell and 32K cells of memory, each 16-bit.
 Instructions are followed by zero to three operands - register indices, memory addresses, ...
 
@@ -38,6 +42,9 @@ Instructions are followed by zero to three operands - register indices, memory a
 | halt     | 29      |     |     |     |                  | Halt machine                |
 
 The machine loads a [`boot.bin`](./boot.bin) image of little-endian encoded memory cells at startup and begins executing at address zero.
+
+## Demo
+
 A demo hand-made [`boot.bin`](./boot.bin) is provided which will simply capitalize console input by subtracting 32 from input characters:
 
 | Assembly    |     |     |     |     |
@@ -47,3 +54,11 @@ A demo hand-made [`boot.bin`](./boot.bin) is provided which will simply capitali
 | `sub c c u` | 9   | 1   | 1   | 0   |
 | `out c`     | 5   | 1   |     |     |
 | `jump 0003` | 26  | 3   |     |     |
+
+Encoded: `0000 0000 2000 0400 0100 0900 0100 0100 0000 0500 0100 1a00 0300`
+
+Running the machine and typing `hello`:
+
+    $ ./machine.exe
+    hello
+    HELLO
