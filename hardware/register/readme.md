@@ -12,7 +12,7 @@ Instructions are followed by zero to three operands - register indices, memory a
 | -------- | ------- | --- | --- | --- | ---------------- | --------------------------- |
 | ldc      | 0       | x   | v   |     | x = v            | Load constant value         |
 | ld       | 1       | x   | a   |     | x = mem[a]       | Load from memory            |
-| st       | 2       | a   | x   |     | mem[a] = x]      | Store to memory             |
+| st       | 2       | a   | x   |     | mem[a] = x       | Store to memory             |
 | cp       | 3       | x   | y   |     | x = y            | Copy between registers      |
 | in       | 4       | x   |     |     | x = getc()       | Read from console           |
 | out      | 5       | x   |     |     | putc(x)          | Write to console            |
