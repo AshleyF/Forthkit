@@ -85,11 +85,11 @@ int main(void)
             case 16: // not (x = ~y)
                 reg[next()] = ~rval();
                 break;
-            case 17: // rsh (x = y >> z)
-                reg[next()] = rval() >> rval();
-                break;
-            case 18: // lsh (x = y << z)
+            case 17: // lsh (x = y << z)
                 reg[next()] = rval() << rval();
+                break;
+            case 18: // rsh (x = y >> z)
+                reg[next()] = rval() >> rval();
                 break;
             case 19: // beq (branch if x == y)
                 x = next();
