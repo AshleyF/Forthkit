@@ -1,6 +1,6 @@
 # Register Machine
 
-Virtual "hardware" target machine.
+Virtual "hardware" target machine (VM in C).
 Build with [`sh ./build.sh](./build.sh).
 
 ## Instruction Set
