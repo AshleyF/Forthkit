@@ -37,7 +37,7 @@ Instructions are followed by zero to three operands - register indices, memory a
 | ret      | 28      |     |     |     | pc = pop()       | Return from call            |
 | halt     | 29      |     |     |     |                  | Halt machine                |
 
-The machine loads a [`boot.bin`](./boot.bin) image at startup and begins executing at address zero.
+The machine loads a [`boot.bin`](./boot.bin) image of little-endian encoded memory cells at startup and begins executing at address zero.
 A demo hand-made [`boot.bin`](./boot.bin) is provided which will simply capitalize console input by subtracting 32 from input characters:
 
 | Assembly    |     |     |     |     |
