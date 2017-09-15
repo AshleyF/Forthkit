@@ -16,8 +16,8 @@ Instructions are followed by zero to three operands - register indices, memory a
 | cp       | 3       | x   | y   |     | x = y            | Copy between registers      |
 | in       | 4       | x   |     |     | x = getc()       | Read from console           |
 | out      | 5       | x   |     |     | putc(x)          | Write to console            |
-| inc      | 6       | x   |     |     | x++              | Increment register          |
-| dec      | 7       | x   |     |     | x--              | Decrement register          |
+| inc      | 6       | x   | y   |     | x = y + 1        | Increment register          |
+| dec      | 7       | x   | y   |     | x = y - 1        | Decrement register          |
 | add      | 8       | x   | y   | z   | x = y + z        | Addition                    |
 | sub      | 9       | x   | y   | z   | x = y - z        | Subtraction                 |
 | mul      | 10      | x   | y   | z   | x = y × z        | Multiplication              |
