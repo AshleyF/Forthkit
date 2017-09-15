@@ -70,9 +70,8 @@ A [Forth-based assembler is provided](./assembler.4th), allowing the above progr
     0 const u
     1 const c
 
-    label &start
-
       32 u ldc,
+     label &start
          c in,
      c u c sub,
          c out,
