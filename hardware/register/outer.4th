@@ -1,4 +1,4 @@
-( inner interpreter - reads tokens, compiles headers, literals, ... )
+( outer interpreter - reads tokens, compiles headers, literals, ... )
 ( requires assembler )
 
 ( --- register allocation/init ----------------------------------------------- )
