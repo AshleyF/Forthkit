@@ -229,8 +229,8 @@ var link
           two n n add,      ( address of code field )
            &pushn jump,     ( push cursor )
        
-       0 sym dump header, ( dump core to boot.bin )
-                  dump,   ( TODO: build outside of outer interpreter )
+       0 sym dump header,   ( dump core to boot.bin )
+                  dump,     ( TODO: build outside of outer interpreter )
 
 ahead,
 
