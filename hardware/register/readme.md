@@ -90,3 +90,20 @@ An [outer interpreter](./outer.4th) may be assembled with [`./outer.sh`](./outer
 The dictionary format is as follows. Words are length-suffixed characters followed by a "link" field pointing to the link field of the previous word (or `0` if the first word), followed by an "immediate flag" indicating whether the word should be executed even in compiling mode, followed by machine code (VM bytecode) and presumably a `ret` instruction.
 
 ![Dictionary Format](./dictionary.png)
+
+In addition to numeric literals support, the following words are currently in the dictionary:
+
+| Word        |                                                                                                                  |
+| ----------- | ---------------------------------------------------------------------------------------------------------------- |
+| `create`    | Reads token and creates word header                                                                              |
+| `immediate` | Set immediate flag in latest word header                                                                         |
+| `compile`   | Switch to compiling mode (literals packed, words looked up and calls compiled (or executed if flagged immediate) |
+| `interact`  | Switch to interactive mode (literals pushed to stack and words executed                                          |
+| `;`         | Compile `ret` instruction and exit compiling mode                                                                |
+| `pushn`     | Push number in `n` register                                                                                      |
+| `popn`      | Pop number in `n` register                                                                                       |
+| `,`         | Append TOS to dictionary                                                                                         |
+| `find`      | Find next token in dictionary and push address                                                                   |
+| `dump`      | Core dump to `boot.bin`                                                                                          |
+
+These should be enough to bootstrap a new assembler and meta-circular outer interpreter!
