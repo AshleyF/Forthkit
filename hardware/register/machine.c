@@ -129,6 +129,15 @@ int main(void)
                 break;
             case 29: // halt
                 return 0;
+            case 30: // dump
+                file = fopen("boot.bin", "w");
+                if (!file || !fwrite(&mem, sizeof(mem), 1, file))
+                {
+                    printf("Could not write boot image.");
+                    return 1;
+                }
+                fclose(file);
+                return 0;
             default:
                 printf("Invalid instruction!");
                 return 1;

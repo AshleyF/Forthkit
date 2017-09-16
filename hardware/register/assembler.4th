@@ -34,6 +34,7 @@ var dp ( dictionary pointer )
 : call,   27 , , ;          (     a call, →  push[pc], pc = a )
 : ret,    28 , ;            (       ret,  →  pc = pop[]       )
 : halt,   29 , ;            (       halt, →  halt machine     )
+: dump,   30 , ;            (       dump, →  core to boot.bin )
 
 : label here const ;
 : leap, here 0 jump, ; ( dummy jump, push address )

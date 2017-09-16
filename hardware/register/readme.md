@@ -40,6 +40,7 @@ Instructions are followed by zero to three operands - register indices, memory a
 | call     | 27      | a   |     |     | push(pc), pc = a | Call address, save return   |
 | ret      | 28      |     |     |     | pc = pop()       | Return from call            |
 | halt     | 29      |     |     |     |                  | Halt machine                |
+| dump     | 30      |     |     |     |                  | Dump core to boot.bin       |
 
 The machine loads a [`boot.bin`](./boot.bin) image of little-endian encoded memory cells at startup and begins executing at address zero.
 
@@ -59,7 +60,7 @@ Encoded: `0000 0000 2000 0400 0100 0900 0100 0100 0000 0500 0100 1a00 0300`
 
 Running the machine and typing `hello`:
 
-    $ ./machine.exe
+    $ ./machine
     hello
     HELLO
 
