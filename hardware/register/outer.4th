@@ -31,7 +31,6 @@
          25 const comp      ( compiling flag )
          26 const x         ( temp )
          27 const y         ( temp )
-         28 const z         ( temp - reserved bootstrap )
 
             32 sp ldc,      ( space ASCII )
         48 zeroch ldc,      ( '0' ASCII )
@@ -211,10 +210,10 @@ var link
               ret append,   ( append ret instruction )
         &interact jump,     ( switch out of compiling mode )
        
-     0 sym pushn, header,   ( push number [n] to stack from )
+      0 sym pushn header,   ( push number to stack from n )
            &pushn jump,     ( jump to push )
        
-      0 sym popn, header,   ( pop number from stack to n )
+       0 sym popn header,   ( pop number from stack to n )
             &popn jump,     ( jump pop )
        
           0 sym , header,   ( append value from stack )
