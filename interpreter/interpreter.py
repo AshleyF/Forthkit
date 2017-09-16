@@ -65,8 +65,7 @@ class Forth:
       '\''   : lambda: self._x(self.find),
       '['    : self.anonymous,
       'call' : lambda: self.x_(self.call),
-      'exit' : lambda: exit(0),
-      'debug': lambda: self.debug() }
+      'exit' : lambda: exit(0) }
     self.names = self.dictionary.keys()
 
   def push(self, x): self.stack.append(x)
@@ -99,10 +98,6 @@ class Forth:
 
   def memoryStore(self, val, addr): self.memory[addr] = val
   def variableStore(self, val, addr): self.variables[addr] = val
-
-  def debug(self):
-    print 'STACK: %s' % self.stack
-    print 'MEMORY: %s' % self.memory[:1000]
 
   def dump(self):
     with open('boot.bin', 'wb') as f:

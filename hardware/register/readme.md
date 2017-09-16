@@ -78,6 +78,6 @@ A [Forth-based assembler is provided](./assembler.4th), allowing the above progr
     &start jump,
 
 This is a pretty nice assembly format, leaving all the power of Forth available as a "macro assembler."
-A new [`boot.bin`](./boot.bin) may be build/run with [`./test.sh`](./test.sh).
+A new [`boot.bin`](./boot.bin) may be build with [`./test.sh`](./test.sh).
 
 In addition to `label` to give names to addresses for backward jumps (most common), there are `leap,` and `ahead,` words to skip over code (likely for library routines).
