@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-echo "Assembling capitalize..."
-cat ./assembler.4th ./capitalize.4th | python ../../interpreter/interpreter.py
+echo "Assembling outer interpreter..."
+cat ./assembler.4th ./outer-interpreter.4th | python ../../interpreter/interpreter.py
 
 if [ ! -f ./machine.exe ]; then
     echo "Building machine..."
