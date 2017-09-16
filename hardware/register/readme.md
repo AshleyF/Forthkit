@@ -82,3 +82,11 @@ This is a pretty nice assembly format, leaving all the power of Forth available 
 A new [`boot.bin`](./boot.bin) may be build with [`./test.sh`](./test.sh).
 
 In addition to `label` to give names to addresses for backward jumps (most common), there are `leap,` and `ahead,` words to skip over code (likely for library routines).
+
+# Outer Interpreter
+
+An [outer interpreter](./outer.4th) may be assembled with [`./outer.sh`](./outer.sh). This reads Forth tokens, compiles dictionary headers and literals, and manages a stack.
+
+The dictionary format is as follows. Words are length-suffixed characters followed by a "link" field pointing to the link field of the previous word (or `0` if the first word), followed by an "immediate flag" indicating whether the word should be executed even in compiling mode, followed by machine code (VM bytecode) and presumably a `ret` instruction.
+
+![Dictionary Format](./dictionary.png)
