@@ -97,8 +97,8 @@ In addition to numeric literals support, the following words are currently in th
 | ----------- | ---------------------------------------------------------------------------------------------------------------- |
 | `create`    | Reads token and creates word header                                                                              |
 | `immediate` | Set immediate flag in latest word header                                                                         |
-| `compile`   | Switch to compiling mode (literals packed, words looked up and calls compiled (or executed if flagged immediate) |
-| `interact`  | Switch to interactive mode (literals pushed to stack and words executed                                          |
+| `compile`   | Switch to compiling mode (literals packed, words looked up and calls compiled or executed if flagged immediate)  |
+| `interact`  | Switch to interactive mode (literals pushed to stack and words executed)                                         |
 | `;`         | Compile `ret` instruction and exit compiling mode                                                                |
 | `pushn`     | Push number in `n` register                                                                                      |
 | `popn`      | Pop number in `n` register                                                                                       |
