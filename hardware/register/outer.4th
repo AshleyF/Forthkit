@@ -1,50 +1,44 @@
 ( outer interpreter - reads tokens, compiles headers, literals, ... )
 ( requires assembler )
 
-( --- register allocation/init ----------------------------------------------- )
+( --- register allocation/init ----------------------------------------- )
 
-          0 const c         ( char last read )
-          1 const sp        ( space 32 ASCII )
-          2 const tib       ( terminal input buffer )
-          3 const len       ( token length )
-          4 const len'      ( name length )
-          5 const zero      ( constant 0 )
-          6 const d         ( dictionary pointer )
-          7 const nm        ( match flag for search )
-          8 const p         ( pointer )
-          9 const c         ( char being compared )
-         10 const p'        ( pointer )
-         11 const c'        ( char being compared )
-         12 const cur       ( cursor )
-         13 const lnk       ( link pointer )
-         14 const true      ( truth value )
-         15 const false     ( false value )
-         16 const n         ( parsed number )
-         17 const zeroch    ( '0' ASCII )
-         18 const base      ( number base )
-         19 const s         ( stack pointer )
-         20 const nreg      ( register n number )
-         21 const ldc       ( ldc instruction [0] )
-         22 const call      ( call instruction [27] )
-         23 const ret       ( return instruction [29] )
-         24 const two       ( constant 2 )
-         25 const comp      ( compiling flag )
-         26 const x         ( temp )
-         27 const y         ( temp )
+  0 const zero                  ( constant 0 )
+  1 const two 2 two ldc,        ( constant 2 )
 
-            32 sp ldc,      ( space ASCII )
-        48 zeroch ldc,      ( '0' ASCII )
-          -1 true ldc,      ( all bits set [logical/bitwise equivalent] )
-          10 base ldc,      ( decimal by default )
-          32767 s ldc,      ( top of data stack )
-           n nreg ldc,      ( register number of n )
-          27 call ldc,      ( call instruction )
-           28 ret ldc,      ( ret instruction )
-            2 two ldc,      ( constant 2 )
+  2 const true -1 true ldc,     ( truth value - all bits set )
+  3 const false                 ( false value )
+
+  4 const zeroch 48 zeroch ldc, ( '0' ASCII )
+  5 const rparch 41 rparch ldc, ( right parenthesis ASCII )
+
+  6 const c                     ( char last read )
+  7 const sp 32 sp ldc,         ( space ASCII )
+  8 const tib                   ( terminal input buffer )
+  9 const len                   ( token length )
+ 10 const len'                  ( name length )
+ 11 const d                     ( dictionary pointer )
+ 12 const nm                    ( match flag for search )
+ 13 const p                     ( pointer )
+ 14 const c                     ( char being compared )
+ 15 const p'                    ( pointer )
+ 16 const c'                    ( char being compared )
+ 17 const cur                   ( cursor )
+ 18 const lnk                   ( link pointer )
+ 19 const n                     ( parsed number )
+ 20 const nreg n nreg ldc,      ( register number of n )
+ 21 const base 10 base ldc,     ( number base decimal by default )
+ 22 const s 32767 s ldc,        ( stack pointer )
+ 23 const ldc                   ( ldc instruction [0] )
+ 24 const call 27 call ldc,     ( call instruction )
+ 25 const ret 28 ret ldc,       ( ret instruction )
+ 26 const comp                  ( compiling flag )
+ 27 const x                     ( temp )
+ 28 const y                     ( temp )
 
 leap,
 
-( --- tokenization ----------------------------------------------------------- )
+( --- tokenization ----------------------------------------------------- )
 
             label &skipws   ( skip until non-whitespace )
                 c in,       ( read char )
@@ -66,10 +60,10 @@ leap,
           &skipws call,     ( skip initial whitespace )
             &name jump,     ( append name )
 
-( --- dictionary search ------------------------------------------------------ )
+( --- dictionary search ------------------------------------------------ )
       
-            label &nomatch
-          true nm cp,       ( set no-match flag )
+            label &nomatch  ( set no-match flag )
+          true nm cp,
                   ret,
       
             label &compcs   ( compare chars to input word )
@@ -101,9 +95,9 @@ zero cur &nomatch beq,      ( no match if start of dict )
           lnk cur cp,       ( initialize cursor to last )
             &comp jump,     ( compare with tib )
       
-( --- number processing ------------------------------------------------------ )
+( --- number processing ------------------------------------------------ )
 
-            label &digits
+            label &digits   ( parse digits )
               p c ld,       ( get char )
        c zeroch c sub,      ( convert to digit )
          n base n mul,      ( base shift left )
@@ -127,7 +121,7 @@ zero cur &nomatch beq,      ( no match if start of dict )
               s n ld,       ( load value )
                   ret,
 
-( --- literals --------------------------------------------------------------- )
+( --- literals --------------------------------------------------------- )
 
 : append, d st, d d inc, ;  ( macro: append and advance d )
 
@@ -145,7 +139,7 @@ zero cur &nomatch beq,      ( no match if start of dict )
   true comp &litn beq,      ( if compiling, compile literal )
            &pushn jump,     ( else, push literal )
       
-( --- word processing -------------------------------------------------------- )
+( --- word processing --------------------------------------------------- )
 
             label &exec     ( execute word )
         two cur x add,      ( point to code field )
@@ -170,14 +164,14 @@ zero cur &nomatch beq,      ( no match if start of dict )
      true nm &num beq,      ( if not found, assume number )
             &word jump,     ( else, process as a word )
       
-( --- REPL ------------------------------------------------------------------- )
+( --- REPL ------------------------------------------------------------- )
 
             label &repl     ( loop forever )
            &token call,     ( read a token )
             &eval call,     ( evaluate it )
             &repl jump,     ( forever )
       
-( --- initial dictionary ----------------------------------------------------- )
+( --- initial dictionary ----------------------------------------------- )
 
 var link
 : header, dup 0 do swap , loop , link @ here link ! , , ;
@@ -231,14 +225,20 @@ var link
        0 sym dump header,   ( dump core to boot.bin )
                   dump,     ( TODO: build outside of outer interpreter )
 
+          -1 40 1 header,   ( skip comment - 40=left paren ASCII )
+            label &comment
+                x in,       ( next char )
+rparch x &comment bne,      ( continue to skip until right-paren )
+                  ret,
+
 ahead,
 
-( --- set `lnk` to within last header and `d` to just past this code --------- )
+( --- set `lnk` to within last header and `d` to just past this code --- )
 
-link @ lnk ldc,             ( compile-time link ptr to runtime )
-here 5 + d ldc,             ( compile-time dict ptr to runtime [advance over init code below] )
+link @ lnk ldc, ( compile-time link to runtime )
+here 5 + d ldc, ( compile-time dict to runtime [advance over code below] )
 
-&repl jump,                 ( start the REPL )
+&repl jump,     ( start the REPL )
 
 assemble
 
