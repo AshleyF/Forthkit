@@ -3,37 +3,37 @@
 
 ( --- register allocation/init ----------------------------------------- )
 
-  0 const x                     ( temp )
-  1 const y                     ( temp )
+ 0 const x                     ( temp )
+ 1 const y                     ( temp )
+ 2 const d                     ( dictionary pointer )
 
-  2 const zero                  ( constant 0 )
-  3 const two 2 two ldc,        ( constant 2 )
+ 3 const zero                  ( constant 0 )
+ 4 const two 2 two ldc,        ( constant 2 )
 
-  4 const true -1 true ldc,     ( truth value - all bits set )
-  5 const false                 ( false value )
+ 5 const true -1 true ldc,     ( truth value - all bits set )
+ 6 const false                 ( false value )
 
-  6 const zeroch 48 zeroch ldc, ( '0' ASCII )
-  7 const rparch 41 rparch ldc, ( right parenthesis ASCII )
+ 7 const zeroch 48 zeroch ldc, ( '0' ASCII )
+ 8 const rparch 41 rparch ldc, ( right parenthesis ASCII )
 
-  8 const c                     ( char last read )
-  9 const sp 32 sp ldc,         ( space ASCII )
- 10 const tib                   ( terminal input buffer )
- 11 const len                   ( token length )
- 12 const len'                  ( name length )
- 13 const d                     ( dictionary pointer )
- 14 const nm                    ( match flag for search )
- 15 const p                     ( pointer )
- 16 const c                     ( char being compared )
- 17 const p'                    ( pointer )
- 18 const c'                    ( char being compared )
- 19 const cur                   ( cursor )
- 20 const lnk                   ( link pointer )
- 21 const base 10 base ldc,     ( number base decimal by default )
- 22 const s 32767 s ldc,        ( stack pointer )
- 23 const ldc                   ( ldc instruction [0] )
- 24 const call 27 call ldc,     ( call instruction )
- 25 const ret 28 ret ldc,       ( ret instruction )
- 26 const comp                  ( compiling flag )
+ 9 const c                     ( char last read )
+10 const sp 32 sp ldc,         ( space ASCII )
+11 const tib                   ( terminal input buffer )
+12 const len                   ( token length )
+13 const len'                  ( name length )
+14 const nm                    ( match flag for search )
+15 const p                     ( pointer )
+16 const c                     ( char being compared )
+17 const p'                    ( pointer )
+18 const c'                    ( char being compared )
+19 const cur                   ( cursor )
+20 const lnk                   ( link pointer )
+21 const base 10 base ldc,     ( number base decimal by default )
+22 const s 32767 s ldc,        ( stack pointer )
+23 const ldc                   ( ldc instruction [0] )
+24 const call 27 call ldc,     ( call instruction )
+25 const ret 28 ret ldc,       ( ret instruction )
+26 const comp                  ( compiling flag )
 
 leap,
 
@@ -214,12 +214,17 @@ var link
                 x append,   ( append x ) 
                   ret,
        
-       0 sym find header,   ( find word )
+       0 sym find header,   ( find word - nm set if not found )
            &token call,     ( read a token )
             &find call,     ( find token )
             cur x cp,       ( prep to push cursor )
           two x x add,      ( address of code field )
            &pushx jump,     ( push cursor )
+
+     0 sym forget header,   ( forget word )
+            &find call,     ( find word to forget )
+             p' d cp,       ( set dictionary point to name )
+                  ret,
        
           -1 40 1 header,   ( skip comment - 40=left paren ASCII )
             label &comment

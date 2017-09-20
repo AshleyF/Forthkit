@@ -7,6 +7,7 @@ create : compile create compile ; ( magic! )
 
 : x 0 ; immediate
 : y 1 ; immediate
+: d 2 ; immediate ( dictionary pointer )
 
 : cp, 3 , , , ; immediate
 : popyx, popx x y cp, popx ;
@@ -78,3 +79,5 @@ create : compile create compile ; ( magic! )
 : emit popx x out, ;
 : cr 10 emit ;
 : space 32 emit ;
+
+: allot popx  x y cp,  d x cp,  pushx  y d d add, ;
