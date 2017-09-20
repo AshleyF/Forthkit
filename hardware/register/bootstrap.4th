@@ -3,14 +3,15 @@
 
 create : compile create compile ;
 
-: n 19 ; immediate
-: z 28 ; immediate
+: x 0 ; immediate
+: y 1 ; immediate
+
 : cp, 3 , , , ; immediate
-: popzn, popn n z cp, popn ;
-: pushnz, pushn z n cp, pushn ;
+: popyx, popx x y cp, popx ;
+: pushxy, pushx y x cp, pushx ;
 
 : xor, 15 , , , , ; immediate
-: swap popzn, n z n xor, n z z xor, n z n xor, pushnz, ;
+: swap popyx, x y x xor, x y y xor, x y x xor, pushxy, ;
 
 : ldc,   0 , , , ;        immediate
 : ld,    1 , , , ;        immediate
@@ -40,27 +41,27 @@ create : compile create compile ;
 : call, 27 , , ;          immediate
 : ret,  28 , ;            immediate
 : halt, 29 , ;            immediate
-: dbg,  30 , ;            immediate
-: dmp,  31 , , , ;        immediate
+: dump, 30 , ;            immediate
 
-: key n in, pushn ;
-: emit popn n out, ;
+: key x in, pushx ;
+: emit popx x out, ;
 
-: 1+ popn n n inc, pushn ;
-: 1- popn n n dec, pushn ;
+: 1+ popx x x inc, pushx ;
+: 1- popx x x dec, pushx ;
 
-: +   popzn, n z n add, pushn ;
-: -   popzn, n z n sub, pushn ;
-: *   popzn, n z n mul, pushn ;
-: /   popzn, n z n div, pushn ;
-: mod popzn, n z n mod, pushn ;
-: 2/  popzn, n z n shr, pushn ;
-: 2*  popzn, n z n shl, pushn ;
-: and popzn, n z n and, pushn ;
-: or  popzn, n z n or,  pushn ;
-: xor popzn, n z n xor, pushn ;
-: not popn n n not, pushn ;
+: +    popyx, x y x add, pushx ;
+: -    popyx, x y x sub, pushx ;
+: *    popyx, x y x mul, pushx ;
+: /    popyx, x y x div, pushx ;
+: mod  popyx, x y x mod, pushx ;
+: 2/   popyx, x y x shr, pushx ;
+: 2*   popyx, x y x shl, pushx ;
+: and  popyx, x y x and, pushx ;
+: or   popyx, x y x or,  pushx ;
+: xor  popyx, x y x xor, pushx ;
+: not  popx x x not, pushx ;
 : halt halt, ;
+: dump dump, ;
 
-: drop popn ;
-: dup popn pushn pushn ;
+: drop popx ;
+: dup popx pushx pushx ;
