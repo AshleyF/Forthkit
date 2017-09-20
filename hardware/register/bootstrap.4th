@@ -1,7 +1,9 @@
 ( bootstrap remainder of interpreter )
 ( load into machine running outer interpreter image )
 
-create : compile create compile ;
+create : compile create compile ; ( magic! )
+
+( assembler )
 
 : x 0 ; immediate
 : y 1 ; immediate
@@ -43,11 +45,7 @@ create : compile create compile ;
 : halt, 29 , ;            immediate
 : dump, 30 , ;            immediate
 
-: key x in, pushx ;
-: emit popx x out, ;
-
-: 1+ popx x x inc, pushx ;
-: 1- popx x x dec, pushx ;
+( instruction words )
 
 : +    popyx, x y x add, pushx ;
 : -    popyx, x y x sub, pushx ;
@@ -60,8 +58,23 @@ create : compile create compile ;
 : or   popyx, x y x or,  pushx ;
 : xor  popyx, x y x xor, pushx ;
 : not  popx x x not, pushx ;
-: halt halt, ;
+: 1+   popx x x inc, pushx ;
+: 1-   popx x x dec, pushx ;
+: exec popx x exec, ;
 : dump dump, ;
+: exit halt, ;
+
+( stack manipulation )
 
 : drop popx ;
 : dup popx pushx pushx ;
+
+( vocabulary )
+
+: true 65535 ; ( TODO: support signed literals )
+: false 0 ;
+
+: key x in, pushx ;
+: emit popx x out, ;
+: cr 10 emit ;
+: space 32 emit ;

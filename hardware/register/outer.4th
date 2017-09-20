@@ -221,9 +221,6 @@ var link
           two x x add,      ( address of code field )
            &pushx jump,     ( push cursor )
        
-       0 sym dump header,   ( dump core to boot.bin )
-                  dump,     ( TODO: build outside of outer interpreter )
-
           -1 40 1 header,   ( skip comment - 40=left paren ASCII )
             label &comment
                 x in,       ( next char )
