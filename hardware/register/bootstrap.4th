@@ -5,16 +5,16 @@ create : compile create compile ; ( magic! )
 
 ( assembler )
 
-: x 0 ; immediate
-: y 1 ; immediate
-: d 2 ; immediate ( dictionary pointer )
+: x 1 ; immediate ( shared by outer interpreter )
+: d 2 ; immediate ( dictionary pointer - shared by outer interpreter )
+: y 31 ; immediate
 
 : cp, 3 , , , ; immediate
-: popyx, popx x y cp, popx ;
-: pushxy, pushx y x cp, pushx ;
+: popxy popx x y cp, popx ;
+: pushxy pushx y x cp, pushx ;
 
 : xor, 15 , , , , ; immediate
-: swap popyx, x y x xor, x y y xor, x y x xor, pushxy, ;
+: swap popxy x y x xor, x y y xor, x y x xor, pushxy ;
 
 : ldc,   0 , , , ;        immediate
 : ld,    1 , , , ;        immediate
@@ -48,16 +48,16 @@ create : compile create compile ; ( magic! )
 
 ( instruction words )
 
-: +    popyx, x y x add, pushx ;
-: -    popyx, x y x sub, pushx ;
-: *    popyx, x y x mul, pushx ;
-: /    popyx, x y x div, pushx ;
-: mod  popyx, x y x mod, pushx ;
-: 2/   popyx, x y x shr, pushx ;
-: 2*   popyx, x y x shl, pushx ;
-: and  popyx, x y x and, pushx ;
-: or   popyx, x y x or,  pushx ;
-: xor  popyx, x y x xor, pushx ;
+: +    popxy x y x add, pushx ;
+: -    popxy x y x sub, pushx ;
+: *    popxy x y x mul, pushx ;
+: /    popxy x y x div, pushx ;
+: mod  popxy x y x mod, pushx ;
+: 2/   popxy x y x shr, pushx ;
+: 2*   popxy x y x shl, pushx ;
+: and  popxy x y x and, pushx ;
+: or   popxy x y x or,  pushx ;
+: xor  popxy x y x xor, pushx ;
 : not  popx x x not, pushx ;
 : 1+   popx x x inc, pushx ;
 : 1-   popx x x dec, pushx ;
@@ -80,4 +80,7 @@ create : compile create compile ; ( magic! )
 : cr 10 emit ;
 : space 32 emit ;
 
-: allot popx  x y cp,  d x cp,  pushx  y d d add, ;
+: @ popx x x ld, pushx ;
+: ! popxy x y st, ;
+
+: allot d x cp, pushx swap popx x d d add, ;

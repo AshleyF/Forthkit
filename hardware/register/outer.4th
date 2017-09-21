@@ -3,37 +3,38 @@
 
 ( --- register allocation/init ----------------------------------------- )
 
- 0 const x                     ( temp )
- 1 const y                     ( temp )
+ 0 const n                     ( number parsing - assumed 0 below )
+ 1 const x                     ( shared by bootstrap )
  2 const d                     ( dictionary pointer )
+ 3 const m
 
- 3 const zero                  ( constant 0 )
- 4 const two 2 two ldc,        ( constant 2 )
+ 4 const zero                  ( constant 0 )
+ 5 const two 2 two ldc,        ( constant 2 )
 
- 5 const true -1 true ldc,     ( truth value - all bits set )
- 6 const false                 ( false value )
+ 6 const true -1 true ldc,     ( truth value - all bits set )
+ 7 const false                 ( false value )
 
- 7 const zeroch 48 zeroch ldc, ( '0' ASCII )
- 8 const rparch 41 rparch ldc, ( right parenthesis ASCII )
+ 8 const zeroch 48 zeroch ldc, ( '0' ASCII )
+ 9 const rparch 41 rparch ldc, ( right parenthesis ASCII )
 
- 9 const c                     ( char last read )
-10 const sp 32 sp ldc,         ( space ASCII )
-11 const tib                   ( terminal input buffer )
-12 const len                   ( token length )
-13 const len'                  ( name length )
-14 const nm                    ( match flag for search )
-15 const p                     ( pointer )
-16 const c                     ( char being compared )
-17 const p'                    ( pointer )
-18 const c'                    ( char being compared )
-19 const cur                   ( cursor )
-20 const lnk                   ( link pointer )
-21 const base 10 base ldc,     ( number base decimal by default )
-22 const s 32767 s ldc,        ( stack pointer )
-23 const ldc                   ( ldc instruction [0] )
-24 const call 27 call ldc,     ( call instruction )
-25 const ret 28 ret ldc,       ( ret instruction )
-26 const comp                  ( compiling flag )
+10 const c                     ( char last read )
+11 const sp 32 sp ldc,         ( space ASCII )
+12 const tib                   ( terminal input buffer )
+13 const len                   ( token length )
+14 const len'                  ( name length )
+15 const nm                    ( match flag for search )
+16 const p                     ( pointer )
+17 const c                     ( char being compared )
+18 const p'                    ( pointer )
+19 const c'                    ( char being compared )
+20 const cur                   ( cursor )
+21 const lnk                   ( link pointer )
+22 const base 10 base ldc,     ( number base decimal by default )
+23 const s 32767 s ldc,        ( stack pointer )
+24 const ldc                   ( ldc instruction [0] )
+25 const call 27 call ldc,     ( call instruction )
+26 const ret 28 ret ldc,       ( ret instruction )
+27 const comp                  ( compiling flag )
 
 leap,
 
@@ -99,59 +100,59 @@ zero cur &nomatch beq,      ( no match if start of dict )
             label &digits   ( parse digits )
               p c ld,       ( get char )
        c zeroch c sub,      ( convert to digit )
-         x base x mul,      ( base shift left )
-            x c x add,      ( add in one's place )
+         n base n mul,      ( base shift left )
+            n c n add,      ( add in one's place )
               p p inc,      ( next char )
     p tib &digits blt,      ( not end? continue... )
                   ret,
       
             label &parsenum ( parse token as number )
         tib len p sub,      ( point p at start of word )
-           zero x cp,       ( init number )
+           zero n cp,       ( init number )
           &digits jump,
       
-            label &pushx    ( push interactive number )
-              x s st,       ( store x at stack pointer )
+            label &pushn    ( push interactive number )
+              n s st,       ( store n at stack pointer )
               s s dec,      ( adjust stack pointer )
                   ret,
       
-            label &popx     ( pop number )
+            label &popn     ( pop number )
               s s inc,      ( adjust stack pointer )
-              s x ld,       ( load value )
+              s n ld,       ( load value )
                   ret,
 
 ( --- literals --------------------------------------------------------- )
 
 : append, d st, d d inc, ;  ( macro: append and advance d )
 
-            label &litx     ( compile literal )
+            label &litn     ( compile literal )
               ldc append,   ( append ldc instruction )
-             zero append,   ( append x register number [0] )
-                x append,   ( append value )
+             zero append,   ( append n register number [0] )
+                n append,   ( append value )
              call append,   ( append call instruction )
-         &pushx y ldc,      ( load address of &pushx )
-                y append,   ( append pushx address )
+         &pushn m ldc,      ( load address of &pushn )
+                m append,   ( append pushn address )
                   ret,
       
             label &num      ( process token as number )
         &parsenum call,     ( parse number )
-  true comp &litx beq,      ( if compiling, compile literal )
-           &pushx jump,     ( else, push literal )
+  true comp &litn beq,      ( if compiling, compile literal )
+           &pushn jump,     ( else, push literal )
       
 ( --- word processing --------------------------------------------------- )
 
             label &exec     ( execute word )
-        two cur y add,      ( point to code field )
-                y exec,     ( exec word )
+        two cur m add,      ( point to code field )
+                m exec,     ( exec word )
                   ret,
       
             label &compw    ( compile word )
-            cur x inc,      ( point to immediate flag )
-              x y ld,       ( read immediate flag )
-     true y &exec beq,      ( execute if immediate )
+            cur n inc,      ( point to immediate flag )
+              n m ld,       ( read immediate flag )
+     true m &exec beq,      ( execute if immediate )
              call append,   ( append call instruction )
-              x x inc,      ( point to code field )
-                x append,   ( append code field address )
+              n n inc,      ( point to code field )
+                n append,   ( append code field address )
                   ret,
       
             label &word     ( process potential word token )
@@ -186,8 +187,8 @@ var link
                   ret,
 
   0 sym immediate header,   ( set immediate flag )
-            lnk x inc,      ( point to immediate flag )
-           true x st,       ( set immediate flag )
+            lnk n inc,      ( point to immediate flag )
+           true n st,       ( set immediate flag )
                   ret,
 
     0 sym compile header,   ( switch to compiling mode )
@@ -204,32 +205,37 @@ var link
         &interact jump,     ( switch out of compiling mode )
        
       0 sym pushx header,   ( push number to stack from x )
-           &pushx jump,     ( jump to push )
+              x n cp,       ( bootstrap to outer interpreter reg )
+           &pushn jump,     ( jump to push )
        
        0 sym popx header,   ( pop number from stack to x )
-            &popx jump,     ( jump pop )
+            &popn call,     ( jump pop )
+              n x cp,       ( outer interpreter to bootstrap reg )
+                  ret,
        
           0 sym , header,   ( append value from stack )
-            &popx call,     ( pop value from stack )
-                x append,   ( append x ) 
+            &popn call,     ( pop value from stack )
+                n append,   ( append n ) 
                   ret,
        
        0 sym find header,   ( find word - nm set if not found )
            &token call,     ( read a token )
             &find call,     ( find token )
-            cur x cp,       ( prep to push cursor )
-          two x x add,      ( address of code field )
-           &pushx jump,     ( push cursor )
+            cur n cp,       ( prep to push cursor )
+          two n n add,      ( address of code field )
+           &pushn jump,     ( push cursor )
 
      0 sym forget header,   ( forget word )
             &find call,     ( find word to forget )
+          cur cur ld,       ( follow link to previous )
+          cur lnk cp,       ( set lnk to word prior to forgotten )
              p' d cp,       ( set dictionary point to name )
                   ret,
        
           -1 40 1 header,   ( skip comment - 40=left paren ASCII )
             label &comment
-                x in,       ( next char )
-rparch x &comment bne,      ( continue to skip until right-paren )
+                n in,       ( next char )
+rparch n &comment bne,      ( continue to skip until right-paren )
                   ret,
 
 ahead,
