@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
-gcc -Wall -O3 -std=c99 -o ./machine ./machine.c
+if [ ! -f ./machine ]; then
+  echo "Building machine..."
+  gcc -Wall -O3 -std=c99 -o ./machine ./machine.c
+  echo "Done"
+fi
