@@ -16,6 +16,6 @@ var x var y var theta var dx var dy
 
 : begin clear 0 0 0 pose ;
 : turn theta @ + head ;
-: move repeat dx @ x +! dy @ y +! plot loop ;
-: jump repeat dx @ x +! dy @ y +! loop ;
+: move times dx @ x +! dy @ y +! plot loop ;
+: jump times dx @ x +! dy @ y +! loop ;
 

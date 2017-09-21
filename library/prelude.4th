@@ -9,7 +9,7 @@
 : max 2dup < if swap then drop ;
 : between rot swap over >= -rot <= and ;
 
-: repeat 0 do ;
+: times 0 do ;
 
 : neg -1 * ;
 : abs dup 0 < if neg then ;
