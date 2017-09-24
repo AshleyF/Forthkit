@@ -101,9 +101,7 @@ class Forth:
 
   def dump(self):
     with open('boot.bin', 'wb') as f:
-      last = next(m for m in self.memory[::-1] if m != 0)
-      end = len(self.memory) - self.memory[::-1].index(last)
-      for m in self.memory[0:end]:
+      for m in self.memory:
         f.write(struct.pack('h', m))
 
   def symbol(self):

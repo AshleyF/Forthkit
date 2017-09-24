@@ -84,3 +84,12 @@ create : compile create compile ; ( magic! )
 : ! popxy x y st, ;
 
 : allot d x cp, pushx swap popx x d d add, ;
+
+: here@ d x cp, pushx ;
+: here! popx x d cp, ;
+
+: >dfa 2 + ;
+: ' find >dfa ; immediate
+
+: if 27 ( call ) , 0 , 19 ( beq ) , here@ 0 , 1 ( x ) , 4 ( zero ) , ; immediate
+: then here@ swap ! ;

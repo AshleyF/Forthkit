@@ -10,17 +10,9 @@ int main(void)
     short* r = rstack;
 
     FILE *file = fopen("boot.bin", "r");
-    if (!file)
+    if (!file || !fread(&mem, sizeof(mem), 1, file))
     {
         printf("Could not open boot image.");
-        return 1;
-    }
-    fseek(file, 0, SEEK_END);
-    long fsize = ftell(file);
-    fseek(file, 0, SEEK_SET);
-    if (!fread(&mem, fsize, 1, file))
-    {
-        printf("Could not read boot image.");
         return 1;
     }
     fclose(file);
