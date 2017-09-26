@@ -91,5 +91,8 @@ create : compile create compile ; ( magic! )
 : >dfa 2 + ;
 : ' find >dfa ; immediate
 
-: if 27 ( call ) , 0 , 19 ( beq ) , here@ 0 , 1 ( x ) , 4 ( zero ) , ; immediate
-: then here@ swap ! ;
+: if 27 ( call ) , ' popx , 19 ( beq ) , here@ 0 , 1 ( x ) , 4 ( zero ) , ; immediate
+: else 26 ( jump ) , here@ 0 , swap here@ swap ! ; immediate
+: then here@ swap ! ; immediate
+
+
