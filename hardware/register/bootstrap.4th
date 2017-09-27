@@ -8,7 +8,8 @@ create : compile create compile ; ( magic! )
 : x 1 ; ( shared by outer interpreter )
 : d 2 ; ( dictionary pointer - shared by outer interpreter )
 : zero 4 ; ( shared by outer interpreter )
-: y 31 ; 
+: y 30 ; 
+: z 31 ; 
 
 : [ interact ; immediate
 : ] compile ;
@@ -71,8 +72,14 @@ create : compile create compile ; ( magic! )
 
 ( stack manipulation )
 
-: drop popx ;
-: dup popx pushx pushx ;
+: drop ( a- ) popx ;
+: 2drop ( ab- ) drop drop ;
+: dup ( a-aa ) popx pushx pushx ;
+: over ( ab-aba ) popxy pushx pushx [ y x cp, ] pushx swap ;
+: 2dup ( ab-abab ) over over ;
+: nip ( ab-b ) swap drop ;
+: tuck ( ab-bab ) swap over ;
+: -rot ( abc-cab ) swap popxy pushx [ y z cp, ] swap [ z x cp, ] pushx ;
 
 ( vocabulary )
 
@@ -95,7 +102,7 @@ create : compile create compile ; ( magic! )
 : >dfa 2 + ;
 : ' find >dfa ;
 
-: if [ ' popx literal ] call, here@ 1+ zero x 0 beq, ; immediate
+: if [ ' popxy literal ] call, here@ 1+ zero x 0 beq, ; immediate
 : else here@ 1+ 0 jump, swap here@ swap ! ; immediate
 : then here@ swap ! ; immediate
 
@@ -105,3 +112,11 @@ create : compile create compile ; ( magic! )
 : < popxy 0 [ x y here@ 6 + bge, ] not ;
 : >= popxy 0 [ x y here@ 6 + blt, ] not ;
 : <= popxy 0 [ x y here@ 6 + bgt, ] not ;
+
+: sign 0 < if -1 else 1 then ;
+: /mod 2dup / -rot mod ;
+
+: .sign dup sign -1 * 44 + emit ; ( happens 44 +/- 1 is ASCII '-'/'+' )
+: .dig 10 /mod swap ;
+: .digemit 48 + emit ;  ( 48 is ASCII '0' )
+: . .sign .dig .dig .dig .dig .dig drop .digemit .digemit .digemit .digemit .digemit cr ;
