@@ -98,3 +98,10 @@ create : compile create compile ; ( magic! )
 : if [ ' popx literal ] call, here@ 1+ zero x 0 beq, ; immediate
 : else here@ 1+ 0 jump, swap here@ swap ! ; immediate
 : then here@ swap ! ; immediate
+
+: = popxy 0 [ x y here@ 6 + bne, ] not ;
+: <> popxy 0 [ x y here@ 6 + beq, ] not ;
+: > popxy 0 [ x y here@ 6 + ble, ] not ;
+: < popxy 0 [ x y here@ 6 + bge, ] not ;
+: >= popxy 0 [ x y here@ 6 + blt, ] not ;
+: <= popxy 0 [ x y here@ 6 + bgt, ] not ;
