@@ -9,32 +9,35 @@
  3 const m
 
  4 const zero                  ( constant 0 )
- 5 const two 2 two ldc,        ( constant 2 )
+ 5 const one 1 one ldc,        ( constant 1 )
+ 6 const two 2 two ldc,        ( constant 2 )
 
- 6 const true -1 true ldc,     ( truth value - all bits set )
- 7 const false                 ( false value )
+ 7 const true -1 true ldc,     ( truth value - all bits set )
+ 8 const false                 ( false value )
 
- 8 const zeroch 48 zeroch ldc, ( '0' ASCII )
- 9 const rparch 41 rparch ldc, ( right parenthesis ASCII )
+ 9 const zeroch 48 zeroch ldc, ( '0' ASCII )
+10 const rparch 41 rparch ldc, ( right parenthesis ASCII )
+11 const spch 32 spch ldc,     ( space ASCII )
+12 const negch 45 negch ldc,   ( '-' ASCII )
 
-10 const c                     ( char last read )
-11 const sp 32 sp ldc,         ( space ASCII )
-12 const tib                   ( terminal input buffer )
-13 const len                   ( token length )
-14 const len'                  ( name length )
-15 const nm                    ( match flag for search )
-16 const p                     ( pointer )
-17 const c                     ( char being compared )
-18 const p'                    ( pointer )
-19 const c'                    ( char being compared )
-20 const cur                   ( cursor )
-21 const lnk                   ( link pointer )
-22 const base 10 base ldc,     ( number base decimal by default )
-23 const s 32767 s ldc,        ( stack pointer )
-24 const ldc                   ( ldc instruction [0] )
-25 const call 27 call ldc,     ( call instruction )
-26 const ret 28 ret ldc,       ( ret instruction )
-27 const comp                  ( compiling flag )
+13 const c                     ( char last read )
+14 const tib                   ( terminal input buffer )
+15 const len                   ( token length )
+16 const len'                  ( name length )
+17 const nm                    ( match flag for search )
+18 const p                     ( pointer )
+19 const c                     ( char being compared )
+20 const p'                    ( pointer )
+21 const c'                    ( char being compared )
+22 const cur                   ( cursor )
+23 const lnk                   ( link pointer )
+24 const base 10 base ldc,     ( number base decimal by default )
+25 const s 32767 s ldc,        ( stack pointer )
+26 const ldc                   ( ldc instruction [0] )
+27 const call 27 call ldc,     ( call instruction )
+28 const ret 28 ret ldc,       ( ret instruction )
+29 const comp                  ( compiling flag )
+30 const sign                  ( number sign while parsing )
 
 leap,
 
@@ -42,7 +45,7 @@ leap,
 
             label &skipws   ( skip until non-whitespace )
                 c in,       ( read char )
-     c sp &skipws ble,      ( keep skipping whitespace )
+   c spch &skipws ble,      ( keep skipping whitespace )
                   ret,
       
             label &name     ( read input name into buffer )
@@ -50,7 +53,7 @@ leap,
           tib tib inc,      ( advance tib )
           len len inc,      ( increment length )
                 c in,       ( read char )
-       c sp &name bgt,      ( continue until whitespace )
+     c spch &name bgt,      ( continue until whitespace )
           len tib st,       ( append length )
                   ret,
       
@@ -97,6 +100,11 @@ zero cur &nomatch beq,      ( no match if start of dict )
       
 ( --- number processing ------------------------------------------------ )
 
+            label &negate   ( set negative sign )
+        true sign cp,       ( note: `true` is -1 )
+              p p inc,      ( next char )
+                            ( fall through to &digits )
+
             label &digits   ( parse digits )
               p c ld,       ( get char )
        c zeroch c sub,      ( convert to digit )
@@ -104,12 +112,16 @@ zero cur &nomatch beq,      ( no match if start of dict )
             n c n add,      ( add in one's place )
               p p inc,      ( next char )
     p tib &digits blt,      ( not end? continue... )
+         sign n n mul,      ( multiply by sign )
                   ret,
       
             label &parsenum ( parse token as number )
         tib len p sub,      ( point p at start of word )
            zero n cp,       ( init number )
-          &digits jump,
+         one sign cp,       ( init sign )
+              p c ld,       ( get char )
+  c negch &negate beq,      ( set negative sign )
+          &digits jump,     ( parse digits )
       
             label &pushn    ( push interactive number )
               n s st,       ( store n at stack pointer )

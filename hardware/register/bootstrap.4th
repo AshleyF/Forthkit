@@ -76,7 +76,7 @@ create : compile create compile ; ( magic! )
 
 ( vocabulary )
 
-: true 65535 ; ( TODO: support signed literals )
+: true -1 ;
 : false 0 ;
 
 : key [ x in, ] pushx ;
