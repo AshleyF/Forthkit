@@ -212,6 +212,10 @@ var link
             &popn call,     ( jump pop )
               n x cp,       ( outer interpreter to bootstrap reg )
                   ret,
+
+    0 sym literal header,   ( compile literal from stack )
+            &popn call,     ( pop into n )
+            &litn jump,     ( compile literal n )
        
           0 sym , header,   ( append value from stack )
             &popn call,     ( pop value from stack )
