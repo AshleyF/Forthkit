@@ -80,7 +80,7 @@ create : compile create compile ; ( magic! )
 : nip ( ab-b ) swap drop ;
 : tuck ( ab-bab ) swap over ;
 : -rot ( abc-cab ) swap popxy pushx [ y z cp, ] swap [ z x cp, ] pushx ;
-: rot ( abs-bca ) -rot -rot ;
+: rot ( abc-bca ) -rot -rot ;
 
 ( vocabulary )
 
@@ -130,3 +130,8 @@ create : compile create compile ; ( magic! )
 : . .sign .dig .dig .dig .dig .dig drop .digemit .digemit .digemit .digemit .digemit cr ;
 
 : ?dup dup unless drop then ;
+
+: factorial dup 1 > if dup 1- factorial * then ;
+
+: begin here@ ; immediate
+: until [ ' popxy literal ] call, zero x rot beq, ; immediate
