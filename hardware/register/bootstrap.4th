@@ -116,7 +116,13 @@ create : compile create compile ; ( magic! )
 : sign 0 < if -1 else 1 then ;
 : /mod 2dup / -rot mod ;
 
-: .sign dup sign -1 * 44 + emit ; ( happens 44 +/- 1 is ASCII '-'/'+' )
+: min 2dup > if swap then drop ;
+: max 2dup < if swap then drop ;
+
+: negate -1 * ;
+: abs dup 0 < if negate then ;
+
+: .sign dup sign negate 44 + emit ; ( happens 44 +/- 1 is ASCII '-'/'+' )
 : .dig 10 /mod swap ;
 : .digemit 48 + emit ;  ( 48 is ASCII '0' )
 : . .sign .dig .dig .dig .dig .dig drop .digemit .digemit .digemit .digemit .digemit cr ;
