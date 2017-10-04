@@ -135,3 +135,4 @@ create : compile create compile ; ( magic! )
 
 : begin here@ ; immediate
 : until [ ' popxy literal ] call, zero x rot beq, ; immediate
+: again [ ' popxy literal ] call, jump, ; immediate
