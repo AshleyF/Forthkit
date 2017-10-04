@@ -37,7 +37,7 @@ var dp ( dictionary pointer )
 : dump,   30 , ;            (       dump, →  core to boot.bin )
 
 : label here const ;
-: leap, here 0 jump, ; ( dummy jump, push address )
-: ahead, here swap dp ! dup jump, dp ! ; ( pop address, patch jump )
+: ahead, here 1 + 0 jump, ; ( dummy jump, push address )
+: then, here swap m! ; ( patch jump )
 
 : assemble here . dump ;

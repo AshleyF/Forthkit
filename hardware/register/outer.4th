@@ -39,7 +39,7 @@
 29 const comp                  ( compiling flag )
 30 const sign                  ( number sign while parsing )
 
-leap,
+ahead,
 
 ( --- tokenization ----------------------------------------------------- )
 
@@ -254,7 +254,7 @@ var link
 rparch n &comment bne,      ( continue to skip until right-paren )
                   ret,
 
-ahead,
+then,
 
 ( --- set `lnk` to within last header and `d` to just past this code --- )
 
