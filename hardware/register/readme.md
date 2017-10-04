@@ -81,7 +81,7 @@ A [Forth-based assembler is provided](./assembler.4th), allowing the above progr
 This is a pretty nice assembly format, leaving all the power of Forth available as a "macro assembler."
 A new [`boot.bin`](./boot.bin) may be build with [`./test.sh`](./test.sh).
 
-In addition to `label` to give names to addresses for backward jumps (most common), there are `leap,` and `ahead,` words to skip over code (likely for library routines).
+In addition to `label` to give names to addresses for backward jumps (most common), there are `ahead,` and `then,` words to skip over code (likely for library routines).
 
 # Outer Interpreter
 
@@ -93,17 +93,20 @@ The dictionary format is as follows. Words are length-suffixed characters follow
 
 In addition to numeric literals support, the following words are currently in the dictionary:
 
-| Word        |                                                                                                                  |
-| ----------- | ---------------------------------------------------------------------------------------------------------------- |
-| `create`    | Reads token and creates word header                                                                              |
-| `immediate` | Set immediate flag in latest word header                                                                         |
-| `compile`   | Switch to compiling mode (literals packed, words looked up and calls compiled or executed if flagged immediate)  |
-| `interact`  | Switch to interactive mode (literals pushed to stack and words executed)                                         |
-| `;`         | Compile `ret` instruction and exit compiling mode                                                                |
-| `pushn`     | Push number in `n` register                                                                                      |
-| `popn`      | Pop number in `n` register                                                                                       |
-| `,`         | Append TOS to dictionary                                                                                         |
-| `find`      | Find next token in dictionary and push address                                                                   |
-| `dump`      | Core dump to `boot.bin`                                                                                          |
+| Word        |                                                                                                                 |
+| ----------- | --------------------------------------------------------------------------------------------------------------- |
+| `create`    | Reads token and creates word header                                                                             |
+| `immediate` | Set immediate flag in latest word header                                                                        |
+| `compile`   | Switch to compiling mode (literals packed, words looked up and calls compiled or executed if flagged immediate) |
+| `interact`  | Switch to interactive mode (literals pushed to stack and words executed)                                        |
+| `;`         | Compile `ret` instruction and exit compiling mode                                                               |
+| `pushx`     | Push number in `x` register                                                                                     |
+| `popx`      | Pop number in `x` register                                                                                      |
+| `,`         | Append TOS to dictionary                                                                                        |
+| `literal`   | Compile inline literal from the stack                                                                           |
+| `find`      | Find following token in dictionary and push address                                                             |
+| `forget`    | Reset dictionary to following token                                                                             |
+| `dump`      | Core dump to `boot.bin`                                                                                         |
+| `(`         | Begin comment, terminated by ')'                                                                                |
 
 These should be enough to bootstrap a new assembler and meta-circular outer interpreter!
