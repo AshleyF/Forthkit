@@ -66,7 +66,7 @@ Running the machine and typing `hello`:
 
 ## Assembler
 
-A [Forth-based assembler is provided](./assembler.4th), allowing the above program [to be expressed](./capitalize.4th) as:
+A [Forth-based assembler is provided](./assembler.4th), allowing the above program [to be expressed](./test.4th) as:
 
     0 const u
     1 const c
