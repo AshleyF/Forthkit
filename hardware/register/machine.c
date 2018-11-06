@@ -19,110 +19,103 @@ int main(void)
 
     short x;
 
-    inline short next()
-    {
-        return mem[pc++];
-    }
-
-    inline short rval()
-    {
-        return reg[next()];
-    }
+    #define NEXT mem[pc++]
+    #define RVAL reg[NEXT]
 
     while (1)
     {
-        switch(next())
+        switch(NEXT)
         {
             case 0: // ldc (x = v)
-                reg[next()] = next();
+                reg[NEXT] = NEXT;
                 break;
             case 1: // ld (x = m[y])
-                reg[next()] = mem[rval()];
+                reg[NEXT] = mem[RVAL];
                 break;
             case 2: // st (m[x] = y)
-                mem[rval()] = rval();
+                mem[RVAL] = RVAL;
                 break;
             case 3: // cp (x = y)
-                reg[next()] = reg[next()];
+                reg[NEXT] = reg[NEXT];
                 break;
             case 4: // in (x = getc())
-                reg[next()] = getc(stdin);
+                reg[NEXT] = getc(stdin);
                 break;
             case 5: // out (putc(x))
-                putc(rval(), stdout);
+                putc(RVAL, stdout);
                 break;
             case 6: // inc (x = ++y)
-                reg[next()] = rval() + 1;
+                reg[NEXT] = RVAL + 1;
                 break;
             case 7: // dec (x = --y)
-                reg[next()] = rval() - 1;
+                reg[NEXT] = RVAL - 1;
                 break;
             case 8: // add (x = y + z)
-                reg[next()] = rval() + rval();
+                reg[NEXT] = RVAL + RVAL;
                 break;
             case 9: // sub (x = y - z)
-                reg[next()] = rval() - rval();
+                reg[NEXT] = RVAL - RVAL;
                 break;
             case 10: // mul (x = y * z)
-                reg[next()] = rval() * rval();
+                reg[NEXT] = RVAL * RVAL;
                 break;
             case 11: // div (x = y / z)
-                reg[next()] = rval() / rval();
+                reg[NEXT] = RVAL / RVAL;
                 break;
             case 12: // mod (x = y % z)
-                reg[next()] = rval() % rval();
+                reg[NEXT] = RVAL % RVAL;
                 break;
             case 13: // and (x = y & z)
-                reg[next()] = rval() & rval();
+                reg[NEXT] = RVAL & RVAL;
                 break;
             case 14: // or (x = y | z)
-                reg[next()] = rval() | rval();
+                reg[NEXT] = RVAL | RVAL;
                 break;
             case 15: // xor (x = y ^ z)
-                reg[next()] = rval() ^ rval();
+                reg[NEXT] = RVAL ^ RVAL;
                 break;
             case 16: // not (x = ~y)
-                reg[next()] = ~rval();
+                reg[NEXT] = ~RVAL;
                 break;
             case 17: // lsh (x = y << z)
-                reg[next()] = rval() << rval();
+                reg[NEXT] = RVAL << RVAL;
                 break;
             case 18: // rsh (x = y >> z)
-                reg[next()] = rval() >> rval();
+                reg[NEXT] = RVAL >> RVAL;
                 break;
             case 19: // beq (branch if x == y)
-                x = next();
-                if (rval() == rval()) pc = x;
+                x = NEXT;
+                if (RVAL == RVAL) pc = x;
                 break;
             case 20: // bne (branch if x != y)
-                x = next();
-                if (rval() != rval()) pc = x;
+                x = NEXT;
+                if (RVAL != RVAL) pc = x;
                 break;
             case 21: // bgt (branch if x > y)
-                x = next();
-                if (rval() > rval()) pc = x;
+                x = NEXT;
+                if (RVAL > RVAL) pc = x;
                 break;
             case 22: // bge (branch if x >= y)
-                x = next();
-                if (rval() >= rval()) pc = x;
+                x = NEXT;
+                if (RVAL >= RVAL) pc = x;
                 break;
             case 23: // blt (branch if x < y)
-                x = next();
-                if (rval() < rval()) pc = x;
+                x = NEXT;
+                if (RVAL < RVAL) pc = x;
                 break;
             case 24: // ble (branch if x <= y)
-                x = next();
-                if (rval() <= rval()) pc = x;
+                x = NEXT;
+                if (RVAL <= RVAL) pc = x;
                 break;
             case 25: // exec (pc = x)
-                pc = rval();
+                pc = RVAL;
                 break;
             case 26: // jump (pc = v)
-                pc = next();
+                pc = NEXT;
                 break;
             case 27: // call (jsr(v))
                 *(r++) = pc + 1;
-                pc = next();
+                pc = NEXT;
                 break;
             case 28: // return (ret)
                 pc = *(--r);
