@@ -1,4 +1,5 @@
 ( simple assembler/VM test - capitalize [-32] console input )
+( requires assembler )
 
 0 const u
 1 const c
@@ -11,4 +12,3 @@
 &start jump,
 
 assemble
-
