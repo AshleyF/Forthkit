@@ -17,111 +17,50 @@ int main(void)
     }
     fclose(file);
 
-    short x;
+    short x, y, z;
 
     #define NEXT mem[pc++]
-    #define RVAL reg[NEXT]
+    #define X x = NEXT;
+    #define XY X; y = NEXT;
+    #define XYZ XY; z = NEXT;
+    #define Rx reg[x]
+    #define Ry reg[y]
+    #define Rz reg[z]
 
     while (1)
     {
         switch(NEXT)
         {
-            case 0: // ldc (x = v)
-                reg[NEXT] = NEXT;
-                break;
-            case 1: // ld (x = m[y])
-                reg[NEXT] = mem[RVAL];
-                break;
-            case 2: // st (m[x] = y)
-                mem[RVAL] = RVAL;
-                break;
-            case 3: // cp (x = y)
-                reg[NEXT] = reg[NEXT];
-                break;
-            case 4: // in (x = getc())
-                reg[NEXT] = getc(stdin);
-                break;
-            case 5: // out (putc(x))
-                putc(RVAL, stdout);
-                break;
-            case 6: // inc (x = ++y)
-                reg[NEXT] = RVAL + 1;
-                break;
-            case 7: // dec (x = --y)
-                reg[NEXT] = RVAL - 1;
-                break;
-            case 8: // add (x = y + z)
-                reg[NEXT] = RVAL + RVAL;
-                break;
-            case 9: // sub (x = y - z)
-                reg[NEXT] = RVAL - RVAL;
-                break;
-            case 10: // mul (x = y * z)
-                reg[NEXT] = RVAL * RVAL;
-                break;
-            case 11: // div (x = y / z)
-                reg[NEXT] = RVAL / RVAL;
-                break;
-            case 12: // mod (x = y % z)
-                reg[NEXT] = RVAL % RVAL;
-                break;
-            case 13: // and (x = y & z)
-                reg[NEXT] = RVAL & RVAL;
-                break;
-            case 14: // or (x = y | z)
-                reg[NEXT] = RVAL | RVAL;
-                break;
-            case 15: // xor (x = y ^ z)
-                reg[NEXT] = RVAL ^ RVAL;
-                break;
-            case 16: // not (x = ~y)
-                reg[NEXT] = ~RVAL;
-                break;
-            case 17: // lsh (x = y << z)
-                reg[NEXT] = RVAL << RVAL;
-                break;
-            case 18: // rsh (x = y >> z)
-                reg[NEXT] = RVAL >> RVAL;
-                break;
-            case 19: // beq (branch if x == y)
-                x = NEXT;
-                if (RVAL == RVAL) pc = x;
-                break;
-            case 20: // bne (branch if x != y)
-                x = NEXT;
-                if (RVAL != RVAL) pc = x;
-                break;
-            case 21: // bgt (branch if x > y)
-                x = NEXT;
-                if (RVAL > RVAL) pc = x;
-                break;
-            case 22: // bge (branch if x >= y)
-                x = NEXT;
-                if (RVAL >= RVAL) pc = x;
-                break;
-            case 23: // blt (branch if x < y)
-                x = NEXT;
-                if (RVAL < RVAL) pc = x;
-                break;
-            case 24: // ble (branch if x <= y)
-                x = NEXT;
-                if (RVAL <= RVAL) pc = x;
-                break;
-            case 25: // exec (pc = x)
-                pc = RVAL;
-                break;
-            case 26: // jump (pc = v)
-                pc = NEXT;
-                break;
-            case 27: // call (jsr(v))
-                *(r++) = pc + 1;
-                pc = NEXT;
-                break;
-            case 28: // return (ret)
-                pc = *(--r);
-                break;
-            case 29: // halt
-                return 0;
+            case  0: XY;  Rx = y;                  break; // ldc (x = v)
+            case  1: XY;  Rx = mem[y];             break; // ld (x = m[y])
+            case  2: XY;  mem[x] = y;              break; // st (m[x] = y)
+            case  3: XY;  Rx = Ry;                 break; // cp (x = y)
+            case  4: X;   Rx = getc(stdin);        break; // in (x = getc())
+            case  5: X;   putc(Rx, stdout);        break; // out (putc(x))
+            case  6: XY;  Rx = Ry + 1;             break; // inc (x = ++y)
+            case  7: XY;  Rx = Ry - 1;             break; // dec (x = --y)
+            case  8: XYZ; Rx = Ry + Rz;            break; // add (x = y + z)
+            case  9: XYZ; Rx = Ry - Rz;            break; // sub (x = y - z)
+            case 10: XYZ; Rx = Ry * Rz;            break; // mul (x = y * z)
+            case 11: XYZ; Rx = Ry / Rz;            break; // div (x = y / z)
+            case 12: XYZ; Rx = Ry % Rz;            break; // mod (x = y % z)
+            case 13: XYZ; Rx = Ry & Rz;            break; // and (x = y & z)
+            case 14: XYZ; Rx = Ry | Rz;            break; // or (x = y | z)
+            case 15: XYZ; Rx = Ry ^ Rz;            break; // xor (x = y ^ z)
+            case 16: XY;  Rx = ~Ry;                break; // not (x = ~y)
+            case 17: XYZ; Rx = Ry << Rz;           break; // lsh (x = y << z)
+            case 18: XYZ; Rx = Ry >> Rz;           break; // rsh (x = y >> z)
+            case 19: XYZ; if (Ry == Rz) pc = x;    break; // beq (branch if x == y)
+            case 20: XYZ; if (Ry != Rz) pc = x;    break; // bne (branch if x != y)
+            case 21: XYZ; if (Ry >  Rz) pc = x;    break; // bgt (branch if x > y)
+            case 22: XYZ; if (Ry >= Rz) pc = x;    break; // bge (branch if x >= y)
+            case 23: XYZ; if (Ry <  Rz) pc = x;    break; // blt (branch if x < y)
+            case 24: XYZ; if (Ry <= Rz) pc = x;    break; // ble (branch if x <= y)
+            case 25: X;   pc = Rx;                 break; // exec (pc = x)
+            case 26: X;   pc = x;                  break; // jump (pc = v)
+            case 27: X;   *(r++) = pc + 1; pc = x; break; // call (jsr(v))
+            case 28:      pc = *(--r);             break; // return (ret)
+            case 29:      return 0; // halt
             case 30: // dump
                 file = fopen("boot.bin", "w");
                 if (!file || !fwrite(&mem, sizeof(mem), 1, file))
