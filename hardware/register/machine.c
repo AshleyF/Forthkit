@@ -33,7 +33,7 @@ int main(void)
         {
             case  0: XY;  Rx = y;                  break; // ldc (x = v)
             case  1: XY;  Rx = mem[y];             break; // ld (x = m[y])
-            case  2: XY;  mem[x] = y;              break; // st (m[x] = y)
+            case  2: XY;  mem[x] = Ry;              break; // st (m[x] = y)
             case  3: XY;  Rx = Ry;                 break; // cp (x = y)
             case  4: X;   Rx = getc(stdin);        break; // in (x = getc())
             case  5: X;   putc(Rx, stdout);        break; // out (putc(x))
