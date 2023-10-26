@@ -1,6 +1,6 @@
 # Forthkit
 
-Inspired by Lispkit, build your own Forth from scratch.
+Inspired by [Lispkit](https://github.com/AshleyF/Lispkit), build your own Forth from scratch.
 
 0) [Write an interpreter (in Python)](./interpreter/). Similar to Chuck Moore's first punch card interpreter.
 1) Play with it!
