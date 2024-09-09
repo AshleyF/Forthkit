@@ -69,10 +69,12 @@ class Forth:
     self.names = self.dictionary.keys()
 
   def push(self, x): self.stack.append(x)
-  def push2(self, (x, y)):
+  def push2(self, xy):
+    x, y = xy
     self.push(x)
     self.push(y)
-  def push3(self, (x, y, z)):
+  def push3(self, xyz):
+    x, y, z = xyz
     self.push(x)
     self.push(y)
     self.push(z)
@@ -105,21 +107,21 @@ class Forth:
         f.write(struct.pack('h', m))
 
   def symbol(self):
-    name = self.tokens.next()
+    name = next(self.tokens)
     for c in name[::-1]: self.push(ord(c))
     self.push(len(name))
 
   def comment(self):
-    while self.scan().next() != ')': pass
+    while next(self.scan()) != ')': pass
 
   def doif(self):
     term = ['else', 'then']
     if self.pop() == 0:
-      while not self.scan().next() in term:
+      while not next(self.scan()) in term:
         pass
 
   def doelse(self):
-    while self.scan().next() != 'then': pass
+    while next(self.scan()) != 'then': pass
 
   def dothen(self): pass
 
@@ -137,18 +139,18 @@ class Forth:
     self.index = savedIndex
 
   def constant(self):
-    name = self.tokens.next()
+    name = next(self.tokens)
     val = self.pop()
     self.dictionary[name] = lambda: self.push(val)
 
   def variable(self):
-    name = self.tokens.next()
+    name = next(self.tokens)
     index = len(self.variables)
     self.variables[index] = 0
     self.dictionary[name] = lambda: self.push(index)
 
   def define(self):
-    name = self.tokens.next()
+    name = next(self.tokens)
     code = list(takewhile(lambda t: t != ';', self.scan()))
     self.dictionary[name] = (lambda: self.execute(code))
     if not name in self.names: self.names.append([name])
@@ -159,14 +161,14 @@ class Forth:
     self.push(len(self.names) - 1)
 
   def find(self):
-    name = self.tokens.next()
+    name = next(self.tokens)
     i = self.names.index([name])
     return i
 
   def call(self, i): self.execute(self.names[i])
 
   def input(self):
-    for token in raw_input().split(): yield token
+    for token in input().split(): yield token
 
   def read(self): self.tokens = self.input()
 
@@ -185,7 +187,7 @@ class Forth:
   def evaluate(self):
     try:
       while True:
-        token = self.tokens.next()
+        token = next(self.tokens)
         if token in self.dictionary:
           self.dictionary[token]()
         else:
@@ -201,15 +203,15 @@ class Forth:
 
 forth = Forth()
 
-print "Welcome to PyForth 0.3 REPL"
+print("Welcome to PyForth 0.3 REPL")
 while True:
   try:
-    print '> ',
+    print('> ',)
     stdout.flush()
     forth.read()
     forth.evaluate()
-    print 'ok'
+    print('ok')
   except EOFError:
-    print 'done'
+    print('done')
     exit()
-  except Exception, error: print error
+  except Exception as error: print(error)
