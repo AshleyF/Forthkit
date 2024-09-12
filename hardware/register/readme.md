@@ -48,17 +48,17 @@ The machine loads a [`boot.bin`](./boot.bin) image of little-endian encoded memo
 
 A demo [`boot.bin`](./boot.bin) may be built (see Assembler section below) which will simply capitalize console input by subtracting 32 from input characters:
 
-| Assembly    |     |     |     |     |
-| ----------- | --- | --- | --- | --- |
-| `ldc u 32`  | 0   | 0   | 32  |     |
-| `in c`      | 4   | 1   |     |     |
-| `sub c c u` | 9   | 1   | 1   | 0   |
-| `out c`     | 5   | 1   |     |     |
-| `jump 0003` | 26  | 3   |     |     |
+| Assembly    | Op  |     |     |     | Encoded             |
+| ----------- | --- | --- | --- | --- | ------------------- |
+| `ldc u 32`  | 0   | 0   | 32  |     | 0000 0000 2000      |
+| `in c`      | 4   | 1   |     |     | 0400 0100           |
+| `sub c c u` | 9   | 1   | 1   | 0   | 0900 0100 0100 0000 |
+| `out c`     | 5   | 1   |     |     | 0500                |
+| `jump 0003` | 26  | 3   |     |     | 1a00 0300           |
 
-Encoded: `0000 0000 2000 0400 0100 0900 0100 0100 0000 0500 0100 1a00 0300`
+The encoding could be more compact, but we're more concerned with keeping things simple. The full `boot.bin` contains the following bytes (in pairs forming 16-bit `short` memory cells): `0000 0000 2000 0400 0100 0900 0100 0100 0000 0500 0100 1a00 0300`
 
-Running the machine and typing `hello` (note: `boot.bin` must be assembled first, see Assembler section below):
+After assembling a `boot.bit` (see Assembler section below), we may run the machine and type something (e.g. `hello`):
 
     $ ./machine
     hello
@@ -79,9 +79,10 @@ A [Forth-based assembler is provided](./assembler.4th), allowing the above progr
     &start jump,
 
 This is a pretty nice assembly format, leaving all the power of Forth available as a "macro assembler."
+
 A new [`boot.bin`](./boot.bin) may be build with [`./test.sh`](./test.sh).
 
-In addition to `label` to give names to addresses for backward jumps (most common), there are `ahead,` and `then,` words to skip over code (likely for library routines).
+In addition to the `label` mechanism to give names to addresses for backward jumps (most common), there are `ahead,` and `then,` words to skip over code (likely for library routines).
 
 # Outer Interpreter
 
@@ -89,7 +90,9 @@ An [outer interpreter](./outer.4th) may be assembled with [`./outer.sh`](./outer
 
 The dictionary format is as follows. Words are length-suffixed characters followed by a "link" field pointing to the link field of the previous word (or `0` if the first word), followed by an "immediate flag" indicating whether the word should be executed even in compiling mode, followed by machine code (VM bytecode) and presumably a `ret` instruction.
 
-![Dictionary Format](./dictionary.png)
+| Name   | Link | Flag | Code      | Name   | Link | Flag | Code      | ... |
+| ------ | ---- | ---- | --------- | ------ | ---- | ---- | --------- | --- |
+| `foo3` | 0    | -1   | ... `ret` | `bar3` | 0    | -1   | ... `ret` | ... |
 
 In addition to numeric literals support, the following words are currently in the dictionary:
 
@@ -107,6 +110,6 @@ In addition to numeric literals support, the following words are currently in th
 | `find`      | Find following token in dictionary and push address                                                             |
 | `forget`    | Reset dictionary to following token                                                                             |
 | `dump`      | Core dump to `boot.bin`                                                                                         |
-| `(`         | Begin comment, terminated by ')'                                                                                |
+| `(`         | Begin comment, terminated by `)`                                                                                |
 
 These should be enough to bootstrap a new assembler and meta-circular outer interpreter!
