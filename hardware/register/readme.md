@@ -46,7 +46,7 @@ The machine loads a [`boot.bin`](./boot.bin) image of little-endian encoded memo
 
 ## Demo
 
-A demo hand-made [`boot.bin`](./boot.bin) is provided which will simply capitalize console input by subtracting 32 from input characters:
+A demo [`boot.bin`](./boot.bin) may be built (see Assembler section below) which will simply capitalize console input by subtracting 32 from input characters:
 
 | Assembly    |     |     |     |     |
 | ----------- | --- | --- | --- | --- |
@@ -58,7 +58,7 @@ A demo hand-made [`boot.bin`](./boot.bin) is provided which will simply capitali
 
 Encoded: `0000 0000 2000 0400 0100 0900 0100 0100 0000 0500 0100 1a00 0300`
 
-Running the machine and typing `hello`:
+Running the machine and typing `hello` (note: `boot.bin` must be assembled first, see Assembler section below):
 
     $ ./machine
     hello

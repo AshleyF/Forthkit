@@ -20,7 +20,7 @@ class Forth:
       '+'    : lambda: self.xx_x(operator.add),
       '-'    : lambda: self.xx_x(operator.sub),
       '*'    : lambda: self.xx_x(operator.mul),
-      '/'    : lambda: self.xx_x(lambda x,y: x // y if isinstance(x, int) and isinstance(y, int) else x / y),
+      '/'    : lambda: self.xx_x(operator.truediv),
       'mod'  : lambda: self.xx_x(operator.mod),
       'acos' : lambda: self.x_x(math.acos),
       'asin' : lambda: self.x_x(math.asin),
