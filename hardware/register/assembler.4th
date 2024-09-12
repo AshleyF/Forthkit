@@ -41,4 +41,3 @@ var dp ( dictionary pointer )
 : then, here swap m! ; ( patch jump )
 
 : assemble here . dump ;
-

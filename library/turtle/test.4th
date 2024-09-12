@@ -38,4 +38,3 @@
 : spiral begin 1 spiral-rec show ;
 
 burst shapes squaril spiro stars rose flower spiral
-

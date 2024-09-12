@@ -20,7 +20,7 @@ class Forth:
       '+'    : lambda: self.xx_x(operator.add),
       '-'    : lambda: self.xx_x(operator.sub),
       '*'    : lambda: self.xx_x(operator.mul),
-      '/'    : lambda: self.xx_x(operator.div),
+      '/'    : lambda: self.xx_x(lambda x,y: x // y if isinstance(x, int) and isinstance(y, int) else x / y),
       'mod'  : lambda: self.xx_x(operator.mod),
       'acos' : lambda: self.x_x(math.acos),
       'asin' : lambda: self.x_x(math.asin),
@@ -42,14 +42,14 @@ class Forth:
       'or'   : lambda: self.xx_x(operator.or_),
       'xor'  : lambda: self.xx_x(operator.xor),
       'not'  : lambda: self.x_x(operator.inv),
-      'm@'   : lambda: self.x_x(lambda x: self.memory[x]),
+      'm@'   : lambda: self.x_x(lambda x: self.memory[int(x)]),
       'm!'   : lambda: self.xx_(self.memoryStore),
       '@'    : lambda: self.x_x(lambda x: self.variables[x]),
       '!'    : lambda: self.xx_(self.variableStore),
       '.'    : lambda: stdout.write('%f ' % self.pop()),
       '.s'   : lambda: stdout.write('%s ' % self.stack),
       '.m'   : lambda: stdout.write('%s ' % self.memory[self.pop():self.pop()]),
-      'emit' : lambda: self.x_(lambda x:stdout.write(unichr(x))),
+      'emit' : lambda: self.x_(lambda x:stdout.write(chr(x))),
       'flush': lambda: lambda: stdout.flush(),
       'dump' : self.dump,
       'sym'  : self.symbol,
@@ -64,9 +64,10 @@ class Forth:
       ':'    : self.define,
       '\''   : lambda: self._x(self.find),
       '['    : self.anonymous,
+      'words': self.words,
       'call' : lambda: self.x_(self.call),
       'exit' : lambda: exit(0) }
-    self.names = self.dictionary.keys()
+    self.names = list(self.dictionary.keys())
 
   def push(self, x): self.stack.append(x)
   def push2(self, xy):
@@ -98,7 +99,7 @@ class Forth:
   def _x(self, f): self.push(f())
   def xx_(self, f): self.flip2(f, self.pop(), self.pop())
 
-  def memoryStore(self, val, addr): self.memory[addr] = val
+  def memoryStore(self, val, addr): self.memory[int(addr)] = val
   def variableStore(self, val, addr): self.variables[addr] = val
 
   def dump(self):
@@ -160,6 +161,11 @@ class Forth:
     self.names.append(code)
     self.push(len(self.names) - 1)
 
+  def words(self):
+    for word in self.dictionary:
+      print(word, end=' ')
+    print()
+
   def find(self):
     name = next(self.tokens)
     i = self.names.index([name])
@@ -188,6 +194,7 @@ class Forth:
     try:
       while True:
         token = next(self.tokens)
+        #print(token)
         if token in self.dictionary:
           self.dictionary[token]()
         else:
@@ -206,7 +213,7 @@ forth = Forth()
 print("Welcome to PyForth 0.3 REPL")
 while True:
   try:
-    print('> ',)
+    print('> ', end='')
     stdout.flush()
     forth.read()
     forth.evaluate()
