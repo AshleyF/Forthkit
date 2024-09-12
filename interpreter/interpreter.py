@@ -11,9 +11,8 @@ class Forth:
     self.memory = [0] * 32 * 1024
     self.stack = []
     self.dictionary = {
-      '.'    : lambda: stdout.write('%f ' % self.pop()),
-      '.s'   : lambda: stdout.write('%s ' % self.stack),
-      '.m'   : lambda: stdout.write('%s ' % self.memory[int(self.pop()):int(self.pop())]),
+      '.'    : lambda: print(self.pop()),
+      '.s'   : lambda: print(self.stack),
       '+'    : lambda: self.xx_x(operator.add),
       '-'    : lambda: self.xx_x(operator.sub),
       '*'    : lambda: self.xx_x(operator.mul),
@@ -32,9 +31,9 @@ class Forth:
       '>='   : lambda: self.xx_b(operator.ge),
       '<'    : lambda: self.xx_b(operator.lt),
       '<='   : lambda: self.xx_b(operator.le),
-      'and'  : lambda: self.xx_x(lambda x, y: int(x) & int(y)),
-      'or'   : lambda: self.xx_x(lambda x, y: int(x) | int(y)),
-      'xor'  : lambda: self.xx_x(lambda x, y: int(x) ^ int(y)),
+      'and'  : lambda: self.xx_x(lambda x,y: int(x) & int(y)),
+      'or'   : lambda: self.xx_x(lambda x,y: int(x) | int(y)),
+      'xor'  : lambda: self.xx_x(lambda x,y: int(x) ^ int(y)),
       'not'  : lambda: self.x_x(lambda x: ~x),
       'dup'  : lambda: self.x_xx(lambda x: (x,x)),
       'drop' : lambda: self.x_(lambda _: None),
@@ -42,25 +41,26 @@ class Forth:
       'over' : lambda: self.xx_xxx(lambda x,y: (x,y,x)),
       'rot'  : lambda: self.xxx_xxx(lambda x,y,z: (y,z,x)),
       '-rot' : lambda: self.xxx_xxx(lambda x,y,z: (z,x,y)),
-      'm@'   : lambda: self.x_x(lambda x: self.memory[int(x)]),
-      'm!'   : lambda: self.xx_(self.memoryStore),
+      'var'  : self.variable,
       '@'    : lambda: self.x_x(lambda x: self.variables[int(x)]),
       '!'    : lambda: self.xx_(self.variableStore),
-      'emit' : lambda: self.x_(lambda x: stdout.write(chr(int(x)))),
+      'const': self.constant,
+      'm@'   : lambda: self.x_x(lambda x: self.memory[int(x)]),
+      'm!'   : lambda: self.xx_(self.memoryStore),
+      '.m'   : lambda: print(self.memory[int(self.pop()):int(self.pop())]),
       'dump' : self.dump,
-      'sym'  : self.symbol,
       '('    : self.comment,
       'if'   : self.doif,
       'else' : self.doelse,
       'then' : self.dothen,
       'do'   : self.doloop,
       'i'    : lambda: self.push(self.index),
-      'const': self.constant,
-      'var'  : self.variable,
       ':'    : self.define,
       '\''   : lambda: self._x(self.find),
       '['    : self.anonymous,
       'call' : lambda: self.x_(self.call),
+      'emit' : lambda: self.x_(lambda x: stdout.write(chr(int(x)))),
+      'sym'  : self.symbol,
       'words': self.words,
       'exit' : lambda: exit(0) }
     self.names = list(self.dictionary.keys())
@@ -95,18 +95,30 @@ class Forth:
   def _x(self, f): self.push(f())
   def xx_(self, f): self.flip2(f, self.pop(), self.pop())
 
-  def memoryStore(self, val, addr): self.memory[int(addr)] = int(val)
   def variableStore(self, val, addr): self.variables[addr] = val
+  def memoryStore(self, val, addr): self.memory[int(addr)] = int(val)
+
+  def variable(self):
+    name = next(self.tokens)
+    index = len(self.variables)
+    self.variables[index] = 0
+    self.dictionary[name] = lambda: self.push(index)
+
+  def constant(self):
+    name = next(self.tokens)
+    val = self.pop()
+    self.dictionary[name] = lambda: self.push(val)
 
   def dump(self):
     with open('image.bin', 'wb') as f:
       for m in self.memory:
         f.write(struct.pack('h', m))
 
-  def symbol(self):
-    name = next(self.tokens)
-    for c in name[::-1]: self.push(ord(c))
-    self.push(len(name))
+  def scan(self):
+    while True:
+      for token in self.tokens:
+        yield token
+      self.read()
 
   def comment(self):
     while next(self.scan()) != ')': pass
@@ -135,16 +147,10 @@ class Forth:
     self.tokens = savedTokens
     self.index = savedIndex
 
-  def constant(self):
+  def symbol(self):
     name = next(self.tokens)
-    val = self.pop()
-    self.dictionary[name] = lambda: self.push(val)
-
-  def variable(self):
-    name = next(self.tokens)
-    index = len(self.variables)
-    self.variables[index] = 0
-    self.dictionary[name] = lambda: self.push(index)
+    for c in name[::-1]: self.push(ord(c))
+    self.push(len(name))
 
   def define(self):
     name = next(self.tokens)
@@ -168,12 +174,6 @@ class Forth:
     return i
 
   def call(self, i): self.execute(self.names[i])
-
-  def scan(self):
-    while True:
-      for token in self.tokens:
-        yield token
-      self.read()
 
   def execute(self, code):
     self.tokens = chain(code, self.tokens)
