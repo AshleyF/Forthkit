@@ -9,7 +9,7 @@ int main(void)
     short rstack[256] = {};
     short* r = rstack;
 
-    FILE *file = fopen("boot.bin", "r");
+    FILE *file = fopen("image.bin", "r");
     if (!file || !fread(&mem, sizeof(mem), 1, file))
     {
         printf("Could not open boot image.\n");
@@ -29,7 +29,6 @@ int main(void)
 
     while (1)
     {
-        // printf("Inst: %i Reg: %04x %04x %04x %04x %04x %04x %04x Stack: %04x %04x %04x %04x %04x %04x %04x %04x Return: %i %i %i %i %i %i %i %i\n", mem[pc], reg[0], reg[1], reg[2], reg[3], reg[4], reg[5], reg[6], mem[32767], mem[32766], mem[32765], mem[32764], mem[32763], mem[32762], mem[32761], mem[32760], mem[32255], mem[32254], mem[32253], mem[32252], mem[32251], mem[32250], mem[32249], mem[32248]);
         switch(NEXT)
         {
             case  0: XY;  Rx = y;               break; // ldc (x = v)
@@ -63,14 +62,17 @@ int main(void)
             case 28:      pc = *(--r);          break; // return (ret)
             case 29:      return 0; // halt
             case 30: // dump
-                file = fopen("boot.bin", "w");
+                file = fopen("image.bin", "w");
                 if (!file || !fwrite(&mem, sizeof(mem), 1, file))
                 {
                     printf("Could not write boot image.\n");
                     return 1;
                 }
                 fclose(file);
-                return 0;
+                break;
+            case 31: // debug
+                printf("Inst: %i Reg: %04x %04x %04x %04x %04x %04x %04x Stack: %04x %04x %04x %04x %04x %04x %04x %04x Return: %i %i %i %i %i %i %i %i\n", mem[pc], reg[0], reg[1], reg[2], reg[3], reg[4], reg[5], reg[6], mem[32767], mem[32766], mem[32765], mem[32764], mem[32763], mem[32762], mem[32761], mem[32760], mem[32255], mem[32254], mem[32253], mem[32252], mem[32251], mem[32250], mem[32249], mem[32248]);
+                break;
             default:
                 printf("Invalid instruction! (pc=%i [%i])\n", pc - 1, mem[pc - 1]);
                 return 1;

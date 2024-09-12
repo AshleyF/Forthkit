@@ -21,35 +21,36 @@ create : compile create compile ; ( magic! )
 : xor, 15 , , , , ; 
 : swap popxy [ x y x xor, x y y xor, x y x xor, ] pushxy ;
 
-: ldc,   0 , , , ;
-: ld,    1 , , , ;
-: st,    2 , , , ;
-: in,    4 , , ;
-: out,   5 , , ;
-: inc,   6 , , , ;
-: dec,   7 , , , ;
-: add,   8 , , , , ;
-: sub,   9 , , swap , , ;
-: mul,  10 , , , , ;
-: div,  11 , , swap , , ;
-: mod,  12 , , swap , , ;
-: and,  13 , , , , ;
-: or,   14 , , , , ;
-: not,  16 , , , ;
-: shr,  17 , , swap , , ;
-: shl,  18 , , swap , , ;
-: beq,  19 , , , , ;
-: bne,  20 , , , , ;
-: bgt,  21 , , swap , , ;
-: bge,  22 , , swap , , ;
-: blt,  23 , , swap , , ;
-: ble,  24 , , swap , , ;
-: exec, 25 , , ;
-: jump, 26 , , ;
-: call, 27 , , ;
-: ret,  28 , ;
-: halt, 29 , ;
-: dump, 30 , ;
+: ldc,    0 , , , ;
+: ld,     1 , , , ;
+: st,     2 , , , ;
+: in,     4 , , ;
+: out,    5 , , ;
+: inc,    6 , , , ;
+: dec,    7 , , , ;
+: add,    8 , , , , ;
+: sub,    9 , , swap , , ;
+: mul,   10 , , , , ;
+: div,   11 , , swap , , ;
+: mod,   12 , , swap , , ;
+: and,   13 , , , , ;
+: or,    14 , , , , ;
+: not,   16 , , , ;
+: shr,   17 , , swap , , ;
+: shl,   18 , , swap , , ;
+: beq,   19 , , , , ;
+: bne,   20 , , , , ;
+: bgt,   21 , , swap , , ;
+: bge,   22 , , swap , , ;
+: blt,   23 , , swap , , ;
+: ble,   24 , , swap , , ;
+: exec,  25 , , ;
+: jump,  26 , , ;
+: call,  27 , , ;
+: ret,   28 , ;
+: halt,  29 , ;
+: dump,  30 , ;
+: debug, 31 , ;
 
 ( instruction words )
 
@@ -67,8 +68,9 @@ create : compile create compile ; ( magic! )
 : 1+   popx [ x x inc, ] pushx ;
 : 1-   popx [ x x dec, ] pushx ;
 : exec popx [ x exec, ] ;
-: dump [ dump, ] ;
 : exit [ halt, ] ;
+: dump [ dump, ] ;
+: debug [ debug, ] ;
 
 ( stack manipulation )
 
@@ -127,7 +129,7 @@ create : compile create compile ; ( magic! )
 : .sign dup sign negate 44 + emit ; ( happens 44 +/- 1 is ASCII '-'/'+' )
 : .dig 10 /mod swap ;
 : .digemit 48 + emit ;  ( 48 is ASCII '0' )
-: . .sign .dig .dig .dig .dig .dig drop .digemit .digemit .digemit .digemit .digemit cr ;
+: . .sign abs .dig .dig .dig .dig .dig drop .digemit .digemit .digemit .digemit .digemit cr ;
 
 : ?dup dup unless drop then ;
 
@@ -136,4 +138,3 @@ create : compile create compile ; ( magic! )
 : begin here@ ; immediate
 : until [ ' popxy literal ] call, zero x rot beq, ; immediate
 : again [ ' popxy literal ] call, jump, ; immediate
-

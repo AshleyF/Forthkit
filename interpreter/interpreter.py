@@ -11,12 +11,9 @@ class Forth:
     self.memory = [0] * 32 * 1024
     self.stack = []
     self.dictionary = {
-      'dup'  : lambda: self.x_xx(lambda x: (x,x)),
-      'drop' : lambda: self.x_(lambda _: None),
-      'swap' : lambda: self.xx_xx(lambda x,y: (y,x)),
-      'over' : lambda: self.xx_xxx(lambda x,y: (x,y,x)),
-      'rot'  : lambda: self.xxx_xxx(lambda x,y,z: (y,z,x)),
-      '-rot' : lambda: self.xxx_xxx(lambda x,y,z: (z,x,y)),
+      '.'    : lambda: stdout.write('%f ' % self.pop()),
+      '.s'   : lambda: stdout.write('%s ' % self.stack),
+      '.m'   : lambda: stdout.write('%s ' % self.memory[int(self.pop()):int(self.pop())]),
       '+'    : lambda: self.xx_x(operator.add),
       '-'    : lambda: self.xx_x(operator.sub),
       '*'    : lambda: self.xx_x(operator.mul),
@@ -28,29 +25,28 @@ class Forth:
       'cos'  : lambda: self.x_x(math.cos),
       'sin'  : lambda: self.x_x(math.sin),
       'tan'  : lambda: self.x_x(math.tan),
-      'int'  : lambda: self.x_x(int),
-      'float': lambda: self.x_x(float),
-      '>>'   : lambda: self.xx_x(operator.rshift),
-      '<<'   : lambda: self.xx_x(operator.lshift),
+      'floor': lambda: self.x_x(math.floor),
       '='    : lambda: self.xx_b(operator.eq),
       '<>'   : lambda: self.xx_b(operator.ne),
       '>'    : lambda: self.xx_b(operator.gt),
       '>='   : lambda: self.xx_b(operator.ge),
       '<'    : lambda: self.xx_b(operator.lt),
       '<='   : lambda: self.xx_b(operator.le),
-      'and'  : lambda: self.xx_x(operator.and_),
-      'or'   : lambda: self.xx_x(operator.or_),
-      'xor'  : lambda: self.xx_x(operator.xor),
-      'not'  : lambda: self.x_x(operator.inv),
+      'and'  : lambda: self.xx_x(lambda x, y: int(x) & int(y)),
+      'or'   : lambda: self.xx_x(lambda x, y: int(x) | int(y)),
+      'xor'  : lambda: self.xx_x(lambda x, y: int(x) ^ int(y)),
+      'not'  : lambda: self.x_x(lambda x: ~x),
+      'dup'  : lambda: self.x_xx(lambda x: (x,x)),
+      'drop' : lambda: self.x_(lambda _: None),
+      'swap' : lambda: self.xx_xx(lambda x,y: (y,x)),
+      'over' : lambda: self.xx_xxx(lambda x,y: (x,y,x)),
+      'rot'  : lambda: self.xxx_xxx(lambda x,y,z: (y,z,x)),
+      '-rot' : lambda: self.xxx_xxx(lambda x,y,z: (z,x,y)),
       'm@'   : lambda: self.x_x(lambda x: self.memory[int(x)]),
       'm!'   : lambda: self.xx_(self.memoryStore),
-      '@'    : lambda: self.x_x(lambda x: self.variables[x]),
+      '@'    : lambda: self.x_x(lambda x: self.variables[int(x)]),
       '!'    : lambda: self.xx_(self.variableStore),
-      '.'    : lambda: stdout.write('%f ' % self.pop()),
-      '.s'   : lambda: stdout.write('%s ' % self.stack),
-      '.m'   : lambda: stdout.write('%s ' % self.memory[self.pop():self.pop()]),
-      'emit' : lambda: self.x_(lambda x:stdout.write(chr(x))),
-      'flush': lambda: lambda: stdout.flush(),
+      'emit' : lambda: self.x_(lambda x: stdout.write(chr(int(x)))),
       'dump' : self.dump,
       'sym'  : self.symbol,
       '('    : self.comment,
@@ -64,10 +60,16 @@ class Forth:
       ':'    : self.define,
       '\''   : lambda: self._x(self.find),
       '['    : self.anonymous,
-      'words': self.words,
       'call' : lambda: self.x_(self.call),
+      'words': self.words,
       'exit' : lambda: exit(0) }
     self.names = list(self.dictionary.keys())
+
+  def pop(self):
+    if len(self.stack) == 0:
+      raise Exception("Stack empty")
+    self.stack, val = self.stack[:-1], self.stack[-1]
+    return val
 
   def push(self, x): self.stack.append(x)
   def push2(self, xy):
@@ -79,12 +81,6 @@ class Forth:
     self.push(x)
     self.push(y)
     self.push(z)
-
-  def pop(self):
-    if len(self.stack) == 0:
-      raise Exception("Stack empty")
-    self.stack, val = self.stack[:-1], self.stack[-1]
-    return val
 
   def flip2(self, f, x, y): return f(y, x)
   def flip3(self, f, x, y, z): return f(z, y, x)
@@ -99,11 +95,11 @@ class Forth:
   def _x(self, f): self.push(f())
   def xx_(self, f): self.flip2(f, self.pop(), self.pop())
 
-  def memoryStore(self, val, addr): self.memory[int(addr)] = val
+  def memoryStore(self, val, addr): self.memory[int(addr)] = int(val)
   def variableStore(self, val, addr): self.variables[addr] = val
 
   def dump(self):
-    with open('boot.bin', 'wb') as f:
+    with open('image.bin', 'wb') as f:
       for m in self.memory:
         f.write(struct.pack('h', m))
 
@@ -173,40 +169,30 @@ class Forth:
 
   def call(self, i): self.execute(self.names[i])
 
-  def input(self):
-    for token in input().split(): yield token
-
-  def read(self): self.tokens = self.input()
-
   def scan(self):
     while True:
       for token in self.tokens:
         yield token
       self.read()
 
-  def number(self, token):
-    try:
-      return int(token)
-    except ValueError:
-      return float(token)
+  def execute(self, code):
+    self.tokens = chain(code, self.tokens)
+    self.evaluate()
+
+  def read(self):
+    self.tokens = (token for token in input().split())
 
   def evaluate(self):
     try:
       while True:
         token = next(self.tokens)
-        #print(token)
         if token in self.dictionary:
           self.dictionary[token]()
         else:
-          try:
-            self.push(self.number(token))
-          except ValueError:
-            raise Exception("%s?" % token)
-    except StopIteration: pass
-
-  def execute(self, code):
-    self.tokens = chain(code, self.tokens)
-    self.evaluate()
+          self.push(float(token))
+    except ValueError: raise Exception(f'{token}?') # not found
+    except StopIteration: pass # end of tokens
+    except Exception as error: raise Exception(f'{token} error {error}')
 
 forth = Forth()
 
@@ -214,7 +200,6 @@ print("Welcome to PyForth 0.3 REPL")
 while True:
   try:
     print('> ', end='')
-    stdout.flush()
     forth.read()
     forth.evaluate()
     print('ok')

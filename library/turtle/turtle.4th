@@ -3,8 +3,8 @@
 
 var x var y var theta var dx var dy
 
-: point-x x @ width 2 / + 0.5 + int ;
-: point-y y @ height 2 / + 0.5 + int ;
+: point-x x @ width 2 / + 0.5 + floor ;
+: point-y y @ height 2 / + 0.5 + floor ;
 : valid-x point-x 0.5 width 1.0 - between ;
 : valid-y point-y 0.5 height 1.0 - between ;
 : valid valid-x valid-y and ;
@@ -18,4 +18,3 @@ var x var y var theta var dx var dy
 : turn theta @ + head ;
 : move times dx @ x +! dy @ y +! plot loop ;
 : jump times dx @ x +! dy @ y +! loop ;
-

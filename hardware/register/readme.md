@@ -5,7 +5,7 @@ Build with [`./machine.sh](./machine.sh).
 
 ## Instruction Set
 
-It is a register-based machine with 32 register cell and 32K cells of memory, each 16-bit.
+It is a register-based machine with 32 register cells and 32K cells of memory, each 16-bit.
 Instructions are followed by zero to three operands - register indices, memory addresses, ...
 
 | Mnumonic | Op Code |     |     |     | Effect           | Description                 |
@@ -40,13 +40,14 @@ Instructions are followed by zero to three operands - register indices, memory a
 | call     | 27      | a   |     |     | push(pc), pc = a | Call address, save return   |
 | ret      | 28      |     |     |     | pc = pop()       | Return from call            |
 | halt     | 29      |     |     |     |                  | Halt machine                |
-| dump     | 30      |     |     |     |                  | Dump core to boot.bin       |
+| dump     | 30      |     |     |     |                  | Dump core to image.bin      |
+| debug    | 31      |     |     |     |                  | Print machine state         |
 
-The machine loads a [`boot.bin`](./boot.bin) image of little-endian encoded memory cells at startup and begins executing at address zero.
+The machine loads an `image.bin` dump of little-endian encoded memory cells at startup and begins executing at address zero.
 
 ## Demo
 
-A demo [`boot.bin`](./boot.bin) may be built (see Assembler section below) which will simply capitalize console input by subtracting 32 from input characters:
+A demo `image.bin` may be built (see Assembler section below) which will simply capitalize console input by subtracting 32 from input characters:
 
 | Assembly    | Op  |     |     |     | Encoded             |
 | ----------- | --- | --- | --- | --- | ------------------- |
@@ -56,9 +57,9 @@ A demo [`boot.bin`](./boot.bin) may be built (see Assembler section below) which
 | `out c`     | 5   | 1   |     |     | 0500                |
 | `jump 0003` | 26  | 3   |     |     | 1a00 0300           |
 
-The encoding could be more compact, but we're more concerned with keeping things simple. The full `boot.bin` contains the following bytes (in pairs forming 16-bit `short` memory cells): `0000 0000 2000 0400 0100 0900 0100 0100 0000 0500 0100 1a00 0300`
+The encoding could be more compact, but we're more concerned with keeping things simple. The full `image.bin` contains the following bytes (in pairs forming 16-bit `short` memory cells): `0000 0000 2000 0400 0100 0900 0100 0100 0000 0500 0100 1a00 0300`
 
-After assembling a `boot.bit` (see Assembler section below), we may run the machine and type something (e.g. `hello`):
+After assembling a `image.bin` (see Assembler section below), we may run the machine and type something (e.g. `hello`):
 
     $ ./machine
     hello
@@ -80,7 +81,7 @@ A [Forth-based assembler is provided](./assembler.4th), allowing the above progr
 
 This is a pretty nice assembly format, leaving all the power of Forth available as a "macro assembler."
 
-A new [`boot.bin`](./boot.bin) may be build with [`./test.sh`](./test.sh).
+A new `image.bin` may be build with [`./test.sh`](./test.sh).
 
 In addition to the `label` mechanism to give names to addresses for backward jumps (most common), there are `ahead,` and `then,` words to skip over code (likely for library routines).
 
@@ -109,7 +110,7 @@ In addition to numeric literals support, the following words are currently in th
 | `literal`   | Compile inline literal from the stack                                                                           |
 | `find`      | Find following token in dictionary and push address                                                             |
 | `forget`    | Reset dictionary to following token                                                                             |
-| `dump`      | Core dump to `boot.bin`                                                                                         |
+| `dump`      | Core dump to `image.bin`                                                                                         |
 | `(`         | Begin comment, terminated by `)`                                                                                |
 
 These should be enough to bootstrap a new assembler and meta-circular outer interpreter!
