@@ -8,9 +8,11 @@ To test the [`pixels`](./pixels.4th) library: [`sh ./test.sh`](./test.sh)
 
 You should see this little guy (assuming Unicode font supporting Braille and UTF-8 terminal):
 
+```text
     ⠀⠀⠀ ⠀⣀⣠⠤⢤⠤⣀⠀⠀   ⢀⠔⠊⡉⠑⡄
     ⠀⠀⢀⠔⡫⡊⠉⡢⡊⠉⡢⡋⣢⣀⡎⠀⠀⠠⡤⠃
     ⠀⡔⠫⡹⡀⡸⡹⡀⡸⣉⠔⠉⢀⡰⠁⢀⠔⠉
     ⠀⠑⣄⣈⣉⣉⣉⣉⣉⣀⢤⠪⢅⣀⢔⠏
     ⠀⢎⡠⠚⠢⠤⠤⡤⠃⢀⠮⠤⠤⢖⠑⢢
      ⠀⠀⠀⠀⠀ ⠀⠑⠒⠁⠀⠀ ⠀ ⠉⠁
+```
