@@ -73,6 +73,7 @@ To get the cell and mask value, we can duplicate the pair of x and y coordinates
 
 Using `cell-mask` we can `set` or `reset` individual dots. To `set` we `or` the mask and current value. To `reset` we invert the mask (`not`), then `and` it with the current value. In both cases be then store the value in the cell.
 
+```forth
 : show
   size 0 do
     i columns mod 0 = if 10 emit then  ( newline as appropriate )
@@ -81,6 +82,65 @@ Using `cell-mask` we can `set` or `reset` individual dots. To `set` we `or` the 
 ```
 
 The above `clear`, `set` and `reset` words don't display anything on the screen. They just manipulate the buffer. To `show` the buffer, we walk it and emit the values, while emitting a newline (`10`) after each 80-character column.
+
+## Turtle Turtle
+
+Before we get into proper [turtle graphics](../turtle/), let's at least draw a graphic of a turtle. We'll start by making a mechanism to draw from bitmaps in code.
+
+```forth
+var x var y
+
+: start clear 0 x ! 0 y ! ;
+: | 0 do 35 = if x @ y @ set then 1 x +! loop 0 x ! 1 y +! ;
+```
+
+The `start` word clears the canvas and initializes the `x`/`y` coordinates. The `|` word expects to have a sequence of numbers on the stack and sets dots for each `35` encountered, which is the ASCII for a `#` character. The sequence should be followed by a number indicating its length.
+
+Remember the `sym` word that deconstructs a token into its ASCII values followed by the length? Perfect. `sym #_##_#` places `35 95 35 35 95 35 6` on the stack. A `35` for each `#` and the length `6` we need. `|` then sets the dots accordingly.
+
+```forth
+start
+sym _#_#_ |
+sym _#_#_ |
+sym #___# |
+sym _###_ |
+show
+```
+
+Shows this tiny happy face.
+
+```text
+⢜⣘⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+```
+
+In [test.4th](./test.4th) is a our turtle.
+
+```forth
+: turtle start
+  sym ```````````````````````````````####`` |
+  sym `````````````````````````````##````#` |
+  sym ```````````#######``````````#```````# |
+  sym ````````####```#``##```````#````#```# |
+  sym ``````##`###```###``##`````#````````# |
+  sym `````##`#```#`#```#`#`#```#`````````# |
+  sym ````#``#`````#`````#```#``#``````###` |
+  sym ```#``#`#```#`#```#`#`#####```````#`` |
+  sym ``####```###```###``##````#`````##``` |
+  sym `##``#```#`#```#```#`````#`````#````` |
+  sym #``#`#```#`#```#``#``````#````#`````` |
+  sym #```#`#`#`#`#`#`##`````##````#``````` |
+  sym #````###########`````##`````##``````` |
+  sym `#``````````````````#``````##```````` |
+  sym ``#```````````````##`##```#`#```````` |
+  sym ``################`#```###`#````````` |
+  sym `#```#````````#````#``````#`````````` |
+  sym #```###```````#```#`````##`##```````` |
+  sym #``#```#######````#######````#``````` |
+  sym `##`````````#````#```````#```#``````` |
+  sym ````````````#```#`````````###```````` |
+  sym `````````````###````````````````````` |
+  show ;
+```
 
 ## Next
 
