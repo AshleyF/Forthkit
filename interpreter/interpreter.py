@@ -7,7 +7,7 @@ setrecursionlimit(100000)
 class Forth:
   def __init__(self):
     self.index = 0
-    self.variables = {}
+    self.variables = []
     self.memory = [0] * 32 * 1024
     self.stack = []
     self.dictionary = {
@@ -53,7 +53,7 @@ class Forth:
       'if'   : self.doif,
       'else' : self.doelse,
       'then' : self.dothen,
-      'do'   : self.doloop,
+      'do'   : lambda: self.xx_(self.doloop),
       'i'    : lambda: self.push(self.index),
       ':'    : self.define,
       '\''   : lambda: self._x(self.find),
@@ -63,7 +63,7 @@ class Forth:
       'sym'  : self.symbol,
       'words': self.words,
       'exit' : lambda: exit(0) }
-    self.names = list(self.dictionary.keys())
+    self.names = [[name] for name in self.dictionary.keys()]
 
   def pop(self):
     if len(self.stack) == 0:
@@ -101,7 +101,7 @@ class Forth:
   def variable(self):
     name = next(self.tokens)
     index = len(self.variables)
-    self.variables[index] = 0
+    self.variables.append(0)
     self.dictionary[name] = lambda: self.push(index)
 
   def constant(self):
@@ -124,9 +124,8 @@ class Forth:
     while next(self.scan()) != ')': pass
 
   def doif(self):
-    term = ['else', 'then']
     if self.pop() == 0:
-      while not next(self.scan()) in term:
+      while not next(self.scan()) in ['else', 'then']:
         pass
 
   def doelse(self):
@@ -134,12 +133,11 @@ class Forth:
 
   def dothen(self): pass
 
-  def doloop(self):
+  def doloop(self, end, start):
     savedIndex = self.index # for loop nesting
-    self.index = self.pop()
-    end = self.pop()
-    code = list(takewhile(lambda t: t != 'loop', self.scan()))
     savedTokens = self.tokens
+    code = list(takewhile(lambda t: t != 'loop', self.scan()))
+    self.index = start
     self.tokens = (_ for _ in ())
     while self.index < end:
       self.execute(code)
@@ -147,10 +145,9 @@ class Forth:
     self.tokens = savedTokens
     self.index = savedIndex
 
-  def symbol(self):
-    name = next(self.tokens)
-    for c in name[::-1]: self.push(ord(c))
-    self.push(len(name))
+  def execute(self, code):
+    self.tokens = chain(code, self.tokens)
+    self.evaluate()
 
   def define(self):
     name = next(self.tokens)
@@ -158,26 +155,27 @@ class Forth:
     self.dictionary[name] = (lambda: self.execute(code))
     if not name in self.names: self.names.append([name])
 
-  def anonymous(self):
-    code = list(takewhile(lambda t: t != ']', self.scan()))
-    self.names.append(code)
-    self.push(len(self.names) - 1)
-
-  def words(self):
-    for word in self.dictionary:
-      print(word, end=' ')
-    print()
-
   def find(self):
     name = next(self.tokens)
     i = self.names.index([name])
     return i
 
-  def call(self, i): self.execute(self.names[i])
+  def anonymous(self):
+    code = list(takewhile(lambda t: t != ']', self.scan()))
+    self.push(len(self.names))
+    self.names.append(code)
 
-  def execute(self, code):
-    self.tokens = chain(code, self.tokens)
-    self.evaluate()
+  def call(self, i): self.execute(self.names[int(i)])
+
+  def symbol(self):
+    name = next(self.tokens)
+    for c in name[::-1]: self.push(ord(c))
+    self.push(len(name))
+
+  def words(self):
+    for word in self.dictionary:
+      print(word, end=' ')
+    print()
 
   def read(self):
     self.tokens = (token for token in input().split())
