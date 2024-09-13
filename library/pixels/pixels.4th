@@ -20,5 +20,7 @@ canvas-size const dots ( after canvas )
 : set cell-mask-dots or swap m! ;
 : reset cell-mask-dots swap not and swap m! ;
 
-: newline-as-appropriate i 80 mod 0 = if 10 emit then ;
-: show canvas-size times newline-as-appropriate i m@ emit loop ;
+: show
+  canvas-size times
+  i 80 mod 0 = if 10 emit then  ( newline as appropriate )
+  i m@ emit loop ;

@@ -1,7 +1,8 @@
 ( turtle graphics )
 ( requires: pixels.4th )
 
-var x var y var theta var dx var dy
+var x var y var theta
+var dx var dy
 
 : point-x x @ width 2 / + 0.5 + floor ;
 : point-y y @ height 2 / + 0.5 + floor ;

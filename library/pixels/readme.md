@@ -16,3 +16,5 @@ You should see this little guy (assuming Unicode font supporting Braille and UTF
     ⠀⢎⡠⠚⠢⠤⠤⡤⠃⢀⠮⠤⠤⢖⠑⢢
      ⠀⠀⠀⠀⠀ ⠀⠑⠒⠁⠀⠀ ⠀ ⠉⠁
 ```
+
+## Walkthrough

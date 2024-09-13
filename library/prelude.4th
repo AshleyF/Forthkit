@@ -17,5 +17,7 @@
 : +! dup @ rot + swap ! ;
 
 3.14159265359 const pi
-: deg2rad pi 180.0 / * ;
-: rad2deg 180.0 pi / * ;
+pi 180.0 / const rads
+180.0 pi / const degs
+: deg2rad rads * ;
+: rad2deg degs * ;
