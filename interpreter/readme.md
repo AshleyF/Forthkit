@@ -11,60 +11,60 @@
 
 The following primitive words are available:
 
-| Word    | Description                          |
-| ------- | ------------------------------------ |
-| `+`     | Add                                  |
-| `-`     | Subtract                             |
-| `*`     | Multiply                             |
-| `/`     | Divide                               |
-| `mod`   | Modulus                              |
-| `cos`   | Cosine                               |
-| `sin`   | Sine                                 |
-| `tan`   | Tangent                              |
-| `acos`  | Arc cosine                           |
-| `asin`  | Arc sine                             |
-| `atan`  | Arc tangent                          |
-| `floor` | Floor number                         |
-| `.`     | Pop and print top value              |
-| `.s`    | Print whole stack                    |
-| `=`     | Equal                                |
-| `<>`    | Not equal                            |
-| `>`     | Greater than                         |
-| `>=`    | Greater than or equal                |
-| `<`     | Less than                            |
-| `<=`    | Less than or equal                   |
-| `and`   | Logical/bitwise and                  |
-| `or`    | Logical/bitwise or                   |
-| `xor`   | Logical/bitwise xor                  |
-| `not`   | Logical/bitwise not                  |
-| `dup`   | Duplicate top value                  |
-| `drop`  | Drop top value                       |
-| `swap`  | Swap top two values                  |
-| `over`  | Duplicate 2nd value to top           |
-| `rot`   | Rotate 3rd value to top              |
-| `-rot`  | Rotate top value to 3rd              |
-| `var`   | Create variable                      |
-| `@`     | Fetch variable value                 |
-| `!`     | Store into variable                  |
-| `const` | Create constant                      |
-| `m@`    | Fetch memory address                 |
-| `m!`    | Store into memory address            |
-| `.m`    | Print memory range                   |
-| `dump`  | Dump memory to image file            |
-| `(`     | Start comment (to `)`)               |
-| `if`    | Start conditional (to `else`/`then`) |
-| `else`  | Start alternative (to `then`)        |
-| `then`  | End conditional                      |
-| `do`    | Start loop (to `loop`)               |
-| `i`     | Get loop index                       |
-| `:`     | Start definition (to `;`)            |
-| `'`     | Get address of next token            |
-| `[`     | Start lambda (to `]`)                |
-| `call`  | Call address                         |
-| `emit`  | Emit to console                      |
-| `sym`   | Deconstruct next token               |
-| `words` | Print dictionary words               |
-| `exit`  | Halt interpreter                     |
+| Word    | Signature | Description                          |
+| ------- | --------- | ------------------------------------ |
+| `+`     |  yx-n     | Add                                  |
+| `-`     |  yx-n     | Subtract                             |
+| `*`     |  yx-n     | Multiply                             |
+| `/`     |  yx-n     | Divide                               |
+| `mod`   |   x-n     | Modulus                              |
+| `cos`   |   x-n     | Cosine                               |
+| `sin`   |   x-n     | Sine                                 |
+| `tan`   |   x-n     | Tangent                              |
+| `acos`  |   x-n     | Arc cosine                           |
+| `asin`  |   x-n     | Arc sine                             |
+| `atan`  |   x-n     | Arc tangent                          |
+| `floor` |   x-n     | Floor number                         |
+| `.`     |    -      | Pop and print top value              |
+| `.s`    |    -      | Print whole stack                    |
+| `=`     |  yx-b     | Equal                                |
+| `<>`    |  yx-b     | Not equal                            |
+| `>`     |  yx-b     | Greater than                         |
+| `>=`    |  yx-b     | Greater than or equal                |
+| `<`     |  yx-b     | Less than                            |
+| `<=`    |  yx-b     | Less than or equal                   |
+| `and`   |  yx-b     | Logical/bitwise and                  |
+| `or`    |  yx-b     | Logical/bitwise or                   |
+| `xor`   |  yx-b     | Logical/bitwise xor                  |
+| `not`   |   x-b     | Logical/bitwise not                  |
+| `dup`   |  yx-b     | Duplicate top value                  |
+| `drop`  |   x-      | Drop top value                       |
+| `swap`  |  yx-xy    | Swap top two values                  |
+| `over`  |  yx-xyx   | Duplicate 2nd value to top           |
+| `rot`   | zyx-xzy   | Rotate 3rd value to top              |
+| `-rot`  | zyx-yxz   | Rotate top value to 3rd              |
+| `var`   |    -      | Create variable                      |
+| `@`     |   a-n     | Fetch variable value                 |
+| `!`     |  xa-      | Store into variable                  |
+| `const` |   x-      | Create constant                      |
+| `m@`    |   a-n     | Fetch memory address                 |
+| `m!`    |  xa-      | Store into memory address            |
+| `.m`    |    -      | Print memory range                   |
+| `dump`  |    -      | Dump memory to image file            |
+| `(`     |    -      | Start comment (to `)`)               |
+| `if`    |    -      | Start conditional (to `else`/`then`) |
+| `else`  |    -      | Start alternative (to `then`)        |
+| `then`  |    -      | End conditional                      |
+| `do`    |    -      | Start loop (to `loop`)               |
+| `i`     |    -i     | Get loop index                       |
+| `:`     |    -      | Start definition (to `;`)            |
+| `'`     |    -a     | Get address of next token            |
+| `[`     |    -      | Start lambda (to `]`)                |
+| `call`  |   a-      | Call address                         |
+| `emit`  |   x-      | Emit to console                      |
+| `sym`   |    -c..cn | Deconstruct next token               |
+| `words` |    -      | Print dictionary words               |
+| `exit`  |    -      | Halt interpreter                     |
 
 ## Walkthrough
 

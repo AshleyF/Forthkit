@@ -17,9 +17,20 @@ You should see this little guy (assuming Unicode font supporting Braille and UTF
      ⠀⠀⠀⠀⠀ ⠀⠑⠒⠁⠀⠀ ⠀ ⠉⠁
 ```
 
+## Vocabulary
+
+| Word     | Signature | Description      |
+| -------- | --------- | ---------------- |
+| `width`  |    -n     | Canvas width     |
+| `height` |    -n     | Canvas height    |
+| `clear`  |    -      | Clear canvas     |
+| `set`    |  xy-      | Set canvas dot   |
+| `reset`  |  xy-      | Reset canvas dot |
+| `show`   |    -      | Display canvas   |
+
 ## Walkthrough
 
-The idea is to use a range of Braille Unicode characters to each represent 2×4 pixels. We'll have a 160×160 pixel canvas, made from 80×20 characters.
+The idea is to use a range of Braille Unicode characters to each represent 2×4 pixels. We'll have a 160×160 pixel canvas, made from 80×20 characters. We can use this to draw interesting things in the console.
 
 ```forth
 160 const width
@@ -32,19 +43,28 @@ width height * 8 / const size
 We define the canvas `width` and `height`, and can compute the `columns` and total number of characters (`size`). These constants are computed once at _compile time_ as opposed to say `: columns width 2 / ;`.
 
 ```forth
-( init dot masks )
-128 64 32 4 16 2 8 1  8 0 do size i + m! loop
-```
-
-Here we've stored a table of dot mask values just beyond the canvas buffer (at `size`). We push the table values, then iterate eight times, poking them into memory. These values will be used ask masks to build each of the eight dots in a single Braille character.
-
-```forth
 : clear size times 10240 i m! loop ;
 ```
 
 A word to `clear` the canvas fill each cell with the Unicode value of an empty Braille cell (`10240`). This should be called before drawing.
 
 The `times` word comes from the [prelude](../prelude.4th) and merely starts a loop for n-times with `0 do` (that is, `: times 0 do ;`).
+
+```forth
+: set cell-mask or swap m! ;
+: reset cell-mask swap not and swap m! ;
+````
+
+We'll be using a `cell-mask` word, which well look at in a moment, that takes an x, y pair and returns the cell, the mask and the current value at the cell. We can `set` or `reset` individual dots. To `set`, we `or` the mask with the current value. To `reset`, we invert the mask (`not`), then `and` it with the current value. In both cases we then store the value in the cell.
+
+Now to build up to explaining `cell-mask`:
+
+```forth
+( init dot masks )
+128 64 32 4 16 2 8 1  8 0 do size i + m! loop
+```
+
+Here we've stored a table of dot mask values just beyond the canvas buffer (at `size`). We push the table values, then iterate eight times, poking them into memory. These values will be used ask masks to build each of the eight dots in a single Braille character.
 
 ```forth
 : cell 4 / floor columns * swap 2 / floor + ;
@@ -64,14 +84,8 @@ To look up the `mask` value we mod the x coordinate by 2 and the y coordinate by
 : cell-mask 2dup cell -rot mask over m@ ;
 ```
 
-To get the cell and mask value, we can duplicate the pair of x and y coordinates with `2dup` (defined in the prelude as simply `over over`), get the `cell` of one pair, rotate that out of the way and get the `mask` of the duplicate pair. Finally we fetch the current value at the cell with `over m@`. Maybe confusing, but `cell-mask` takes an x, y pair and returns the cell, the mask and the current value at the cell.
+To get the cell and mask value, we can duplicate the pair of x and y coordinates with `2dup` (defined in the prelude as simply `over over`), get the `cell` of one pair, rotate that out of the way and get the `mask` of the duplicate pair. Finally we fetch the current value at the cell with `over m@`.
 
-```forth
-: set cell-mask or swap m! ;
-: reset cell-mask swap not and swap m! ;
-````
-
-Using `cell-mask` we can `set` or `reset` individual dots. To `set`, we `or` the mask with the current value. To `reset`, we invert the mask (`not`), then `and` it with the current value. In both cases we then store the value in the cell.
 
 ```forth
 : show

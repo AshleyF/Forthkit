@@ -4,9 +4,89 @@ Turtle graphics implementation in Forth. It's built on the [`pixels`](../pixels/
 
 The Turtle begins at the center of the canvas, heading "North". You may `go` to another point or `head` in another direction (or use `pose` to accomplish both at once). `begin` to clear the canvas and reset the pose. Use `turn` and `move` to draw. There is no pen-up/down, but instead a `jump` which moves without plotting.
 
-To play with it interactively: [`sh ./play.sh`](./play.sh)
+Test it with some demos: [`sh ./test.sh`](./test.sh) or play with it interactively: [`sh ./play.sh`](./play.sh)
 
-To test it with some demos: [`sh ./test.sh`](./test.sh):
+## Vocabulary
+
+| Word    | Signature | Description                           |
+| ------- | --------- | ------------------------------------- |
+| `x`     |    -x     | Get x coordinate                      |
+| `y`     |    -y     | Get y coordinate                      |
+| `theta` |    -t     | Get theta heading                     |
+| `plot`  |  xy-      | Plot dot at coordinate                |
+| `go`    |  xy-      | Set coordinate (theta)                |
+| `head`  |   t-      | Set heading (x/y)                     |
+| `pose`  | xyt-      | Set pose (x/y/theta)                  |
+| `begin` |    -      | Begin drawing (init)                  |
+| `turn`  |   d-      | Turn relative degrees                 |
+| `move`  |   s-      | Move relative steps (and draw)        |
+| `jump`  |   s-      | Jump relative steps (without drawing) |
+
+## Walkthrough
+
+Turtle graphics is based on a _turtle_ that leaves a trail as it moves (we don't support raising the pen). The turtle maintains a heading and begins at the center of the canvas, which we consider to have the coordinates 0, 0.
+
+```forth
+var x var y var theta
+var dx var dy
+```
+
+ So the complete turtle pose can be expressed with three numbers `x`, `y` and `theta`. We will also maintain a delta x/y to avoid recomputing while the heading hasn't changed.
+
+```forth
+: go y ! x ! ;
+: head dup theta ! deg2rad dup cos dx ! sin dy ! ;
+: pose head go ;
+```
+
+We can `go` to a particular coordinate (without drawing) and may `head` in a particular direction in degrees. Notice that this is converted to radians and the deltas are updated.
+
+```forth
+3.14159265359 const pi
+pi 180.0 / const rads
+180.0 pi / const degs
+: deg2rad rads * ;
+: rad2deg degs * ;
+```
+
+The `deg2rad` and `rad2deg` conversion words are defined as above in the prelude. Note that computation that can be done at compile time is placed in constants.
+
+```forth
+: plot valid? if point-x point-y set then ;
+```
+
+We can `plot` a dot where the turtle is, assuming it's a valid point on the canvas (`valid?`). Note that it's a common naming convention to end predicate words with `?` in the name.
+
+```forth
+: point-x x @ width 2 / + 0.5 + floor ;
+: point-y y @ height 2 / + 0.5 + floor ;
+: valid-x? point-x 0 width 1 - between ;
+: valid-y? point-y 0 height 1 - between ;
+: valid? valid-x? valid-y? and ;
+```
+
+A `valid?` point is one that is within the 160×160 (`width`×`height`) canvas. The `point-x` and `point-y` words essentially shift the origin to the top left corner. The `valid-x?` and `valid-y?` words check that the coordinate is `between` 0 and the corresponding edge.
+
+```forth
+: between rot swap over >= -rot <= and ;
+```
+
+`between` is defined in the prelude as above; taking a value and a lower and upper bound. It rotates the value to the top, does a `swap over` to essentially bury a copy of the value three elements deep, then bounds checks each pair.
+
+```forth
+: begin clear 0 0 0 pose ;
+: turn theta @ + head ;
+: move times dx @ x +! dy @ y +! plot loop ;
+: jump dup dx @ * x +! dy @ * y +! ;
+
+```
+
+We can use `turn` and `move` for _relative_ turning and movement. While moving we also `plot` the points traversed. When we `jump` the coordinates are merely updated without drawing.
+
+This is all we need to begin playing with turtle graphics!
+
+
+
 
 ```text
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠠⡀⠀⠀⠀⡆⠀⠀⠀⡆⠀⠀⠀⡆⠀⠀⠀⡠⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
