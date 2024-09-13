@@ -18,3 +18,70 @@ You should see this little guy (assuming Unicode font supporting Braille and UTF
 ```
 
 ## Walkthrough
+
+The idea is to use a range of Braille Unicode characters to each represent 2x4 pixels. We'll have a 160x160 pixel canvas, made from 80x20 characters.
+
+```forth
+160 const width
+160 const height
+
+width 2 / const columns
+width height * 8 / const size
+```
+
+We define the canvas `width` and `height`, and can compute the `columns` and total number of characters (`size`). These constants are computed once at _compile time_ as opposed to say `: columns width 2 / ;`.
+
+```forth
+( init dot masks )
+128 64 32 4 16 2 8 1  8 0 do size i + m! loop
+```
+
+Here we've stored a table of dot mask values just beyond the canvas buffer (at `size`). We push the table values, then iterate eight times, poking them into memory. These values will be used to build each of the eight dots in a single Braille character.
+
+```forth
+: clear size times 10240 i m! loop ;
+```
+
+A word to `clear` the canvas sets sets each cell to the Unicode value of an empty Braille cell (`10240`). This should be called before drawing.
+
+The `times` word comes from the [prelude](../prelude.4th) and merely starts a loop for n-times with `0 do` (that is, `: times 0 do ;`).
+
+```forth
+: cell 4 / floor columns * swap 2 / floor + ;
+```
+
+Each Braille character _cell_ contains 2x4 dots. We can compute the `cell` in which a dot on the canvas falls, given the x and y coordinates, by dividing y by 4 and adding the number of `columns` (jumping by _rows_), then add to this x divided by 2 (the column of x).
+
+For example, `1 3 cell` returns `0` because the dot falls on the bottom right corner of the first cell. However if we move to the right, `2 3 cell` returns `1`; the bottom left corner of the 2nd cell. Moving down, `2 4 cell` returns `81`; the top left corner of the second cell on the second 80-character row.
+
+```forth
+: mask 4 mod 2 * swap 2 mod + size + m@ ;
+```
+
+To look up the `mask` value we mod the x coordinate by 2 and the y coordinate by 4 (2x4 dots per cell), and look in the table we built just past the canvas memory (`size +`).
+
+```forth
+: cell-mask 2dup cell -rot mask over m@ ;
+```
+
+To get the cell and mask value, we can duplicate the pair of x and y coordinates with `2dup` (defined in the prelude as simply `over over`), get the `cell` of one pair, rotate that out of the way and get the `mask` of the duplicate pair. Finally we fetch the current value at the cell with `over m@`. Maybe confusing, but `cell-mask` takes an x, y pair and returns the cell, the mask and the current value at the cell.
+
+```forth
+: set cell-mask or swap m! ;
+: reset cell-mask swap not and swap m! ;
+````
+
+Using `cell-mask` we can `set` or `reset` individual dots. To `set` we `or` the mask and current value. To `reset` we invert the mask (`not`), then `and` it with the current value. In both cases be then store the value in the cell.
+
+: show
+  size 0 do
+    i columns mod 0 = if 10 emit then  ( newline as appropriate )
+    i m@ emit
+  loop ;
+```
+
+The above `clear`, `set` and `reset` words don't display anything on the screen. They just manipulate the buffer. To `show` the buffer, we walk it and emit the values, while emitting a newline (`10`) after each 80-character column.
+
+## Next
+
+Next let's build a [turtle graphics](../turtle/) library with this.

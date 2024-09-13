@@ -479,7 +479,7 @@ Notice that the name is also added to `self.names`. Notice also that once the di
 
 We can get the address of a word with `'` and we can `call` words by their address. For example, `7 ' dup call *` is equivalent to just `7 dup *`. The `' dup` gets the address of `dup` and we `call` it.
 
-The reason for allowing this indirection is to enable passing words as arguments to other words; higher order functions! For example, we could define a word that expects two arguments; a value and a word address as `: go swap dup rot call ;`. Expecting a value and an address, this swaps the address out of the way, duplicates the value and rotates the address back and calls the word. We can then further define `: square ' * go ;` and `: double ' + go ;` in terms of this. This idea of a word parameterized by other words is very powerful and we'll see some nice examples later when we build the [Turtle Graphics](../library/turtle/) library.
+The reason for allowing this indirection is to enable passing words as arguments to other words; higher order functions! For example, we could define a word that expects two arguments; a value and a word address as `: go swap dup rot call ;`. Expecting a value and an address, this swaps the address out of the way, duplicates the value and rotates the address back and calls the word. We can then further define `: square ' * go ;` and `: double ' + go ;` in terms of this. This idea of a word parameterized by other words is very powerful and we'll see some nice examples later when we build the [turtle graphics](../library/turtle/) library.
 
 Additionally, anonymous sequences of tokens surrounded by square brackets may be given an address, similar to lambda functions in other languages. For example, `7 [ square + ] go` will add a number to it's square (`56.0`). Complicated to follow, but the point is that this is a truly powerful feature.
 
@@ -538,3 +538,7 @@ Being able to deconstruct tokens into their characters with `sym` will be used w
       print(word, end=' ')
     print()
 ```
+
+## Next
+
+Next let's use this interpreter to build a [pixels library](../library/pixels/) and a [turtle graphics library](../library/turtle/). Then let's move on to using the interpreter to replace itself by building a new native Forth for [register machine hardware](../hardware/register/).

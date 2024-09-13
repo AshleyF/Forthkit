@@ -1,26 +1,26 @@
-( pixel graphics library using Unicode Braile characters )
+( pixel graphics library using Unicode Braille characters )
 ( requires: prelude )
 
 160 const width
 160 const height
 
 width 2 / const columns
-width height * 8 / const canvas-size
-
-: clear canvas-size times 10240 i m! loop ;
+width height * 8 / const size
 
 ( init dot masks )
-canvas-size const dots ( after canvas )
-128 64 32 4 16 2 8 1  8 times dots i + m! loop
+128 64 32 4 16 2 8 1  8 times size i + m! loop
 
-: cell 4 / floor columns * swap 2 / + ;
-: mask 4 mod 2 * swap 2 mod + dots + m@ ;
-: cell-mask-dots 2dup cell -rot mask over m@ ;
+: clear size times 10240 i m! loop ;
 
-: set cell-mask-dots or swap m! ;
-: reset cell-mask-dots swap not and swap m! ;
+: cell 4 / floor columns * swap 2 / floor + ;
+: mask 4 mod 2 * swap 2 mod + size + m@ ;
+: cell-mask 2dup cell -rot mask over m@ ;
+
+: set cell-mask or swap m! ;
+: reset cell-mask swap not and swap m! ;
 
 : show
-  canvas-size times
-  i 80 mod 0 = if 10 emit then  ( newline as appropriate )
-  i m@ emit loop ;
+  size times
+    i columns mod 0 = if 10 emit then  ( newline as appropriate )
+    i m@ emit
+  loop ;
