@@ -57,7 +57,7 @@ class Forth:
       'i'    : lambda: self.push(self.index),
       ':'    : self.define,
       '\''   : lambda: self._x(self.find),
-      '['    : self.anonymous,
+      '[:'   : self.anonymous,
       'call' : lambda: self.x_(self.call),
       'emit' : lambda: self.x_(lambda x: stdout.write(chr(int(x)))),
       'sym'  : self.symbol,
@@ -161,7 +161,7 @@ class Forth:
     return i
 
   def anonymous(self):
-    code = list(takewhile(lambda t: t != ']', self.scan()))
+    code = list(takewhile(lambda t: t != ':]', self.scan()))
     self.push(len(self.names))
     self.names.append(code)
 

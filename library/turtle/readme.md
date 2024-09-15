@@ -1,8 +1,8 @@
 # Turtle Graphics
 
-Turtle graphics implementation in Forth. It's built on the [`pixels`](../pixels/) library and is meant to run on the [interpreter](../../interpreter/) and future VMs.
+Turtle graphics implementation in Forth. It's built on the [`pixels`](../pixels/) library and is meant to run on the [interpreter](../../interpreter/) and will be ported to future VMs.
 
-The Turtle starts at the center of the canvas, heading "North". You may `go` to another point or `head` in another direction (or use `pose` to accomplish both at once). `start` to clear the canvas and reset the pose. Use `turn` and `move` to draw. There is no pen-up/down, but instead a `jump` which moves without plotting.
+The Turtle starts at the center of the canvas, heading _North_. You may `go` to another point or `head` in another direction (or use `pose` to do both at once). `start` to clear the canvas and reset the pose. Use `turn` and `move` to draw. There is no pen-up/down, but instead a `jump` which moves without plotting.
 
 Test it with some demos: [`sh ./test.sh`](./test.sh) or play with it interactively: [`sh ./play.sh`](./play.sh)
 
@@ -24,14 +24,14 @@ Test it with some demos: [`sh ./test.sh`](./test.sh) or play with it interactive
 
 ## Walkthrough
 
-Turtle graphics is based on a _turtle_ that leaves a trail as it moves (we don't support raising the pen). The turtle maintains a heading and starts at the center of the canvas, which we consider to have the coordinates 0, 0.
+Turtle graphics is based on a _turtle_ that leaves a trail as it moves (we don't support raising the pen). The turtle maintains a heading and starts at the center of the canvas, which we consider to be coordinate 0, 0.
 
 ```forth
 var x var y var theta
 var dx var dy
 ```
 
- So the complete turtle pose can be expressed with three numbers `x`, `y` and `theta`. We will also maintain a delta x/y to avoid recomputing while the heading hasn't changed.
+ The complete turtle pose can be expressed with three numbers `x`, `y` and `theta`. We will also maintain a delta x/y to avoid recomputing while the heading hasn't changed.
 
 ```forth
 : go y ! x ! ;
@@ -55,7 +55,7 @@ The `deg2rad` and `rad2deg` conversion words are defined as above in the prelude
 : plot valid? if point-x point-y set then ;
 ```
 
-We can `plot` a dot where the turtle is, assuming it's a valid point on the canvas (`valid?`). Note that it's a common naming convention to end predicate words with `?` in the name.
+We can `plot` a dot where the turtle is, assuming it's a valid point on the canvas (`valid?`). Note that it's a common naming convention to end the names of predicate words with `?`.
 
 ```forth
 : point-x x @ width 2 / + 0.5 + floor ;
@@ -81,11 +81,11 @@ A `valid?` point is one that is within the 160×160 (`width`×`height`) canvas. 
 
 ```
 
-We can use `turn` and `move` for _relative_ turning and movement. While moving we also `plot` the points traversed. When we `jump` the coordinates are merely updated without drawing.
+We can use `turn` and `move` for _relative_ turning and movement. While moving we also `plot` the points traversed. If instead we `jump` then the coordinates are merely updated without drawing.
 
-This is all we need to start playing with turtle graphics!
+This is a complete turtle graphics system!
 
-## Play!
+## Let's Play!
 
 Let's have some fun playing with turtle graphics. `start 4 times 30 move 90 turn loop show` produces a square.
 
@@ -120,7 +120,7 @@ To generalize this pattern:
 : polygon dup angle draw ;
 ```
 
-We can draw _any_ polygon by dividing the number of sides into 360 and moving and turning for each. A little stack juggling is happening to get the final signature of `polygon` to be a length and the number of sides. For example, our square becomes `30 4 polygon` and our triangle `30 3 polygon`.
+We can draw _any_ polygon by computing the turn `angle` and iterating turning and moving for each side. A little stack juggling is happening to get the final signature of `polygon` to take a length and the number of sides. For example, our square becomes `30 4 polygon` and our triangle `30 3 polygon`.
 
 ```forth
 : triangle 3 polygon ;
@@ -130,7 +130,7 @@ We can draw _any_ polygon by dividing the number of sides into 360 and moving an
 : circle  36 polygon ;
 ```
 
-We can give these names. Note that leaving off the length argument to `polygon` in the definitions essentially creates words expecting that one argument (e.g. `30 square`, `30 triangle`). If you've used a functional ML language like Haskell or F#, then this may feel like partial application or Currying.
+We can give these names. Note that leaving off the length argument to `polygon` in the definitions essentially creates words expecting that _one_ argument (e.g. `30 square`, `30 triangle`). If you've used a functional ML language like Haskell or F#, then you may recognize this as partial application or Currying.
 
 It's interesting too that a polygon at the limit is essentially a circle.
 
@@ -186,21 +186,21 @@ We can use the `draw` word directly to get things other than regular polygons.
 ⠀⠀⠀⠟⠁⠀⠀ ⠀⠀⠀⠀⠙⠇⠀⠀⠀⠀⠀⠀⠀
 ```
 
-Here's a _very_ tricky higher order word that takes other words (named or anonymous) as an argument; a function that takes a function.
+The following is a _very_ tricky higher order word that takes other words (named or anonymous) as an argument; a function that takes a function.
 
 ```forth
 : spin dup angle swap times 2dup turn call loop 2drop ;
 ```
 
-Given a number of times to spin a shape along with the shape's word itself, it uses `call` to invoke the shape repeatedly while turning the turtle.
+Given a number of times to spin along with a shape-drawing word as an argument, it uses `call` to invoke the shape repeatedly while turning the turtle.
 
 ```forth
-: stars start [ 80 star ] 3 spin show ;
+: stars start [: 80 star :] 3 spin show ;
 
 stars
 ```
 
-If we give it a size 80 star as an anonymous definition and ask it to `spin` 3 times:
+We give it a size 80 star as an anonymous definition and ask it to `spin` 3 times.
 
 ```text
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -247,12 +247,12 @@ Or 15 circles:
 
 
 ```forth
-: spiro start [ 4 circle ] 15 spin show ;
+: spiro start [: 4 circle :] 15 spin show ;
 
 spiro
 ```
 
-This is the power of higher order words. Remember that the phrase `[ 4 circle ]` pushes the address of the anonymous definition. Creating a proper definition such as `: small-circle 4 circle ;` and then using the expression `' small-circle` would do the same thing.
+This is the power of higher order words. Remember that the phrase `[: 4 circle :]` pushes the address of the anonymous definition. Creating a proper definition such as `: small-circle 4 circle ;` and then using the expression `' small-circle` would do the same thing.
 
 ```text
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⠤⠤⠤⣀⣀⣀⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -487,7 +487,7 @@ flower
 spiral
 ```
 
-Using the same trick as with the `rose`; incrementing the `move` distance with `1 + dup`.
+Using a similar trick to the the `rose`; incrementing the `move` distance with `1 + dup`.
 
 Another interesting thing is to notice that `spiral-rec` doesn't use a `loop`. Instead it recursively calls itself! Recursion and higher order functions? Forth is quite a little functional language!
 
@@ -531,3 +531,9 @@ Another interesting thing is to notice that `spiral-rec` doesn't use a `loop`. I
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠤⣀⡰⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ```
+
+Have fun!
+
+## Next
+
+Next let's move on to building a more native Forth for a [register machine](../../hardware/register/).

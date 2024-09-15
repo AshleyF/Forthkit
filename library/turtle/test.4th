@@ -16,9 +16,9 @@
 : star 5 144 draw ;
 
 : spin dup angle swap times 2dup turn call loop 2drop ;
-: stars start [ 80 star ] 3 spin show ;
+: stars start [: 80 star :] 3 spin show ;
 
-: spiro start [ 4 circle ] 15 spin show ;
+: spiro start [: 4 circle :] 15 spin show ;
 
 : burst start 60 times i 6 * head 0 0 go 80 move loop show ;
 

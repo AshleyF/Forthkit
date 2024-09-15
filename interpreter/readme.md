@@ -59,7 +59,7 @@ The following primitive words are available:
 | `i`     |    -i     | Get loop index                       |
 | `:`     |    -      | Start definition (to `;`)            |
 | `'`     |    -a     | Get address of next token            |
-| `[`     |    -      | Start lambda (to `]`)                |
+| `[:`    |    -      | Start lambda (to `:]`)               |
 | `call`  |   a-      | Call address                         |
 | `emit`  |   x-      | Emit to console                      |
 | `sym`   |    -c..cn | Deconstruct next token               |
@@ -481,17 +481,17 @@ We can get the address of a word with `'` and we can `call` words by their addre
 
 The reason for allowing this indirection is to enable passing words as arguments to other words; higher order functions! For example, we could define a word that expects two arguments; a value and a word address as `: go swap dup rot call ;`. Expecting a value and an address, this swaps the address out of the way, duplicates the value and rotates the address back and calls the word. We can then further define `: square ' * go ;` and `: double ' + go ;` in terms of this. This idea of a word parameterized by other words is very powerful and we'll see some nice examples later when we build the [turtle graphics](../library/turtle/) library.
 
-Additionally, anonymous sequences of tokens surrounded by square brackets may be given an address, similar to lambda functions in other languages. For example, `7 [ square + ] go` will add a number to it's square (`56.0`). Complicated to follow, but the point is that this is a truly powerful feature.
+Additionally, anonymous sequences of tokens surrounded by `[: ... :]` words may be given an address, similar to lambda functions in other languages. For example, `7 [: square + :] go` will add a number to it's square (`56.0`). Complicated to follow, but the point is that this is a truly powerful (though non-standard) feature.
 
 ```python
     self.dictionary = {
       '\''   : lambda: self._x(self.find),
-      '['    : self.anonymous,
+      '[:'   : self.anonymous,
       'call' : lambda: self.x_(self.call),
       ... }
 ```
 
-Finding a word's address and calling an address is straight forward. Adding anonymous words is done by appending the sequence of tokens up to the ending `]` token to the `names` list. Interestingly this is actually a list of lists just for this purpose. When an address/index is resolved, the corresponding list is executed. Normally this is a list containing a single word, but in the case of anonymous lambdas its the whole sequence of tokens.
+Finding a word's address and calling an address is straight forward. Adding anonymous words is done by appending the sequence of tokens up to the ending `:]` token to the `names` list. Interestingly this is actually a list of lists just for this purpose. When an address/index is resolved, the corresponding list is executed. Normally this is a list containing a single word, but in the case of anonymous lambdas its the whole sequence of tokens.
 
 ```python
   def find(self):
@@ -500,7 +500,7 @@ Finding a word's address and calling an address is straight forward. Adding anon
     return i
 
   def anonymous(self):
-    code = list(takewhile(lambda t: t != ']', self.scan()))
+    code = list(takewhile(lambda t: t != ':]', self.scan()))
     self.push(len(self.names))
     self.names.append(code)
 
