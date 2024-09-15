@@ -15,7 +15,7 @@ var dx var dy
 : head dup theta ! deg2rad dup cos dx ! sin dy ! ;
 : pose head go ;
 
-: begin clear 0 0 0 pose ;
+: start clear 0 0 0 pose ;
 : turn theta @ + head ;
 : move times dx @ x +! dy @ y +! plot loop ;
 : jump dup dx @ * x +! dy @ * y +! ;
