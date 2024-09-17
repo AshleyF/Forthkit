@@ -160,8 +160,6 @@ Standard I/O is supported by `in` and `out` instructions.
             case 10: XYZ; Rx = Ry * Rz;         break; // mul (x = y * z)
             case 11: XYZ; Rx = Ry / Rz;         break; // div (x = y / z)
             case 12: XYZ; Rx = Ry % Rz;         break; // mod (x = y % z)
-            case 13: XYZ; Rx = Ry << Rz;        break; // shl (x = y << z)
-            case 14: XYZ; Rx = Ry >> Rz;        break; // shr (x = y >> z)
             ...
         }
 ```
@@ -176,6 +174,17 @@ We have basic arithmetic operations, just as in the Python interpreter. For conv
             case 14: XYZ; Rx = Ry | Rz;         break; // or (x = y | z)
             case 15: XYZ; Rx = Ry ^ Rz;         break; // xor (x = y ^ z)
             case 16: XY;  Rx = ~Ry;             break; // not (x = ~y)
+            case 17: XYZ; Rx = Ry << Rz;        break; // shl (x = y << z)
+            case 18: XYZ; Rx = Ry >> Rz;        break; // shr (x = y >> z)
+            ...
+        }
+```
+
+Bit twiddling instructions include `and`, `or`, `xor`, `not` and shift left (`shl`) and right (`shr`). Again, some of the bitwise operators can be thought of as logical operators if we use `-1` (all bit set) to represent true and `0` to represent false. Also, `shl` can be thought of as multiplication by 2 and `shr` as division by 2. In fact, some Forths call these `2*` and `2/`.
+
+```c
+        switch(NEXT)
+        {
             ...
             case 19: XYZ; if (Ry == Rz) pc = x; break; // beq (branch if x == y)
             case 20: XYZ; if (Ry != Rz) pc = x; break; // bne (branch if x != y)
@@ -183,11 +192,30 @@ We have basic arithmetic operations, just as in the Python interpreter. For conv
             case 22: XYZ; if (Ry >= Rz) pc = x; break; // bge (branch if x >= y)
             case 23: XYZ; if (Ry <  Rz) pc = x; break; // blt (branch if x < y)
             case 24: XYZ; if (Ry <= Rz) pc = x; break; // ble (branch if x <= y)
+        }
+```
+
+We have a full suite of conditional branching operators.
+
+```c
+        switch(NEXT)
+        {
+            ...
             case 25: X;   pc = Rx;              break; // exec (pc = x)
             case 26: X;   pc = x;               break; // jump (pc = v)
             case 27: X;   *(r++) = pc; pc = x;  break; // call (jsr(v))
             case 28:      pc = *(--r);          break; // return (ret)
             case 29:      return 0; // halt
+            ...
+        }
+```
+
+We can executle (`exec`) an indirect address through a register, or we can `jump` to a direct address given in the instruction stream. We can also `call` a given address. This places the program counter (`pc`) on a return stack, which is restored when we return (`ret`). Finally, we can explicitly `halt` the machine.
+
+```c
+        switch(NEXT)
+        {
+            ...
             case 30: // dump
                 file = fopen("image.bin", "w");
                 if (!file || !fwrite(&mem, sizeof(mem), 1, file))
@@ -197,6 +225,16 @@ We have basic arithmetic operations, just as in the Python interpreter. For conv
                 }
                 fclose(file);
                 break;
+            ...
+        }
+```
+
+The `dump` instruction will facilitate using this machine to build boot images.
+
+```c
+        switch(NEXT)
+        {
+            ...
             case 31: // debug
                 printf("Inst: %i Reg: %04x %04x %04x %04x %04x %04x %04x Stack: %04x %04x %04x %04x %04x %04x %04x %04x Return: %i %i %i %i %i %i %i %i\n", mem[pc], reg[0], reg[1], reg[2], reg[3], reg[4], reg[5], reg[6], mem[32767], mem[32766], mem[32765], mem[32764], mem[32763], mem[32762], mem[32761], mem[32760], mem[32255], mem[32254], mem[32253], mem[32252], mem[32251], mem[32250], mem[32249], mem[32248]);
                 break;
@@ -206,53 +244,7 @@ We have basic arithmetic operations, just as in the Python interpreter. For conv
         }
 ```
 
-```c
-        switch(NEXT)
-        {
-            ...
-            case  4: X;   Rx = getc(stdin);     break; // in (x = getc())
-            case  5: X;   putc(Rx, stdout);     break; // out (putc(x))
-            case  6: XY;  Rx = Ry + 1;          break; // inc (x = ++y)
-            case  7: XY;  Rx = Ry - 1;          break; // dec (x = --y)
-            case  8: XYZ; Rx = Ry + Rz;         break; // add (x = y + z)
-            case  9: XYZ; Rx = Ry - Rz;         break; // sub (x = y - z)
-            case 10: XYZ; Rx = Ry * Rz;         break; // mul (x = y * z)
-            case 11: XYZ; Rx = Ry / Rz;         break; // div (x = y / z)
-            case 12: XYZ; Rx = Ry % Rz;         break; // mod (x = y % z)
-            case 13: XYZ; Rx = Ry & Rz;         break; // and (x = y & z)
-            case 14: XYZ; Rx = Ry | Rz;         break; // or (x = y | z)
-            case 15: XYZ; Rx = Ry ^ Rz;         break; // xor (x = y ^ z)
-            case 16: XY;  Rx = ~Ry;             break; // not (x = ~y)
-            case 17: XYZ; Rx = Ry << Rz;        break; // lsh (x = y << z)
-            case 18: XYZ; Rx = Ry >> Rz;        break; // rsh (x = y >> z)
-            case 19: XYZ; if (Ry == Rz) pc = x; break; // beq (branch if x == y)
-            case 20: XYZ; if (Ry != Rz) pc = x; break; // bne (branch if x != y)
-            case 21: XYZ; if (Ry >  Rz) pc = x; break; // bgt (branch if x > y)
-            case 22: XYZ; if (Ry >= Rz) pc = x; break; // bge (branch if x >= y)
-            case 23: XYZ; if (Ry <  Rz) pc = x; break; // blt (branch if x < y)
-            case 24: XYZ; if (Ry <= Rz) pc = x; break; // ble (branch if x <= y)
-            case 25: X;   pc = Rx;              break; // exec (pc = x)
-            case 26: X;   pc = x;               break; // jump (pc = v)
-            case 27: X;   *(r++) = pc; pc = x;  break; // call (jsr(v))
-            case 28:      pc = *(--r);          break; // return (ret)
-            case 29:      return 0; // halt
-            case 30: // dump
-                file = fopen("image.bin", "w");
-                if (!file || !fwrite(&mem, sizeof(mem), 1, file))
-                {
-                    printf("Could not write boot image.\n");
-                    return 1;
-                }
-                fclose(file);
-                break;
-            case 31: // debug
-                printf("Inst: %i Reg: %04x %04x %04x %04x %04x %04x %04x Stack: %04x %04x %04x %04x %04x %04x %04x %04x Return: %i %i %i %i %i %i %i %i\n", mem[pc], reg[0], reg[1], reg[2], reg[3], reg[4], reg[5], reg[6], mem[32767], mem[32766], mem[32765], mem[32764], mem[32763], mem[32762], mem[32761], mem[32760], mem[32255], mem[32254], mem[32253], mem[32252], mem[32251], mem[32250], mem[32249], mem[32248]);
-                break;
-            default:
-                printf("Invalid instruction! (pc=%i [%i])\n", pc - 1, mem[pc - 1]);
-                return 1;
-        }
-```
+To help with debugging, this `debug` instruction will display internal state.
 
 ## Assembler
 

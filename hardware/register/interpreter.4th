@@ -1,4 +1,4 @@
-( outer interpreter - reads tokens, compiles headers, literals, ... )
+( interpreter - reads tokens, compiles headers, literals, ... )
 ( requires assembler )
 
 ( --- register allocation/init ----------------------------------------- )
@@ -217,12 +217,12 @@ var link
         &interact jump,     ( switch out of compiling mode )
        
       0 sym pushx header,   ( push number to stack from x )
-              x n cp,       ( bootstrap to outer interpreter reg )
+              x n cp,       ( bootstrap to interpreter reg )
            &pushn jump,     ( jump to push )
        
        0 sym popx header,   ( pop number from stack to x )
             &popn call,     ( jump pop )
-              n x cp,       ( outer interpreter to bootstrap reg )
+              n x cp,       ( interpreter to bootstrap reg )
                   ret,
 
     0 sym literal header,   ( compile literal from stack )

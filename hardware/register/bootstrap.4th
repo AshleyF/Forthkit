@@ -1,13 +1,13 @@
 ( bootstrap remainder of interpreter )
-( load into machine running outer interpreter image )
+( load into machine running interpreter image )
 
 create : compile create compile ; ( magic! )
 
 ( assembler )
 
-: x 1 ; ( shared by outer interpreter )
-: d 2 ; ( dictionary pointer - shared by outer interpreter )
-: zero 4 ; ( shared by outer interpreter )
+: x 1 ; ( shared by interpreter )
+: d 2 ; ( dictionary pointer - shared by interpreter )
+: zero 4 ; ( shared by interpreter )
 : y 30 ; 
 : z 31 ; 
 
@@ -24,6 +24,7 @@ create : compile create compile ; ( magic! )
 : ldc,    0 , , , ;
 : ld,     1 , , , ;
 : st,     2 , , , ;
+( cp,     defined above )
 : in,     4 , , ;
 : out,    5 , , ;
 : inc,    6 , , , ;
@@ -36,8 +37,8 @@ create : compile create compile ; ( magic! )
 : and,   13 , , , , ;
 : or,    14 , , , , ;
 : not,   16 , , , ;
-: shr,   17 , , swap , , ;
-: shl,   18 , , swap , , ;
+: shl,   17 , , swap , , ;
+: shr,   18 , , swap , , ;
 : beq,   19 , , , , ;
 : bne,   20 , , , , ;
 : bgt,   21 , , swap , , ;
@@ -59,8 +60,8 @@ create : compile create compile ; ( magic! )
 : *    popxy [ x y x mul, ] pushx ;
 : /    popxy [ x y x div, ] pushx ;
 : mod  popxy [ x y x mod, ] pushx ;
-: 2/   popxy [ x y x shr, ] pushx ;
 : 2*   popxy [ x y x shl, ] pushx ;
+: 2/   popxy [ x y x shr, ] pushx ;
 : and  popxy [ x y x and, ] pushx ;
 : or   popxy [ x y x or,  ] pushx ;
 : xor  popxy [ x y x xor, ] pushx ;
