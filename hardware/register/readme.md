@@ -250,6 +250,7 @@ To help with debugging, this `debug` instruction will display internal state.
 
 A [Forth-based assembler is provided](./assembler.4th), allowing the above program [to be expressed](./test.4th) as:
 
+```forth
     0 const u
     1 const c
 
@@ -259,6 +260,7 @@ A [Forth-based assembler is provided](./assembler.4th), allowing the above progr
      c u c sub,
          c out,
     &start jump,
+```
 
 This is a pretty nice assembly format, leaving all the power of Forth available as a "macro assembler."
 
@@ -268,7 +270,72 @@ In addition to the `label` mechanism to give names to addresses for backward jum
 
 ### Assembler Walkthrough
 
+Building an assembler in Forth is surprisingly easy.
 
+```forth
+var dp ( dictionary pointer )
+: here dp @ ;
+: , here m! here 1 + dp ! ; ( append )
+```
+
+We start with a _dictionary pointer_ (so named because we'll soon use this assembler to pack a dictionary structure). The `here` word merely fetches the pointer. The comma (`,`) word appends a value to the dictionary space and increments the pointer.
+
+With just these, we can build words taking instruction operands from the stack and packing into the dictionary.
+
+```forth
+: ldc,    0 , , , ;        (   v x ldc,   →  x = v              )
+: ld,     1 , , , ;        (   a x ld,    →  x = mem[a]         )
+: st,     2 , , , ;        (   x a st,    →  mem[a] = x         )
+: cp,     3 , , , ;        (   y x cp,    →  x = y              )
+: in,     4 , , ;          (     x in,    →  x = getc           )
+: out,    5 , , ;          (     x out,   →  putc x             )
+: inc,    6 , , , ;        (   y x inc,   →  x = y + 1          )
+: dec,    7 , , , ;        (   y x dec,   →  x = y - 1          )
+: add,    8 , , , , ;      ( z y x add,   →  x = z + y          )
+: sub,    9 , , swap , , ; ( z y x sub,   →  x = z - y          )
+: mul,   10 , , , , ;      ( z y x mul,   →  x = z × y          )
+: div,   11 , , swap , , ; ( z y x div,   →  x = z ÷ y          )
+: mod,   12 , , swap , , ; ( z y x mod,   →  x = z mod y        )
+: and,   13 , , , , ;      ( z y x and,   →  x = z and y        )
+: or,    14 , , , , ;      ( z y x or,    →  x = z or  y        )
+: xor,   15 , , , , ;      ( z y x xor,   →  x = z xor y        )
+: not,   16 , , , ;        (   y x not,   →  x = not y          )
+: shl,   17 , , swap , , ; ( z y x shl,   →  x = z << y         )
+: shr,   18 , , swap , , ; ( z y x shr,   →  x = z >> y         )
+: beq,   19 , , , , ;      ( x y a beq,   →  pc = a if x = y    )
+: bne,   20 , , , , ;      ( x y a bne,   →  pc = a if x ≠ y    )
+: bgt,   21 , , swap , , ; ( x y a bgt,   →  pc = a if x > y    )
+: bge,   22 , , swap , , ; ( x y a bge,   →  pc = a if x ≥ y    )
+: blt,   23 , , swap , , ; ( x y a blt,   →  pc = a if x < y    )
+: ble,   24 , , swap , , ; ( x y a ble,   →  pc = a if x ≤ y    )
+: exec,  25 , , ;          (     x exec,  →  pc = [x]           )
+: jump,  26 , , ;          (     a jump,  →  pc = a             )
+: call,  27 , , ;          (     a call,  →  push[pc], pc = a   )
+: ret,   28 , ;            (       ret,   →  pc = pop[]         )
+: halt,  29 , ;            (       halt,  →  halt machine       )
+: dump,  30 , ;            (       dump,  →  core to image.bin  )
+: debug, 31 , ;            (       debug, →  show machine state )
+```
+
+In a few places we do a `swap` to order the arguments in a _natural_ way. For example `z y x sub,` packs a subtraction instruction meaning _x = z - y_ (with _z_ and _y_ swapped), because this resembles the ordering for infix expressions (left minus right).
+
+```forth
+: label here const ;
+: ahead, here 1 + 0 jump, ; ( dummy jump, push address )
+: then, here swap m! ; ( patch jump )
+```
+
+Because the assembler is hosted in Forth, we have all the power of Forth to automate and make helper words for anything we like; make this a _macro assembler_.
+
+For now, we've added `lable` word that creates a constant giving a name to the current address (`here`). This is used, for example, in the test assembly above where we `label &start` at the beginning of a loop and later `&start jump,`.
+
+The `label` mechanism works for backward jumps, which may be most commont. The `ahead,` and `then,` words allow us to skip over code. A little tricky, but `ahead,` packs a `jump,` with a dummy (`0`) value and pushes the address of the jump value (`here 1 +`). The `then,` word is used wherever we want to jump _to_. It patches the jump value to do here (`here swap m!`; storing the current `here` at the previously pushed address).
+
+```forth
+: assemble here . dump exit ;
+```
+
+Finally, the `assemble` word dumps memory to an image file (and displays the current size of the dictionary).
 
 ## Interpreter
 
