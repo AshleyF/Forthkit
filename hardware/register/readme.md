@@ -266,7 +266,7 @@ This is a pretty nice assembly format, leaving all the power of Forth available 
 
 A new `image.bin` may be build with [`./test.sh`](./test.sh).
 
-In addition to the `label` mechanism to give names to addresses for backward jumps (most common), there are `ahead,` and `then,` words to skip over code (likely for library routines).
+In addition to the `label` mechanism to give names to addresses for backward jumps (most common), there are `ahead,` and `continue,` words to skip over code (likely for library routines).
 
 ### Assembler Walkthrough
 
@@ -314,7 +314,7 @@ With just these, we can build words taking instruction operands from the stack a
 : ret,   28 , ;            (       ret,   →  pc = pop[]         )
 : halt,  29 , ;            (       halt,  →  halt machine       )
 : dump,  30 , ;            (       dump,  →  core to image.bin  )
-: debug, 31 , ;            (       debug, →  show machine state )
+: debug, 31 , , , ;        (       debug, →  show machine state )
 ```
 
 In a few places we do a `swap` to order the arguments in a _natural_ way. For example `z y x sub,` packs a subtraction instruction meaning _x = z - y_ (with _z_ and _y_ swapped), because this resembles the ordering for infix expressions (left minus right).
@@ -322,14 +322,14 @@ In a few places we do a `swap` to order the arguments in a _natural_ way. For ex
 ```forth
 : label here const ;
 : ahead, here 1 + 0 jump, ; ( dummy jump, push address )
-: then, here swap m! ; ( patch jump )
+: continue, here swap m! ; ( patch jump )
 ```
 
 Because the assembler is hosted in Forth, we have all the power of Forth to automate and make helper words for anything we like; make this a _macro assembler_.
 
 For now, we've added `lable` word that creates a constant giving a name to the current address (`here`). This is used, for example, in the test assembly above where we `label &start` at the beginning of a loop and later `&start jump,`.
 
-The `label` mechanism works for backward jumps, which may be most commont. The `ahead,` and `then,` words allow us to skip over code. A little tricky, but `ahead,` packs a `jump,` with a dummy (`0`) value and pushes the address of the jump value (`here 1 +`). The `then,` word is used wherever we want to jump _to_. It patches the jump value to do here (`here swap m!`; storing the current `here` at the previously pushed address).
+The `label` mechanism works for backward jumps, which may be most commont. The `ahead,` and `continue,` words allow us to skip over code. A little tricky, but `ahead,` packs a `jump,` with a dummy (`0`) value and pushes the address of the jump value (`here 1 +`). The `continue,` word is used wherever we want to jump _to_. It patches the jump value to do here (`here swap m!`; storing the current `here` at the previously pushed address).
 
 ```forth
 : assemble here . dump exit ;

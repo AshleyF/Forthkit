@@ -71,6 +71,11 @@ int main(void)
                 fclose(file);
                 break;
             case 31: // debug
+                XY;
+                for (int i = Ry; i <= Rx; i++)
+                {
+                    printf("Mem[%i] %i\n", i, mem[i]);
+                }
                 printf("Inst: %i Reg: %04x %04x %04x %04x %04x %04x %04x Stack: %04x %04x %04x %04x %04x %04x %04x %04x Return: %i %i %i %i %i %i %i %i\n", mem[pc], reg[0], reg[1], reg[2], reg[3], reg[4], reg[5], reg[6], mem[32767], mem[32766], mem[32765], mem[32764], mem[32763], mem[32762], mem[32761], mem[32760], mem[32255], mem[32254], mem[32253], mem[32252], mem[32251], mem[32250], mem[32249], mem[32248]);
                 break;
             default:
