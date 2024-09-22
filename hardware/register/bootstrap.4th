@@ -99,28 +99,30 @@ create : compile create compile ; ( magic! )
 : @ popx [ x x ld, ] pushx ;
 : ! popxy [ x y st, ] ;
 
-: allot [ d x cp, ] pushx swap popx [ x d d add, ] ;
-
 : here@ [ d x cp, ] pushx ;
 : here! popx [ x d cp, ] ;
 
 : >dfa 2 + ;
 : ' find >dfa ;
 
+: dp+6 here@ 6 + ;
 : const create literal ret, ;  ( e.g. 123 const foo -> foo3 . 0  LDC n 123  CALL &pushn  RET )
-: var create here@ 6 + literal ret, 0 , ;  ( e.g. var foo -> foo3 . 0  LDC n <addr>  CALL &pushn  RET  0 )
+: var create dp+6 literal ret, 0 , ;  ( e.g. var foo -> foo3 . 0  LDC n <addr>  CALL &pushn  RET  0 )
+
+: allot popx [ x d d add, ] ;
+: buffer create dp+6 literal ret, allot ;
 
 : if [ ' popxy literal ] call, here@ 1+ zero x 0 beq, ; immediate
 : unless [ ' popxy literal ] call, here@ 1+ zero x 0 bne, ; immediate
 : else here@ 1+ 0 jump, swap here@ swap ! ; immediate
 : then here@ swap ! ; immediate
 
-: = popxy 0 [ x y here@ 6 + bne, ] not ;
-: <> popxy 0 [ x y here@ 6 + beq, ] not ;
-: > popxy 0 [ x y here@ 6 + ble, ] not ;
-: < popxy 0 [ x y here@ 6 + bge, ] not ;
-: >= popxy 0 [ x y here@ 6 + blt, ] not ;
-: <= popxy 0 [ x y here@ 6 + bgt, ] not ;
+: =  popxy 0 [ x y dp+6 bne, ] not ;
+: <> popxy 0 [ x y dp+6 beq, ] not ;
+: >  popxy 0 [ x y dp+6 ble, ] not ;
+: <  popxy 0 [ x y dp+6 bge, ] not ;
+: >= popxy 0 [ x y dp+6 blt, ] not ;
+: <= popxy 0 [ x y dp+6 bgt, ] not ;
 
 : sign 0 < if -1 else 1 then ;
 : /mod 2dup / -rot mod ;

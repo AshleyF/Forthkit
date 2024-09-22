@@ -49,7 +49,7 @@ pi 180.0 / const rads
 : rad2deg degs * ;
 ```
 
-The `deg2rad` and `rad2deg` conversion words are defined as above in the prelude. Note that computation that can be done at compile time is placed in constants.
+The `deg2rad` and `rad2deg` conversion words are defined as above. Note that computation that can be done at compile time is placed in constants.
 
 ```forth
 : plot valid? if point-x point-y set then ;

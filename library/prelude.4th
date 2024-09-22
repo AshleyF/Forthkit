@@ -15,9 +15,3 @@
 : abs dup 0 < if neg then ;
 
 : +! dup @ rot + swap ! ;
-
-3.14159265359 const pi
-pi 180.0 / const rads
-180.0 pi / const degs
-: deg2rad rads * ;
-: rad2deg degs * ;
