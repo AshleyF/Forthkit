@@ -36,6 +36,7 @@ create : compile create compile ; ( magic! )
 : mod,   12 , , swap , , ;
 : and,   13 , , , , ;
 : or,    14 , , , , ;
+( xor    defined above )
 : not,   16 , , , ;
 : shl,   17 , , swap , , ;
 : shr,   18 , , swap , , ;
@@ -105,6 +106,9 @@ create : compile create compile ; ( magic! )
 
 : >dfa 2 + ;
 : ' find >dfa ;
+
+: const create literal ret, ;  ( e.g. 123 const foo -> foo3 . 0  LDC n 123  CALL &pushn  RET )
+: var create here@ 6 + literal ret, 0 , ;  ( e.g. var foo -> foo3 . 0  LDC n <addr>  CALL &pushn  RET  0 )
 
 : if [ ' popxy literal ] call, here@ 1+ zero x 0 beq, ; immediate
 : unless [ ' popxy literal ] call, here@ 1+ zero x 0 bne, ; immediate
