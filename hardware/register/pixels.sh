@@ -2,4 +2,4 @@
 
 . ./image.sh
 echo "Running bootstrap..."
-cat ./bootstrap.4th ../../library/prelude.4th ../../library/pixels/pixels.4th - | ./machine
+cat ./bootstrap.f ../../library/prelude.f pixels-adapter.f ../../library/pixels/pixels.f ../../library/pixels/test.f - | ./machine

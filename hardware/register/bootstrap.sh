@@ -2,4 +2,4 @@
 
 . ./image.sh
 echo "Running bootstrap..."
-cat ./bootstrap.4th - | ./machine
+cat ./bootstrap.f - | ./machine

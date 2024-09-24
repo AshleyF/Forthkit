@@ -4,8 +4,8 @@
 
 * Install Python: `apt-get install python`
 * Interpreter: `python ./interpreter.py`
-* Execute source: `cat foo.4th bar.4th | python ./interpreter.py`
-* Execute source followed by interactive (add `-`): `cat foo.4th bar.4th - | python ./interpreter.py`
+* Execute source: `cat foo.f bar.f | python ./interpreter.py`
+* Execute source followed by interactive (add `-`): `cat foo.f bar.f - | python ./interpreter.py`
 
 ## Vocabulary
 
@@ -83,7 +83,7 @@ Ultimately, the `Forth` interpreter will be constructed and driven in an interac
 ```python
 forth = Forth()
 
-print("Welcome to PyForth 0.3 REPL")
+print("Welcome to PyForth REPL")
 while True:
   try:
     print('> ', end='')
@@ -96,7 +96,7 @@ while True:
   except Exception as error: print(error)
 ```
 
-We `read()` whitespace-separated tokens from the console. The input may be typed at the console, or may be piped from files and/or keyboard input (e.g. to load a file and then proceed interactively `cat foo.4th - | python ./interpreter.py`).
+We `read()` whitespace-separated tokens from the console. The input may be typed at the console, or may be piped from files and/or keyboard input (e.g. to load a file and then proceed interactively `cat foo.f - | python ./interpreter.py`).
 
 ```python
   def read(self):

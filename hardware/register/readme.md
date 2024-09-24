@@ -248,7 +248,7 @@ To help with debugging, this `debug` instruction will display internal state.
 
 ## Assembler
 
-A [Forth-based assembler is provided](./assembler.4th), allowing the above program [to be expressed](./test.4th) as:
+A [Forth-based assembler is provided](./assembler.f), allowing the above program [to be expressed](./test.f) as:
 
 ```forth
     0 const u
@@ -339,7 +339,7 @@ Finally, the `assemble` word dumps memory to an image file (and displays the cur
 
 ## Interpreter
 
-An [interpreter](./interpreter.4th) may be assembled with [`./interpreter.sh`](./interpreter.sh). This reads Forth tokens, compiles dictionary headers and literals, and manages a stack.
+An [interpreter](./interpreter.f) may be assembled with [`./interpreter.sh`](./interpreter.sh). This reads Forth tokens, compiles dictionary headers and literals, and manages a stack.
 
 The dictionary format is as follows. Words are length-suffixed characters followed by a "link" field pointing to the link field of the previous word (or `0` if the first word), followed by an "immediate flag" indicating whether the word should be executed even in compiling mode, followed by machine code (VM bytecode) and presumably a `ret` instruction.
 

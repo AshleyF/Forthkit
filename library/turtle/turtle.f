@@ -1,5 +1,5 @@
 ( turtle graphics )
-( requires: pixels.4th )
+( requires: pixels.f )
 
 var x var y var theta
 var dx var dy
@@ -23,5 +23,5 @@ pi 180.0 / const rads
 
 : start clear 0 0 0 pose ;
 : turn theta @ + head ;
-: move times dx @ x +! dy @ y +! plot loop ;
+: move 0 do dx @ x +! dy @ y +! plot loop ;
 : jump dup dx @ * x +! dy @ * y +! ;

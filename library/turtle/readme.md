@@ -76,7 +76,7 @@ A `valid?` point is one that is within the 160×160 (`width`×`height`) canvas. 
 ```forth
 : start clear 0 0 0 pose ;
 : turn theta @ + head ;
-: move times dx @ x +! dy @ y +! plot loop ;
+: move 0 do dx @ x +! dy @ y +! plot loop ;
 : jump dup dx @ * x +! dy @ * y +! ;
 
 ```
@@ -87,7 +87,7 @@ This is a complete turtle graphics system!
 
 ## Let's Play!
 
-Let's have some fun playing with turtle graphics. `start 4 times 30 move 90 turn loop show` produces a square.
+Let's have some fun playing with turtle graphics. `start 4 0 do 30 move 90 turn loop show` produces a square.
 
 ```text
 ⡏⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -100,7 +100,7 @@ Let's have some fun playing with turtle graphics. `start 4 times 30 move 90 turn
 ⠧⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠤⠇⠀
 ```
 
-Similarly we can make a triangle with `start 3 times 30 move 120 turn loop show`.
+Similarly we can make a triangle with `start 3 0 do 30 move 120 turn loop show`.
 
 ```test
 ⠹⡉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⠉⡹⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -116,7 +116,7 @@ To generalize this pattern:
 
 ```forth
 : angle 360 swap / ;
-: draw -rot times 2dup move turn loop 2drop ;
+: draw -rot 0 do 2dup move turn loop 2drop ;
 : polygon dup angle draw ;
 ```
 
@@ -189,10 +189,10 @@ We can use the `draw` word directly to get things other than regular polygons.
 The following is a _very_ tricky higher order word that takes other words (named or anonymous) as an argument; a function that takes a function.
 
 ```forth
-: spin dup angle swap times 2dup turn call loop 2drop ;
+: spin dup angle swap 0 do 2dup turn call loop 2drop ;
 ```
 
-Given a number of times to spin along with a shape-drawing word as an argument, it uses `call` to invoke the shape repeatedly while turning the turtle.
+Given a number of 0 do to spin along with a shape-drawing word as an argument, it uses `call` to invoke the shape repeatedly while turning the turtle.
 
 ```forth
 : stars start [: 80 star :] 3 spin show ;
@@ -200,7 +200,7 @@ Given a number of times to spin along with a shape-drawing word as an argument, 
 stars
 ```
 
-We give it a size 80 star as an anonymous definition and ask it to `spin` 3 times.
+We give it a size 80 star as an anonymous definition and ask it to `spin` 3 0 do.
 
 ```text
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
@@ -284,7 +284,7 @@ This is the power of higher order words. Remember that the phrase `[: 4 circle :
 Let's finish with a few more examples.
 
 ```forth
-: burst start 60 times i 6 * head 0 0 go 80 move loop show ;
+: burst start 60 0 do i 6 * head 0 0 go 80 move loop show ;
 
 burst
 ```
@@ -333,7 +333,7 @@ burst
 ```
 
 ```forth
-: squaral start -70 -35 go 20 times 140 move 126 turn loop show ;
+: squaral start -70 -35 go 20 0 do 140 move 126 turn loop show ;
 
 squaral
 ```
@@ -383,7 +383,7 @@ squaral
 ```
 
 ```forth
-: rose start 0 54 times 2 + dup move 84 turn loop show ;
+: rose start 0 54 0 do 2 + dup move 84 turn loop show ;
 
 rose
 ```
@@ -434,8 +434,8 @@ An interesting trick is used here, by pushing a `0` before entering the loop and
 ```
 
 ```forth
-: arc times 2dup turn move loop 2drop ;
-: petal 2 times 4 6 16 arc 1 -6 16 arc 180 turn loop ;
+: arc 0 do 2dup turn move loop 2drop ;
+: petal 2 0 do 4 6 16 arc 1 -6 16 arc 180 turn loop ;
 : flower start ' petal 15 spin show ;
 
 flower

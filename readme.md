@@ -6,8 +6,8 @@ Inspired by [Lispkit](https://github.com/AshleyF/Lispkit), build your own Forth 
 1) Play with it!
     * Write a [console Pixel library](./library/pixels/) (in Forth) using Unicode Braille characters
     * Use this to do [turtle graphics](./library/turtle/) (in Forth)!
-2) Make [register-based "hardware"](./hardware/register/) (VM in C) and [assembler](./hardware/register/assembler.4th) (in Forth)
-3) Use the assembler to [build an interpreter](./hardware/register/interpreter.4th) (a bytecode image using Forth)
+2) Make [register-based "hardware"](./hardware/register/) (VM in C) and [assembler](./hardware/register/assembler.f) (in Forth)
+3) Use the assembler to [build an interpreter](./hardware/register/interpreter.f) (a bytecode image using Forth)
 4) TODO: Abandon the Python interpreter and bootstrap Forth to the new "hardware"
     * TODO: Port turtle graphics to this
 5) TODO: Build an inner interpreter and take away `call`/`ret` from the "hardware"
@@ -17,6 +17,6 @@ Inspired by [Lispkit](https://github.com/AshleyF/Lispkit), build your own Forth 
 6) TODO: Make more new "hardware" - a stack machine this time
 7) TODO: Port our Forth to this - see how the inner interpreter goes away
     * TODO: Use block-style disk I/O
-8) TODO: Move to a colorForth style varient (less syntax, no immediate words, etc.)
+8) TODO: Move to a colorForth style variant (less syntax, no immediate words, etc.)
 9) TODO: Build a block editor and stop using Vim
     * TODO: We've now bootstrapped a whole "OS" for ourselves!

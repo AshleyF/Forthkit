@@ -217,59 +217,60 @@ var link
                                                                       ( INC d d         0600 0200 0200 )
                   ret,                                                ( RET             1C00 )
 
-  0 sym immediate header,       ( set immediate flag )                ( immediate9 . 0  6900 6D00 6D00 6500 6400 6900 6100 7400 6500 0900 3001 0000 )
+  0 sym immediate header,       ( set immediate flag )                ( immediate9 . 0  6900 6D00 6D00 6500 6400 6900 6100 7400 6500 0900 LINK 0000 )
             lnk n inc,          ( point to immediate flag )           ( INC n lnk       0600 0000 1800 )
            true n st,           ( set immediate flag )                ( ST n true       0200 0000 0800 )
                   ret,                                                ( RET             1C00 )
 
-    0 sym compile header,       ( switch to compiling mode )          ( compile7 . 0    6300 6F00 6D00 7000 6900 6C00 6500 0700 5401 0000 )
+    0 sym compile header,       ( switch to compiling mode )          ( compile7 . 0    6300 6F00 6D00 7000 6900 6C00 6500 0700 LINK 0000 )
         true comp cp,           ( set comp flag )                     ( CP comp true    0300 1D00 0800 )
                   ret,                                                ( RET             1C00 )
 
-   0 sym interact header,       ( switch to interactive mode )        ( interact8 . 0   6900 6E00 7400 6500 7200 6100 6300 7400 0800 6501 0000 )
+   0 sym interact header,       ( switch to interactive mode )        ( interact8 . 0   6900 6E00 7400 6500 7200 6100 6300 7400 0800 LINK 0000 )
             label &interact
-       false comp ldc,          ( reset comp flag )                   ( LDC comp false  0000 1D00 0900 )
+       false comp cp,           ( reset comp flag )                   ( CP comp false   0300 1D00 0900 )
                   ret,                                                ( RET             1C00 )
 
-         -1 sym ; header,       ( return )                            ( ;1 . -1         3B00 0100 7401 FFFF )
+         -1 sym ; header,       ( return )                            ( ;1 . -1         3B00 0100 LINK FFFF )
               ret append,       ( append ret instruction )            ( ST d ret        0200 0200 1C00 )
                                                                       ( INC d d         0600 0200 0200 )
         &interact jump,         ( switch out of compiling mode )      ( jump <addr>     1A00 ADDR )
        
-      0 sym pushx header,       ( push number to stack from x )       ( pushx5 . 0      7000 7500 7300 6800 7800 0500 7C01 0000 )
+      0 sym pushx header,       ( push number to stack from x )       ( pushx5 . 0      7000 7500 7300 6800 7800 0500 LINK 0000 )
               x n cp,           ( bootstrap to interpreter reg )      ( CP n x          0300 0000 0100 )
            &pushn jump,         ( jump to push )                      ( jump <addr>     1A00 ADDR )
        
-       0 sym popx header,       ( pop number from stack to x )        ( popx4 . 0       7000 6F00 7000 7800 0400 8C01 0000 )
+       0 sym popx header,       ( pop number from stack to x )        ( popx4 . 0       7000 6F00 7000 7800 0400 LINK 0000 )
             &popn call,         ( jump pop )                          ( call <addr>     1B00 ADDR )
               n x cp,           ( interpreter to bootstrap reg )      ( CP x n          0300 0100 0000 )
                   ret,                                                ( RET             1C00 )
 
-    0 sym literal header,       ( compile literal from stack )        ( literal7 . 0    6C00 6900 7400 6500 7200 6100 6C00 0700 9801 0000 )
+    0 sym literal header,       ( compile literal from stack )        ( literal7 . 0    6C00 6900 7400 6500 7200 6100 6C00 0700 LINK 0000 )
             &popn call,         ( pop into n )                        ( CALL <addr>     1B00 ADDR )
             &litn jump,         ( compile literal n )                 ( JUMP <addr>     1A00 ADDR )
        
-          0 sym , header,       ( append value from stack )           ( ,1 . 0          2C00 0100 A801 0000 )
+          0 sym , header,       ( append value from stack )           ( ,1 . 0          2C00 0100 LINK 0000 )
             &popn call,         ( pop value from stack )              ( CALL <addr>     1B00 ADDR )
                 n append,       ( append n )                          ( ST d n          0200 0200 0000 )
                                                                       ( INC d d         0600 0200 0200 )
                   ret,                                                ( RET             1C00 )
        
-       0 sym find header,       ( find word - nm set if not found )   ( find4 . 0       6600 6900 6E00 6400 0400 B001 0000 )
+          0 sym ' header,       ( find word - nm set if not found )   ( '1 . 0          2700 0100 LINK 0000 )
            &token call,         ( read a token )                      ( CALL <addr>     1B00 ADDR )
             &find call,         ( find token )                        ( CALL <addr>     1B00 ADDR )
             cur n cp,           ( prep to push cursor )               ( CP n cur        0300 0000 1700 )
           two n n add,          ( address of code field )             ( ADD n n two     0800 0000 0000 0600 )
+          two n n add,          ( address of code field )             ( ADD n n two     0800 0000 0000 0600 ) ( TODO why twice?! )
            &pushn jump,         ( push cursor )                       ( JUMP <addr>     1A00 ADDR )
 
-     0 sym forget header,       ( forget word )                       ( forget6 . 0     6600 6F00 7200 6700 6500 7400 0600 C001 0000 )
+     0 sym forget header,       ( forget word )                       ( forget6 . 0     6600 6F00 7200 6700 6500 7400 0600 LINK 0000 )
             &find call,         ( find word to forget )               ( CALL <addr>     1B00 ADDR )
           cur cur ld,           ( follow link to previous )           ( LD cur cur      0100 1700 1700 )
           cur lnk cp,           ( lnk = word prior to forgotten )     ( CP lnk cur      0300 1800 1700 )
              p' d cp,           ( set dictionary point to name )      ( CP d p'         0300 0200 1500 )
                   ret,                                                ( RET             1C00 )
        
-          -1 40 1 header,       ( skip comment, 40=left paren ASCII ) ( 40 1 0 -1       2800 0100 D601 FFFF )
+          -1 40 1 header,       ( skip comment, 40=left paren ASCII ) ( 40 1 0 -1       2800 0100 LINK FFFF )
             label &comment
                 n in,           ( next char )                         ( IN n            0400 0000 )
 rparch n &comment bne,          ( continue until right-paren )        ( BNE <addr> . .  1400 ADDR 0000 0B00 )

@@ -1,7 +1,11 @@
 #include <stdio.h>
+#include <wchar.h>
+#include <locale.h>
 
 int main(void)
 {
+    setlocale(LC_ALL, "");
+
     unsigned short mem[0x8000];
     short pc = 0;
     short reg[32] = {};
@@ -36,7 +40,7 @@ int main(void)
             case  2: XY;  mem[Rx] = Ry;         break; // st (m[x] = y)
             case  3: XY;  Rx = Ry;              break; // cp (x = y)
             case  4: X;   Rx = getc(stdin);     break; // in (x = getc())
-            case  5: X;   putc(Rx, stdout);     break; // out (putc(x))
+            case  5: X;   wprintf(L"%lc", Rx);  break; // out (putc(x))
             case  6: XY;  Rx = Ry + 1;          break; // inc (x = ++y)
             case  7: XY;  Rx = Ry - 1;          break; // dec (x = --y)
             case  8: XYZ; Rx = Ry + Rz;         break; // add (x = y + z)

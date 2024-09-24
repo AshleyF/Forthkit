@@ -8,9 +8,10 @@ width 2 / const columns
 width height * 8 / const size
 
 ( init dot masks )
-128 64 32 4 16 2 8 1  8 times size i + m! loop
+: init-masks 8 0 do size i + m! loop ;
+128 64 32 4 16 2 8 1 init-masks 
 
-: clear size times 10240 i m! loop ;
+: clear size 0 do 10240 i m! loop ;
 
 : cell 4 / floor columns * swap 2 / floor + ;
 : mask 4 mod 2 * swap 2 mod + size + m@ ;
@@ -20,7 +21,7 @@ width height * 8 / const size
 : reset cell-mask swap not and swap m! ;
 
 : show
-  size times
+  size 0 do
     i columns mod 0 = if 10 emit then  ( newline as appropriate )
     i m@ emit
   loop ;

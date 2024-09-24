@@ -4,7 +4,7 @@ Console pixel graphics library using [Unicode braille characters (`0x2800`-`0x28
 
 The canvas is 160×160. You may `clear` it, `set` and `reset` pixels, and `show` it.
 
-To test the [`pixels`](./pixels.4th) library: [`sh ./test.sh`](./test.sh)
+To test the [`pixels`](./pixels.f) library: [`sh ./test.sh`](./test.sh)
 
 You should see this little guy (assuming Unicode font supporting Braille and UTF-8 terminal):
 
@@ -43,12 +43,10 @@ width height * 8 / const size
 We define the canvas `width` and `height`, and can compute the `columns` and total number of characters (`size`). These constants are computed once at _compile time_ as opposed to say `: columns width 2 / ;`.
 
 ```forth
-: clear size times 10240 i m! loop ;
+: clear size 0 do 10240 i m! loop ;
 ```
 
 A word to `clear` the canvas fill each cell with the Unicode value of an empty Braille cell (`10240`). This should be called before drawing.
-
-The `times` word comes from the [prelude](../prelude.4th) and merely starts a loop for n-times with `0 do` (that is, `: times 0 do ;`).
 
 ```forth
 : set cell-mask or swap m! ;
@@ -129,7 +127,7 @@ Showing this tiny happy face in a few Braille characters.
 ⢜⣘⠄
 ```
 
-In [test.4th](./test.4th) is a our turtle.
+In [test.f](./test.f) is a our turtle.
 
 ```forth
 : turtle start

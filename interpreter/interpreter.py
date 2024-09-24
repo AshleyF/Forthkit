@@ -194,7 +194,7 @@ class Forth:
 
 forth = Forth()
 
-print("Welcome to PyForth 0.3 REPL")
+print("Welcome to PyForth REPL")
 while True:
   try:
     print('> ', end='')

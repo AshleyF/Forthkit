@@ -102,9 +102,6 @@ create : compile create compile ; ( magic! )
 : here@ [ d x cp, ] pushx ;
 : here! popx [ x d cp, ] ;
 
-: >dfa 2 + ;
-: ' find >dfa ;
-
 : dp+6 here@ 6 + ;
 : const create literal ret, ;  ( e.g. 123 const foo -> foo3 . 0  LDC n 123  CALL &pushn  RET )
 : var create dp+6 literal ret, 0 , ;  ( e.g. var foo -> foo3 . 0  LDC n <addr>  CALL &pushn  RET  0 )
@@ -145,3 +142,13 @@ create : compile create compile ; ( magic! )
 : begin here@ ; immediate
 : until [ ' popxy literal ] call, zero x rot beq, ; immediate
 : again [ ' popxy literal ] call, jump, ; immediate
+
+var domin var domax
+: i domin @ ;
+
+: _do domin ! domax ! ;
+: do [ ' _do 2 - literal ] call, here@ ; immediate
+: _loop domin @ 1+ dup domin ! domax @ >= popx ;
+: loop [ ' _loop 2 - literal ] call, zero x rot beq, ; immediate
+
+: foo 10 5 do i . loop ;
