@@ -107,6 +107,8 @@ When the machine boots an image file populates memory.
 The instructions reference register numbers. For example `add` needs to know which two registers to sum and the register in which to deposit the result. We'll refer to these as `x`, `y` and `z`. The macros are shorthand for fetching the `NEXT` slot in the instruction stream, the `X`, `XY` or `XYZ` register numbers (depending on how many operands the instruction expects), and finally a simple shorthand for fetching register values by index (`Rx`, `Ry` and `Rz`).
 
 ```c
+    setlocale(LC_ALL, "");
+
     while (1)
     {
         switch(NEXT)
@@ -120,6 +122,7 @@ The instructions reference register numbers. For example `add` needs to know whi
 
     return 0;
 ```
+We set the locale so that we can emit Unicode characters.
 
 The main loop merely fetches and processes instructions one-by-one.
 
@@ -142,12 +145,12 @@ The first several instructions move data around. Instruction `0` loads a constan
         {
             ...
             case  4: X;   Rx = getc(stdin);     break; // in (x = getc())
-            case  5: X;   putc(Rx, stdout);     break; // out (putc(x))
+            case  5: X;   wprintf(L"%lc", Rx);  break; // out (putc(x))
             ...
         }
 ```
 
-Standard I/O is supported by `in` and `out` instructions.
+Standard I/O is supported by `in` and `out` instructions. We use `wprintf(...)` rather than `putc(...)` in order to support emitting Unicode characters.
 
 ```c
         switch(NEXT)

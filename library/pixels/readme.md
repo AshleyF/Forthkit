@@ -59,10 +59,13 @@ Now to build up to explaining `cell-mask`:
 
 ```forth
 ( init dot masks )
-128 64 32 4 16 2 8 1  8 0 do size i + m! loop
+: init-masks 8 0 do size i + m! loop ;
+128 64 32 4 16 2 8 1 init-masks 
 ```
 
 Here we've stored a table of dot mask values just beyond the canvas buffer (at `size`). We push the table values, then iterate eight times, poking them into memory. These values will be used ask masks to build each of the eight dots in a single Braille character.
+
+The reason for creating a word (`init-masks`) for this because the behavior of `do ... loop` outside of a definition is undefined in some Forths. Though it works in the Python interpreter, it may not work in future Forths we'll be creating.
 
 ```forth
 : cell 4 / floor columns * swap 2 / floor + ;

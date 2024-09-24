@@ -4,14 +4,11 @@
 
 int main(void)
 {
-    setlocale(LC_ALL, "");
-
-    unsigned short mem[0x8000];
-    short pc = 0;
     short reg[32] = {};
-
+    unsigned short mem[0x8000];
     short rstack[256] = {};
     short* r = rstack;
+    short pc = 0;
 
     FILE *file = fopen("image.bin", "r");
     if (!file || !fread(&mem, sizeof(mem), 1, file))
@@ -30,6 +27,8 @@ int main(void)
     #define Rx reg[x]
     #define Ry reg[y]
     #define Rz reg[z]
+
+    setlocale(LC_ALL, "");
 
     while (1)
     {
