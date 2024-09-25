@@ -99,20 +99,19 @@ create : compile create compile ; ( magic! )
 : @ popx [ x x ld, ] pushx ;
 : ! popxy [ x y st, ] ;
 
-: here@ [ d x cp, ] pushx ;
-: here! popx [ x d cp, ] ;
+: here [ d x cp, ] pushx ;
 
-: dp+6 here@ 6 + ;
+: dp+6 here 6 + ;
 : const create literal ret, ;  ( e.g. 123 const foo -> foo3 . 0  LDC n 123  CALL &pushn  RET )
 : var create dp+6 literal ret, 0 , ;  ( e.g. var foo -> foo3 . 0  LDC n <addr>  CALL &pushn  RET  0 )
 
 : allot popx [ x d d add, ] ;
 : buffer create dp+6 literal ret, allot ;
 
-: if [ ' popxy literal ] call, here@ 1+ zero x 0 beq, ; immediate
-: unless [ ' popxy literal ] call, here@ 1+ zero x 0 bne, ; immediate
-: else here@ 1+ 0 jump, swap here@ swap ! ; immediate
-: then here@ swap ! ; immediate
+: if [ ' popxy literal ] call, here 1+ zero x 0 beq, ; immediate
+: unless [ ' popxy literal ] call, here 1+ zero x 0 bne, ; immediate
+: else here 1+ 0 jump, swap here swap ! ; immediate
+: then here swap ! ; immediate
 
 : =  popxy 0 [ x y dp+6 bne, ] not ;
 : <> popxy 0 [ x y dp+6 beq, ] not ;
@@ -137,18 +136,25 @@ create : compile create compile ; ( magic! )
 
 : ?dup dup unless drop then ;
 
-: factorial dup 1 > if dup 1- factorial * then ;
-
-: begin here@ ; immediate
+: begin here ; immediate
 : until [ ' popxy literal ] call, zero x rot beq, ; immediate
 : again [ ' popxy literal ] call, jump, ; immediate
 
-var domin var domax
-: i domin @ ;
+here
+32 allot
+var r r !
 
-: _do domin ! domax ! ;
-: do [ ' _do 2 - literal ] call, here@ ; immediate
-: _loop domin @ 1+ dup domin ! domax @ >= popx ;
-: loop [ ' _loop 2 - literal ] call, zero x rot beq, ; immediate
+: >r r @ ! r @ 1+ r ! ;
+: r> r @ 1- r ! r @ @ ;
+: r@ r @ 1- @ ;
 
-: foo 10 5 do i . loop ;
+: _do swap >r >r ;
+: do [ ' _do 2 - literal ] call, here ; immediate
+: _loop0 r> 1+ dup >r r @ 2 - @ >= popx ;
+: _loop1 r> r> drop drop ;
+: loop [ ' _loop0 2 - literal ] call, zero x rot beq, [ ' _loop1 2 - literal ] call, ; immediate
+
+: i r @ 1- @ ;
+: j r @ 3 - @ ;
+
+: factorial dup 1 > if dup 1- factorial * then ;

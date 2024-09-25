@@ -1,8 +1,9 @@
-here@ dup
+here
 3208 allot ( 80×40+8 )
+const buffer
 
-: m@ [ literal ] + @ ;
-: m! [ literal ] + ! ;
+: m@ buffer + @ ;
+: m! buffer + ! ;
 
 : floor ; ( integer math already )
 

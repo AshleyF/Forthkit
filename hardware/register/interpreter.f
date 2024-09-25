@@ -119,6 +119,7 @@ zero cur &nomatch beq,          ( no match if start of dict )         ( BEQ <add
               p c ld,           ( get char )                          ( LD c p          0100 1400 1300 )
        c zeroch c sub,          ( convert to digit )                  ( SUB c c zeroch  0900 1400 1400 0A00 )
      c ten &error bge,          ( error if non-digit )                ( BGE <addr> . .  1600 ADDR 1400 0700 )
+    c zero &error blt,          ( error if non-digit )                ( BGE <addr> . .  1600 ADDR 1400 0700 )
           n ten n mul,          ( base ten shift left )               ( MUL n ten n     0A00 0000 0700 0000 )
             n c n add,          ( add in one's place )                ( ADD n c n       0800 0000 1400 0000 )
               p p inc,          ( next char )                         ( INC p p         0600 1300 1300 )
