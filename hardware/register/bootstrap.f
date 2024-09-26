@@ -46,9 +46,9 @@ create : compile create compile ; ( magic! )
 : bge,   22 , , swap , , ;
 : blt,   23 , , swap , , ;
 : ble,   24 , , swap , , ;
-: exec,  25 , , ;
-: jump,  26 , , ;
-: call,  27 , , ;
+: jump,  25 , , ;
+: call,  26 , , ;
+: exec,  27 , , ;
 : ret,   28 , ;
 : halt,  29 , ;
 : dump,  30 , ;
@@ -156,5 +156,9 @@ var r r !
 
 : i r @ 1- @ ;
 : j r @ 3 - @ ;
+
+: [: here 7 + ( past LIT . . CALL . JUMP . ) literal 0 jump, here 1- ( jump address field ); immediate
+: :] ret, here swap ! ; immediate
+: call popx [ x exec, ] ;
 
 : factorial dup 1 > if dup 1- factorial * then ;

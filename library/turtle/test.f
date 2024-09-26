@@ -15,10 +15,10 @@
 
 : star 5 144 draw ;
 
-( : spin dup angle swap 0 do 2dup turn call loop 2drop ; )
-( : stars start [: 80 star :] 3 spin show ; )
+: spin dup angle swap 0 do 2dup turn call loop 2drop ;
+: stars start [: 80 star :] 3 spin show ;
 
-( : spiro start [: 4 circle :] 15 spin show ; )
+: spiro start [: 4 circle :] 15 spin show ;
 
 : burst start 60 0 do i 6 * head 0 0 go 80 move loop show ;
 
@@ -28,10 +28,9 @@
 
 : arc 0 do 2dup turn move loop 2drop ;
 : petal 2 0 do 4 6 16 arc 1 -6 16 arc 180 turn loop ;
-( : flower start ' petal 15 spin show ; )
+: flower start [: petal :] 15 spin show ;  ( TODO ' petal instead of [: petal :] )
 
 : spiral-rec 1 + dup move 92 turn dup 110 < if spiral-rec then ;
 : spiral start 1 spiral-rec show ;
 
-burst shapes squaral rose spiral
-( burst shapes squaral spiro stars rose flower spiral )
+burst shapes squaral spiro stars rose flower spiral

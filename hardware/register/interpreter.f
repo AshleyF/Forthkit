@@ -34,7 +34,7 @@
 24 const lnk                    ( link pointer )
 25 const s         32767 s ldc, ( stack pointer )                     ( LDC s 32767     0000 1900 FF7F )
 26 const ldc                    ( ldc instruction [0] )
-27 const call      27 call ldc, ( call instruction, 27 by luck )      ( LDC call 27     0000 1B00 1B00 )
+27 const call      26 call ldc, ( call instruction )                  ( LDC call 26     0000 1B00 1A00 )
 28 const ret        28 ret ldc, ( ret instruction, 28 by luck )       ( LDC ret  28     0000 1C00 1C00 )
 29 const comp                   ( compiling flag )
 30 const sign                   ( number sign while parsing )

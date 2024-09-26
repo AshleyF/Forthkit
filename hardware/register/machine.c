@@ -59,9 +59,9 @@ int main(void)
             case 22: XYZ; if (Ry >= Rz) pc = x; break; // bge (branch if x >= y)
             case 23: XYZ; if (Ry <  Rz) pc = x; break; // blt (branch if x < y)
             case 24: XYZ; if (Ry <= Rz) pc = x; break; // ble (branch if x <= y)
-            case 25: X;   pc = Rx;              break; // exec (pc = x)
-            case 26: X;   pc = x;               break; // jump (pc = v)
-            case 27: X;   *(r++) = pc; pc = x;  break; // call (jsr(v))
+            case 25: X;   pc = x;               break; // jump (pc = v)
+            case 26: X;   *(r++) = pc; pc = x;  break; // call (jsr(v))
+            case 27: X;   *(r++) = pc; pc = Rx; break; // exec (jsr(x))
             case 28:      pc = *(--r);          break; // return (ret)
             case 29:      return 0; // halt
             case 30: // dump
