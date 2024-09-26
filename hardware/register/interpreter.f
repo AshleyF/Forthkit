@@ -261,7 +261,6 @@ var link
             &find call,         ( find token )                        ( CALL <addr>     1B00 ADDR )
             cur n cp,           ( prep to push cursor )               ( CP n cur        0300 0000 1700 )
           two n n add,          ( address of code field )             ( ADD n n two     0800 0000 0000 0600 )
-          two n n add,          ( address of code field )             ( ADD n n two     0800 0000 0000 0600 ) ( TODO why twice?! )
            &pushn jump,         ( push cursor )                       ( JUMP <addr>     1A00 ADDR )
 
      0 sym forget header,       ( forget word )                       ( forget6 . 0     6600 6F00 7200 6700 6500 7400 0600 LINK 0000 )

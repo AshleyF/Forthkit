@@ -108,7 +108,7 @@ create : compile create compile ; ( magic! )
 : allot popx [ x d d add, ] ;
 : buffer create dp+6 literal ret, allot ;
 
-: if [ ' popxy literal ] call, here 1+ zero x 0 beq, ; immediate
+: if [ ' popx literal ] call, here 1+ zero x 0 beq, ; immediate
 : unless [ ' popxy literal ] call, here 1+ zero x 0 bne, ; immediate
 : else here 1+ 0 jump, swap here swap ! ; immediate
 : then here swap ! ; immediate
@@ -149,10 +149,10 @@ var r r !
 : r@ r @ 1- @ ;
 
 : _do swap >r >r ;
-: do [ ' _do 2 - literal ] call, here ; immediate
+: do [ ' _do literal ] call, here ; immediate
 : _loop0 r> 1+ dup >r r @ 2 - @ >= popx ;
 : _loop1 r> r> drop drop ;
-: loop [ ' _loop0 2 - literal ] call, zero x rot beq, [ ' _loop1 2 - literal ] call, ; immediate
+: loop [ ' _loop0 literal ] call, zero x rot beq, [ ' _loop1 literal ] call, ; immediate
 
 : i r @ 1- @ ;
 : j r @ 3 - @ ;
