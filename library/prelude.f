@@ -13,6 +13,11 @@
 
 : +! dup @ rot + swap ! ;
 
+: 0= 0 = ;
+: 0<> 0 <> ;
+: 0< 0 < ;
+: 0> 0 > ;
+
 : /mod 2dup / -rot mod ;
 
 : factorial dup 1 > if dup 1- factorial * then ;
