@@ -5,7 +5,7 @@
 
 here dup
 91 allot
-const table
+constant table
 256 ,, 256 ,, 256 ,, 256 ,, 255 ,, 255 ,, 255 ,, 254 ,, 254 ,, 253 ,,
 252 ,, 251 ,, 250 ,, 249 ,, 248 ,, 247 ,, 246 ,, 245 ,, 243 ,, 242 ,,
 241 ,, 239 ,, 237 ,, 236 ,, 234 ,, 232 ,, 230 ,, 228 ,, 226 ,, 224 ,,
@@ -30,13 +30,13 @@ const table
 
 : sin 90 - cos ;
 
-var x var y var theta
-var dx var dy
+variable x variable y variable theta
+variable dx variable dy
 
 : point-x x @ 256 / width 2 / + ;
 : point-y y @ 256 / height 2 / + ;
-: valid-x? point-x 0 width 1 - between ;
-: valid-y? point-y 0 height 1 - between ;
+: valid-x? point-x 0 width 1 - within ;
+: valid-y? point-y 0 height 1 - within ;
 : valid? valid-x? valid-y? and ;
 : plot valid? if point-x point-y set then ;
 

@@ -1,8 +1,8 @@
 ( simple assembler/VM test - capitalize [-32] console input )
 ( requires assembler )
 
-0 const u
-1 const c
+0 constant u
+1 constant c
 
   32 u ldc,
  label &start

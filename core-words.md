@@ -1,0 +1,334 @@
+# [Standard Words](https://forth-standard.org/)
+
+- ☒ Completed
+- ☑ Partial (TODO)
+
+## Implemented
+
+- [interpreter.f](./hardware/register/interpreter.f)
+    - `create`
+    - `immediate`
+    - `compile` (non-standard)
+    - `interact` (non-standard)
+    - `;`
+    - `pushx` (non-standard)
+    - `popx` (non-standard)
+    - `literal`
+    - `,`
+    - `'`
+    - `(`
+- [bootstrap.f](./hardware/register/bootstrap.f)
+    - `:`
+    - `x` (non-standard, register number)
+    - `d` (non-standard, register number)
+    - `zero` (non-standard, register number)
+    - `y` (non-standard, register number) 
+    - `z` (non-standard, register number) 
+    - `[`
+    - `]`
+    - `cp,` (non-standard, assembly)
+    - `popxy` (non-standard)
+    - `pushxy` (non-standard)
+    - `xor,` (non-standard, assembly)
+    - `swap`
+    - `ldc,` (non-standard, assembly)
+    - `ld,` (non-standard, assembly)
+    - `st,` (non-standard, assembly)
+    - `in,` (non-standard, assembly)
+    - `out,` (non-standard, assembly)
+    - `inc,` (non-standard, assembly)
+    - `dec,` (non-standard, assembly)
+    - `add,` (non-standard, assembly)
+    - `sub,` (non-standard, assembly)
+    - `mul,` (non-standard, assembly)
+    - `div,` (non-standard, assembly)
+    - `mod,` (non-standard, assembly)
+    - `and,` (non-standard, assembly)
+    - `or,` (non-standard, assembly)
+    - `not,` (non-standard, assembly)
+    - `shl,` (non-standard, assembly)
+    - `shr,` (non-standard, assembly)
+    - `beq,` (non-standard, assembly)
+    - `bne,` (non-standard, assembly)
+    - `bgt,` (non-standard, assembly)
+    - `bge,` (non-standard, assembly)
+    - `blt,` (non-standard, assembly)
+    - `ble,` (non-standard, assembly)
+    - `jump,` (non-standard, assembly)
+    - `call,` (non-standard, assembly)
+    - `exec,` (non-standard, assembly)
+    - `ret,` (non-standard, assembly)
+    - `halt,` (non-standard, assembly)
+    - `dump,` (non-standard, assembly)
+    - `debug,` (non-standard, assembly)
+    - `+`
+    - `-`
+    - `*`
+    - `/`
+    - `mod`
+    - `2*`
+    - `2/`
+    - `and`
+    - `or`
+    - `xor`
+    - `invert`
+    - `1+`
+    - `1-`
+    - `execute`
+    - `halt` (non-standard)
+    - `dump` (non-standard)
+    - `debug` (non-standard)
+    - `drop`
+    - `dup`
+    - `over`
+    - `nip`
+    - `tuck`
+    - `-rot` (non-standard)
+    - `rot`
+    - `true`
+    - `false`
+    - `key`
+    - `emit`
+    - `cr`
+    - `space`
+    - `@`
+    - `!`
+    - `here`
+    - `_dp+6` (non-standard, internal)
+    - `constant`
+    - `variable`
+    - `allot`
+    - `if`
+    - `else`
+    - `then`
+    - `=`
+    - `<>`
+    - `>`
+    - `<`
+    - `>=` (non-standard)
+    - `<=` (non-standard)
+    - `negate` (duplicated in prelude)
+    - `abs` (duplicated in prelude)
+    - `2dup` (duplicated in prelude)
+    - `/mod` (duplicated in prelude)
+    - `_sign` (non-standard, internal)
+    - `_dig` (non-standard, internal)
+    - `_digemit` (non-standard, internal)
+    - `.`
+    - `begin`
+    - `until`
+    - `again`
+    - `>r`
+    - `r>`
+    - `r@`
+    - `_do` (non-standard, internal)
+    - `do`
+    - `_loop0` (non-standard, internal)
+    - `_loop1` (non-standard, internal)
+    - `loop`
+    - `i`
+    - `j`
+    - `[:` (non-standard)
+    - `:]` (non-standard)
+    - `call` (non-standard)
+- [prelude.f](./library/prelude.f)
+    - `2dup` (duplicated in bootstrap)
+    - `2drop`
+    - `min`
+    - `max`
+    - `within`
+    - `negate` (duplicated in bootstrap)
+    - `abs` (duplicated in bootstrap)
+    - `+!`
+    - `/mod` (duplicated in bootstrap)
+    - `factorial` (non-standard)
+
+## Core Words
+
+- ☑ [`CREATE`](https://forth-standard.org/standard/core/CREATE) (TODO: return data field address)
+- ☒ [`IMMEDIATE`](https://forth-standard.org/standard/core/IMMEDIATE)
+- ☒ [`;`](https://forth-standard.org/standard/core/Semi)
+- ☒ [`LITERAL`](https://forth-standard.org/standard/core/LITERAL)
+- ☒ [`,`](https://forth-standard.org/standard/core/Comma)
+- ☒ [`'`](https://forth-standard.org/standard/core/Tick)
+- ☒ [`(`](https://forth-standard.org/standard/core/p)
+- ☒ [`:`](https://forth-standard.org/standard/core/Colon)
+- ☒ [`[`](https://forth-standard.org/standard/core/Bracket)
+- ☒ [`]`](https://forth-standard.org/standard/core/right-bracket)
+- ☒ [`SWAP`](https://forth-standard.org/standard/core/SWAP)
+- ☒ [`+`](https://forth-standard.org/standard/core/Plus)
+- ☒ [`-`](https://forth-standard.org/standard/core/Minus)
+- ☒ [`*`](https://forth-standard.org/standard/core/Times)
+- ☒ [`/`](https://forth-standard.org/standard/core/Div)
+- ☒ [`MOD`](https://forth-standard.org/standard/core/MOD)
+- ☒ [`2*`](https://forth-standard.org/standard/core/TwoTimes)
+- ☒ [`2/`](https://forth-standard.org/standard/core/TwoDiv)
+- ☒ [`AND`](https://forth-standard.org/standard/core/AND)
+- ☒ [`OR`](https://forth-standard.org/standard/core/OR)
+- ☒ [`XOR`](https://forth-standard.org/standard/core/XOR)
+- ☒ [`INVERT`](https://forth-standard.org/standard/core/INVERT)
+- ☒ [`1+`](https://forth-standard.org/standard/core/OnePlus)
+- ☒ [`1-`](https://forth-standard.org/standard/core/OneMinus)
+- ☒ [`EXECUTE`](https://forth-standard.org/standard/core/EXECUTE)
+- ☒ [`DROP`](https://forth-standard.org/standard/core/DROP)
+- ☒ [`2DROP`](https://forth-standard.org/standard/core/TwoDROP)
+- ☒ [`DUP`](https://forth-standard.org/standard/core/DUP)
+- ☒ [`OVER`](https://forth-standard.org/standard/core/OVER)
+- ☒ [`2DUP`](https://forth-standard.org/standard/core/TwoDUP)
+- ☒ [`ROT`](https://forth-standard.org/standard/core/ROT)
+- ☑ [`KEY`](https://forth-standard.org/standard/core/KEY) (TODO: Interactive keys)
+- ☒ [`EMIT`](https://forth-standard.org/standard/core/EMIT)
+- ☒ [`CR`](https://forth-standard.org/standard/core/CR)
+- ☒ [`SPACE`](https://forth-standard.org/standard/core/SPACE)
+- ☒ [`@`](https://forth-standard.org/standard/core/Fetch)
+- ☒ [`!`](https://forth-standard.org/standard/core/Store)
+- ☒ [`HERE`](https://forth-standard.org/standard/core/HERE)
+- ☒ [`CONSTANT`](https://forth-standard.org/standard/core/CONSTANT)
+- ☒ [`VARIABLE`](https://forth-standard.org/standard/core/VARIABLE)
+- ☒ [`ALLOT`](https://forth-standard.org/standard/core/ALLOT)
+- ☒ [`IF`](https://forth-standard.org/standard/core/IF)
+- ☒ [`ELSE`](https://forth-standard.org/standard/core/ELSE)
+- ☒ [`THEN`](https://forth-standard.org/standard/core/THEN)
+- ☒ [`=`](https://forth-standard.org/standard/core/Equal)
+- ☒ [`<`](https://forth-standard.org/standard/core/less)
+- ☒ [`>`](https://forth-standard.org/standard/core/more)
+- ☒ [`NEGATE`](https://forth-standard.org/standard/core/NEGATE)
+- ☒ [`ABS`](https://forth-standard.org/standard/core/ABS)
+- ☒ [`/MOD`](https://forth-standard.org/standard/core/DivMOD)
+- ☒ [`.`](https://forth-standard.org/standard/core/d)
+- ☒ [`BEGIN`](https://forth-standard.org/standard/core/BEGIN)
+- ☒ [`UNTIL`](https://forth-standard.org/standard/core/UNTIL)
+- ☒ [`>R`](https://forth-standard.org/standard/core/toR)
+- ☒ [`R>`](https://forth-standard.org/standard/core/Rfrom)
+- ☒ [`R@`](https://forth-standard.org/standard/core/RFetch)
+- ☒ [`DO`](https://forth-standard.org/standard/core/DO)
+- ☒ [`LOOP`](https://forth-standard.org/standard/core/LOOP)
+- ☒ [`I`](https://forth-standard.org/standard/core/I)
+- ☒ [`J`](https://forth-standard.org/standard/core/J)
+- ☒ [`MIN`](https://forth-standard.org/standard/core/MIN)
+- ☒ [`MAX`](https://forth-standard.org/standard/core/MAX)
+- ☒ [`+!`](https://forth-standard.org/standard/core/PlusStore)
+
+- ☐ [`#`](https://forth-standard.org/standard/core/num)
+- ☐ [`#>`](https://forth-standard.org/standard/core/num-end)
+- ☐ [`#S`](https://forth-standard.org/standard/core/numS)
+- ☐ [`*/`](https://forth-standard.org/standard/core/TimesDiv)
+- ☐ [`*/MOD`](https://forth-standard.org/standard/core/TimesDivMOD)
+- ☐ [`+LOOP`](https://forth-standard.org/standard/core/PlusLOOP)
+- ☐ [`."`](https://forth-standard.org/standard/core/Dotq)
+- ☐ [`0<`](https://forth-standard.org/standard/core/Zeroless)
+- ☐ [`0=`](https://forth-standard.org/standard/core/ZeroEqual)
+- ☐ [`2!`](https://forth-standard.org/standard/core/TwoStore)
+- ☐ [`2@`](https://forth-standard.org/standard/core/TwoFetch)
+- ☐ [`2OVER`](https://forth-standard.org/standard/core/TwoOVER)
+- ☐ [`2SWAP`](https://forth-standard.org/standard/core/TwoSWAP)
+- ☐ [`<#`](https://forth-standard.org/standard/core/num-start)
+- ☐ [`>BODY`](https://forth-standard.org/standard/core/toBODY)
+- ☐ [`>IN`](https://forth-standard.org/standard/core/toIN)
+- ☐ [`>NUMBER`](https://forth-standard.org/standard/core/toNUMBER)
+- ☐ [`?DUP`](https://forth-standard.org/standard/core/qDUP)
+- ☐ [`ABORT`](https://forth-standard.org/standard/core/ABORT)
+- ☐ [`ABORT"`](https://forth-standard.org/standard/core/ABORTq)
+- ☐ [`ACCEPT`](https://forth-standard.org/standard/core/ACCEPT)
+- ☐ [`ALIGN`](https://forth-standard.org/standard/core/ALIGN)
+- ☐ [`ALIGNED`](https://forth-standard.org/standard/core/ALIGNED)
+- ☐ [`BASE`](https://forth-standard.org/standard/core/BASE)
+- ☐ [`BL`](https://forth-standard.org/standard/core/BL)
+- ☐ [`C!`](https://forth-standard.org/standard/core/CStore)
+- ☐ [`C,`](https://forth-standard.org/standard/core/CComma)
+- ☐ [`C@`](https://forth-standard.org/standard/core/CFetch)
+- ☐ [`CELL+`](https://forth-standard.org/standard/core/CELLPlus)
+- ☐ [`CELLS`](https://forth-standard.org/standard/core/CELLS)
+- ☐ [`CHAR`](https://forth-standard.org/standard/core/CHAR)
+- ☐ [`CHAR+`](https://forth-standard.org/standard/core/CHARPlus)
+- ☐ [`CHARS`](https://forth-standard.org/standard/core/CHARS)
+- ☐ [`COUNT`](https://forth-standard.org/standard/core/COUNT)
+- ☐ [`DECIMAL`](https://forth-standard.org/standard/core/DECIMAL)
+- ☐ [`DEPTH`](https://forth-standard.org/standard/core/DEPTH)
+- ☐ [`DOES>`](https://forth-standard.org/standard/core/DOES)
+- ☐ [`ENVIRONMENT?`](https://forth-standard.org/standard/core/ENVIRONMENTq)
+- ☐ [`EVALUATE`](https://forth-standard.org/standard/core/EVALUATE)
+- ☐ [`EXIT`](https://forth-standard.org/standard/core/EXIT)
+- ☐ [`FILL`](https://forth-standard.org/standard/core/FILL)
+- ☐ [`FIND`](https://forth-standard.org/standard/core/FIND)
+- ☐ [`FM/MOD`](https://forth-standard.org/standard/core/FMDivMOD)
+- ☐ [`HOLD`](https://forth-standard.org/standard/core/HOLD)
+- ☐ [`LEAVE`](https://forth-standard.org/standard/core/LEAVE)
+- ☐ [`LSHIFT`](https://forth-standard.org/standard/core/LSHIFT)
+- ☐ [`M*`](https://forth-standard.org/standard/core/MTimes)
+- ☐ [`MOVE`](https://forth-standard.org/standard/core/MOVE)
+- ☐ [`POSTPONE`](https://forth-standard.org/standard/core/POSTPONE)
+- ☐ [`QUIT`](https://forth-standard.org/standard/core/QUIT)
+- ☐ [`RECURSE`](https://forth-standard.org/standard/core/RECURSE)
+- ☐ [`REPEAT`](https://forth-standard.org/standard/core/REPEAT)
+- ☐ [`RSHIFT`](https://forth-standard.org/standard/core/RSHIFT)
+- ☐ [`S"`](https://forth-standard.org/standard/core/Sq)
+- ☐ [`S>D`](https://forth-standard.org/standard/core/StoD)
+- ☐ [`SIGN`](https://forth-standard.org/standard/core/SIGN)
+- ☐ [`SM/REM`](https://forth-standard.org/standard/core/SMDivREM)
+- ☐ [`SOURCE`](https://forth-standard.org/standard/core/SOURCE)
+- ☐ [`SPACES`](https://forth-standard.org/standard/core/SPACES)
+- ☐ [`STATE`](https://forth-standard.org/standard/core/STATE)
+- ☐ [`TYPE`](https://forth-standard.org/standard/core/TYPE)
+- ☐ [`U.`](https://forth-standard.org/standard/core/Ud)
+- ☐ [`U<`](https://forth-standard.org/standard/core/Uless)
+- ☐ [`UM*`](https://forth-standard.org/standard/core/UMTimes)
+- ☐ [`UM/MOD`](https://forth-standard.org/standard/core/UMDivMOD)
+- ☐ [`UNLOOP`](https://forth-standard.org/standard/core/UNLOOP)
+- ☐ [`WHILE`](https://forth-standard.org/standard/core/WHILE)
+- ☐ [`WORD`](https://forth-standard.org/standard/core/WORD)
+- ☐ [`[']`](https://forth-standard.org/standard/core/BracketTick)
+- ☐ [`[CHAR]`](https://forth-standard.org/standard/core/BracketCHAR)
+
+## Core Extension Words
+
+- ☒ [`NIP`](https://forth-standard.org/standard/core/NIP)
+- ☒ [`TUCK`](https://forth-standard.org/standard/core/TUCK)
+- ☒ [`TRUE`](https://forth-standard.org/standard/core/TRUE)
+- ☒ [`FALSE`](https://forth-standard.org/standard/core/FALSE)
+- ☒ [`<>`](https://forth-standard.org/standard/core/ne)
+- ☒ [`AGAIN`](https://forth-standard.org/standard/core/AGAIN)
+- ☒ [`WITHIN`](https://forth-standard.org/standard/core/WITHIN)
+
+- ☐ [`.(](https://forth-standard.org/standard/`core/Dotp)
+- ☐ [`.R`](https://forth-standard.org/standard/core/DotR)
+- ☐ [`0<>`](https://forth-standard.org/standard/core/Zerone)
+- ☐ [`0>`](https://forth-standard.org/standard/core/Zeromore)
+- ☐ [`2>R`](https://forth-standard.org/standard/core/TwotoR)
+- ☐ [`2R>`](https://forth-standard.org/standard/core/TwoRfrom)
+- ☐ [`2R@`](https://forth-standard.org/standard/core/TwoRFetch)
+- ☐ [`:NONAME`](https://forth-standard.org/standard/core/ColonNONAME)
+- ☐ [`?DO`](https://forth-standard.org/standard/core/qDO)
+- ☐ [`ACTION-OF`](https://forth-standard.org/standard/core/ACTION-OF)
+- ☐ [`BUFFER:`](https://forth-standard.org/standard/core/BUFFERColon)
+- ☐ [`C"`](https://forth-standard.org/standard/core/Cq)
+- ☐ [`CASE`](https://forth-standard.org/standard/core/CASE)
+- ☐ [`COMPILE,`](https://forth-standard.org/standard/core/COMPILEComma)
+- ☐ [`DEFER`](https://forth-standard.org/standard/core/DEFER)
+- ☐ [`DEFER!`](https://forth-standard.org/standard/core/DEFERStore)
+- ☐ [`DEFER@`](https://forth-standard.org/standard/core/DEFERFetch)
+- ☐ [`ENDCASE`](https://forth-standard.org/standard/core/ENDCASE)
+- ☐ [`ENDOF`](https://forth-standard.org/standard/core/ENDOF)
+- ☐ [`ERASE`](https://forth-standard.org/standard/core/ERASE)
+- ☐ [`HEX`](https://forth-standard.org/standard/core/HEX)
+- ☐ [`HOLDS`](https://forth-standard.org/standard/core/HOLDS)
+- ☐ [`IS`](https://forth-standard.org/standard/core/IS)
+- ☐ [`MARKER`](https://forth-standard.org/standard/core/MARKER)
+- ☐ [`OF`](https://forth-standard.org/standard/core/OF)
+- ☐ [`PAD`](https://forth-standard.org/standard/core/PAD)
+- ☐ [`PARSE`](https://forth-standard.org/standard/core/PARSE)
+- ☐ [`PARSE-NAME`](https://forth-standard.org/standard/core/PARSE-NAME)
+- ☐ [`PICK`](https://forth-standard.org/standard/core/PICK)
+- ☐ [`REFILL`](https://forth-standard.org/standard/core/REFILL)
+- ☐ [`RESTORE-INPUT`](https://forth-standard.org/standard/core/RESTORE-INPUT)
+- ☐ [`ROLL`](https://forth-standard.org/standard/core/ROLL)
+- ☐ [`S\"`](https://forth-standard.org/standard/core/Seq)
+- ☐ [`SAVE-INPUT`](https://forth-standard.org/standard/core/SAVE-INPUT)
+- ☐ [`SOURCE-ID`](https://forth-standard.org/standard/core/SOURCE-ID)
+- ☐ [`TO`](https://forth-standard.org/standard/core/TO)
+- ☐ [`U.R`](https://forth-standard.org/standard/core/UDotR)
+- ☐ [`U>`](https://forth-standard.org/standard/core/Umore)
+- ☐ [`UNUSED`](https://forth-standard.org/standard/core/UNUSED)
+- ☐ [`VALUE`](https://forth-standard.org/standard/core/VALUE)
+- ☐ [`[COMPILE]`](https://forth-standard.org/standard/core/BracketCOMPILE)
+- ☐ [`\`](https://forth-standard.org/standard/core/bs)

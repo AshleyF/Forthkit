@@ -1,6 +1,6 @@
 here
 3208 allot ( 80×40+8 )
-const buffer
+constant buffer
 
 : m@ buffer + @ ;
 : m! buffer + ! ;

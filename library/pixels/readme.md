@@ -33,11 +33,11 @@ You should see this little guy (assuming Unicode font supporting Braille and UTF
 The idea is to use a range of Braille Unicode characters to each represent 2×4 pixels. We'll have a 160×160 pixel canvas, made from 80×20 characters. We can use this to draw interesting things in the console.
 
 ```forth
-160 const width
-160 const height
+160 constant width
+160 constant height
 
-width 2 / const columns
-width height * 8 / const size
+width 2 / constant columns
+width height * 8 / constant size
 ```
 
 We define the canvas `width` and `height`, and can compute the `columns` and total number of characters (`size`). These constants are computed once at _compile time_ as opposed to say `: columns width 2 / ;`.
@@ -50,10 +50,10 @@ A word to `clear` the canvas fill each cell with the Unicode value of an empty B
 
 ```forth
 : set cell-mask or swap m! ;
-: reset cell-mask swap not and swap m! ;
+: reset cell-mask swap invert and swap m! ;
 ````
 
-We'll be using a `cell-mask` word, which well look at in a moment, that takes an x, y pair and returns the cell, the mask and the current value at the cell. We can `set` or `reset` individual dots. To `set`, we `or` the mask with the current value. To `reset`, we invert the mask (`not`), then `and` it with the current value. In both cases we then store the value in the cell.
+We'll be using a `cell-mask` word, which well look at in a moment, that takes an x, y pair and returns the cell, the mask and the current value at the cell. We can `set` or `reset` individual dots. To `set`, we `or` the mask with the current value. To `reset`, we invert the mask (`invert`), then `and` it with the current value. In both cases we then store the value in the cell.
 
 Now to build up to explaining `cell-mask`:
 

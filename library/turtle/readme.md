@@ -42,9 +42,9 @@ var dx var dy
 We can `go` to a particular coordinate (without drawing) and may `head` in a particular direction in degrees. Notice that this is converted to radians and the deltas are updated.
 
 ```forth
-3.14159265359 const pi
-pi 180.0 / const rads
-180.0 pi / const degs
+3.14159265359 constant pi
+pi 180.0 / constant rads
+180.0 pi / constant degs
 : deg2rad rads * ;
 : rad2deg degs * ;
 ```
@@ -60,18 +60,18 @@ We can `plot` a dot where the turtle is, assuming it's a valid point on the canv
 ```forth
 : point-x x @ width 2 / + 0.5 + floor ;
 : point-y y @ height 2 / + 0.5 + floor ;
-: valid-x? point-x 0 width 1 - between ;
-: valid-y? point-y 0 height 1 - between ;
+: valid-x? point-x 0 width 1 - within ;
+: valid-y? point-y 0 height 1 - within ;
 : valid? valid-x? valid-y? and ;
 ```
 
-A `valid?` point is one that is within the 160×160 (`width`×`height`) canvas. The `point-x` and `point-y` words essentially shift the origin to the top left corner. The `valid-x?` and `valid-y?` words check that the coordinate is `between` 0 and the corresponding edge.
+A `valid?` point is one that is within the 160×160 (`width`×`height`) canvas. The `point-x` and `point-y` words essentially shift the origin to the top left corner. The `valid-x?` and `valid-y?` words check that the coordinate is `within` 0 and the corresponding edge.
 
 ```forth
-: between rot swap over >= -rot <= and ;
+: within rot swap over >= -rot <= and ;
 ```
 
-`between` is defined in the prelude as above; taking a value and a lower and upper bound. It rotates the value to the top, does a `swap over` to essentially bury a copy of the value three elements deep, then bounds checks each pair.
+`within` is defined in the prelude as above; taking a value and a lower and upper bound. It rotates the value to the top, does a `swap over` to essentially bury a copy of the value three elements deep, then bounds checks each pair.
 
 ```forth
 : start clear 0 0 0 pose ;

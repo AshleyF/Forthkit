@@ -1,6 +1,6 @@
 ( assembler for register VM )
 
-var dp ( dictionary pointer )
+variable dp ( dictionary pointer )
 : here dp @ ;
 : , here m! here 1 + dp ! ; ( append )
 
@@ -37,8 +37,8 @@ var dp ( dictionary pointer )
 : dump,  30 , ;            (       dump,  →  core to image.bin  )
 : debug, 31 , , , ;        (       debug, →  show machine state )
 
-: label here const ;
+: label here constant ;
 : ahead, here 1 + 0 jump, ; ( dummy jump, push address )
 : continue, here swap m! ; ( patch jump )
 
-: assemble here . dump exit ;
+: assemble here . dump halt ;

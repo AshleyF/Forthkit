@@ -11,60 +11,60 @@
 
 The following primitive words are available:
 
-| Word    | Signature | Description                          |
-| ------- | --------- | ------------------------------------ |
-| `+`     |  yx-n     | Add                                  |
-| `-`     |  yx-n     | Subtract                             |
-| `*`     |  yx-n     | Multiply                             |
-| `/`     |  yx-n     | Divide                               |
-| `mod`   |   x-n     | Modulus                              |
-| `cos`   |   x-n     | Cosine                               |
-| `sin`   |   x-n     | Sine                                 |
-| `tan`   |   x-n     | Tangent                              |
-| `acos`  |   x-n     | Arc cosine                           |
-| `asin`  |   x-n     | Arc sine                             |
-| `atan`  |   x-n     | Arc tangent                          |
-| `floor` |   x-n     | Floor number                         |
-| `.`     |    -      | Pop and print top value              |
-| `.s`    |    -      | Print whole stack                    |
-| `=`     |  yx-b     | Equal                                |
-| `<>`    |  yx-b     | Not equal                            |
-| `>`     |  yx-b     | Greater than                         |
-| `>=`    |  yx-b     | Greater than or equal                |
-| `<`     |  yx-b     | Less than                            |
-| `<=`    |  yx-b     | Less than or equal                   |
-| `and`   |  yx-b     | Logical/bitwise and                  |
-| `or`    |  yx-b     | Logical/bitwise or                   |
-| `xor`   |  yx-b     | Logical/bitwise xor                  |
-| `not`   |   x-b     | Logical/bitwise not                  |
-| `dup`   |  yx-b     | Duplicate top value                  |
-| `drop`  |   x-      | Drop top value                       |
-| `swap`  |  yx-xy    | Swap top two values                  |
-| `over`  |  yx-xyx   | Duplicate 2nd value to top           |
-| `rot`   | zyx-xzy   | Rotate 3rd value to top              |
-| `-rot`  | zyx-yxz   | Rotate top value to 3rd              |
-| `var`   |    -      | Create variable                      |
-| `@`     |   a-n     | Fetch variable value                 |
-| `!`     |  xa-      | Store into variable                  |
-| `const` |   x-      | Create constant                      |
-| `m@`    |   a-n     | Fetch memory address                 |
-| `m!`    |  xa-      | Store into memory address            |
-| `.m`    |    -      | Print memory range                   |
-| `dump`  |    -      | Dump memory to image file            |
-| `(`     |    -      | Start comment (to `)`)               |
-| `if`    |    -      | Start conditional (to `else`/`then`) |
-| `else`  |    -      | Start alternative (to `then`)        |
-| `then`  |    -      | End conditional                      |
-| `do`    |    -      | Start loop (to `loop`)               |
-| `i`     |    -i     | Get loop index                       |
-| `:`     |    -      | Start definition (to `;`)            |
-| `'`     |    -a     | Get address of next token            |
-| `[:`    |    -      | Start lambda (to `:]`)               |
-| `call`  |   a-      | Call address                         |
-| `emit`  |   x-      | Emit to console                      |
-| `sym`   |    -c..cn | Deconstruct next token               |
-| `words` |    -      | Print dictionary words               |
-| `exit`  |    -      | Halt interpreter                     |
+| Word       | Signature | Description                          |
+| ---------- | --------- | ------------------------------------ |
+| `+`        |  yx-n     | Add                                  |
+| `-`        |  yx-n     | Subtract                             |
+| `*`        |  yx-n     | Multiply                             |
+| `/`        |  yx-n     | Divide                               |
+| `mod`      |   x-n     | Modulus                              |
+| `cos`      |   x-n     | Cosine                               |
+| `sin`      |   x-n     | Sine                                 |
+| `tan`      |   x-n     | Tangent                              |
+| `acos`     |   x-n     | Arc cosine                           |
+| `asin`     |   x-n     | Arc sine                             |
+| `atan`     |   x-n     | Arc tangent                          |
+| `floor`    |   x-n     | Floor number                         |
+| `.`        |    -      | Pop and print top value              |
+| `.s`       |    -      | Print whole stack                    |
+| `=`        |  yx-b     | Equal                                |
+| `<>`       |  yx-b     | Not equal                            |
+| `>`        |  yx-b     | Greater than                         |
+| `>=`       |  yx-b     | Greater than or equal                |
+| `<`        |  yx-b     | Less than                            |
+| `<=`       |  yx-b     | Less than or equal                   |
+| `and`      |  yx-b     | Logical/bitwise and                  |
+| `or`       |  yx-b     | Logical/bitwise or                   |
+| `xor`      |  yx-b     | Logical/bitwise xor                  |
+| `invert`   |   x-b     | Logical/bitwise not                  |
+| `dup`      |  yx-b     | Duplicate top value                  |
+| `drop`     |   x-      | Drop top value                       |
+| `swap`     |  yx-xy    | Swap top two values                  |
+| `over`     |  yx-xyx   | Duplicate 2nd value to top           |
+| `rot`      | zyx-xzy   | Rotate 3rd value to top              |
+| `-rot`     | zyx-yxz   | Rotate top value to 3rd              |
+| `variable` |    -      | Create variable                      |
+| `@`        |   a-n     | Fetch variable value                 |
+| `!`        |  xa-      | Store into variable                  |
+| `constant` |   x-      | Create constant                      |
+| `m@`       |   a-n     | Fetch memory address                 |
+| `m!`       |  xa-      | Store into memory address            |
+| `.m`       |    -      | Print memory range                   |
+| `dump`     |    -      | Dump memory to image file            |
+| `(`        |    -      | Start comment (to `)`)               |
+| `if`       |    -      | Start conditional (to `else`/`then`) |
+| `else`     |    -      | Start alternative (to `then`)        |
+| `then`     |    -      | End conditional                      |
+| `do`       |    -      | Start loop (to `loop`)               |
+| `i`        |    -i     | Get loop index                       |
+| `:`        |    -      | Start definition (to `;`)            |
+| `'`        |    -a     | Get address of next token            |
+| `[:`       |    -      | Start lambda (to `:]`)               |
+| `call`     |   a-      | Call address                         |
+| `emit`     |   x-      | Emit to console                      |
+| `sym`      |    -c..cn | Deconstruct next token               |
+| `words`    |    -      | Print dictionary words               |
+| `halt`     |    -      | Halt interpreter                     |
 
 ## Walkthrough
 
@@ -149,18 +149,18 @@ Let's start with some basic math operators.
 
 ```python
     self.dictionary = {
-      '+'    : lambda: self.xx_x(operator.add),
-      '-'    : lambda: self.xx_x(operator.sub),
-      '*'    : lambda: self.xx_x(operator.mul),
-      '/'    : lambda: self.xx_x(operator.truediv),
-      'mod'  : lambda: self.xx_x(operator.mod),
-      'cos'  : lambda: self.x_x(math.cos),
-      'sin'  : lambda: self.x_x(math.sin),
-      'tan'  : lambda: self.x_x(math.tan),
-      'acos' : lambda: self.x_x(math.acos),
-      'asin' : lambda: self.x_x(math.asin),
-      'atan' : lambda: self.x_x(math.atan),
-      'floor': lambda: self.x_x(math.floor),
+      '+'        : lambda: self.xx_x(operator.add),
+      '-'        : lambda: self.xx_x(operator.sub),
+      '*'        : lambda: self.xx_x(operator.mul),
+      '/'        : lambda: self.xx_x(operator.truediv),
+      'mod'      : lambda: self.xx_x(operator.mod),
+      'cos'      : lambda: self.x_x(math.cos),
+      'sin'      : lambda: self.x_x(math.sin),
+      'tan'      : lambda: self.x_x(math.tan),
+      'acos'     : lambda: self.x_x(math.acos),
+      'asin'     : lambda: self.x_x(math.asin),
+      'atan'     : lambda: self.x_x(math.atan),
+      'floor'    : lambda: self.x_x(math.floor),
       ... }
 ```
 
@@ -199,8 +199,8 @@ To see the result, we can use `.` or can print the whole stack with `.s`. Note t
 
 ```python
     self.dictionary = {
-      '.'    : lambda: print(self.pop()),
-      '.s'   : lambda: print(self.stack),
+      '.'        : lambda: print(self.pop()),
+      '.s'       : lambda: print(self.stack),
       ... }
 ```
 
@@ -210,12 +210,12 @@ We can add comparison operations.
 
 ```python
     self.dictionary = {
-      '='    : lambda: self.xx_b(operator.eq),
-      '<>'   : lambda: self.xx_b(operator.ne),
-      '>'    : lambda: self.xx_b(operator.gt),
-      '>='   : lambda: self.xx_b(operator.ge),
-      '<'    : lambda: self.xx_b(operator.lt),
-      '<='   : lambda: self.xx_b(operator.le),
+      '='        : lambda: self.xx_b(operator.eq),
+      '<>'       : lambda: self.xx_b(operator.ne),
+      '>'        : lambda: self.xx_b(operator.gt),
+      '>='       : lambda: self.xx_b(operator.ge),
+      '<'        : lambda: self.xx_b(operator.lt),
+      '<='       : lambda: self.xx_b(operator.le),
       ... }
 ```
 
@@ -227,10 +227,10 @@ This leads us to the logical operators.
 
 ```python
     self.dictionary = {
-      'and'  : lambda: self.xx_x(lambda x,y: int(x) & int(y)),
-      'or'   : lambda: self.xx_x(lambda x,y: int(x) | int(y)),
-      'xor'  : lambda: self.xx_x(lambda x,y: int(x) ^ int(y)),
-      'not'  : lambda: self.x_x(lambda x: ~x),
+      'and'      : lambda: self.xx_x(lambda x,y: int(x) & int(y)),
+      'or'       : lambda: self.xx_x(lambda x,y: int(x) | int(y)),
+      'xor'      : lambda: self.xx_x(lambda x,y: int(x) ^ int(y)),
+      'invert'   : lambda: self.x_x(lambda x: ~x),
       ... }
 ```
 
@@ -242,12 +242,12 @@ To manipulate the positions of values on the stack, we'll add these standard For
 
 ```python
     self.dictionary = {
-      'dup'  : lambda: self.x_xx(lambda x: (x,x)),
-      'drop' : lambda: self.x_(lambda _: None),
-      'swap' : lambda: self.xx_xx(lambda x,y: (y,x)),
-      'over' : lambda: self.xx_xxx(lambda x,y: (x,y,x)),
-      'rot'  : lambda: self.xxx_xxx(lambda x,y,z: (y,z,x)),
-      '-rot' : lambda: self.xxx_xxx(lambda x,y,z: (z,x,y)),
+      'dup'      : lambda: self.x_xx(lambda x: (x,x)),
+      'drop'     : lambda: self.x_(lambda _: None),
+      'swap'     : lambda: self.xx_xx(lambda x,y: (y,x)),
+      'over'     : lambda: self.xx_xxx(lambda x,y: (x,y,x)),
+      'rot'      : lambda: self.xxx_xxx(lambda x,y,z: (y,z,x)),
+      '-rot'     : lambda: self.xxx_xxx(lambda x,y,z: (z,x,y)),
       ... }
 ```
 
@@ -255,7 +255,7 @@ We can duplicate the top value (e.g. `7.2 dup *` produces the square `51.84`), o
 
 ### Variables
 
-An area is set aside for `var` storage. We may create variables with `var foo` and then store (`!`) into them with `42 foo !` and fetch (`@`) their values with `foo @`.
+An area is set aside for `variable` storage. We may create variables with `variable foo` and then store (`!`) into them with `42 foo !` and fetch (`@`) their values with `foo @`.
 
 ```python
     self.variables = []
@@ -263,9 +263,9 @@ An area is set aside for `var` storage. We may create variables with `var foo` a
     ...
 
     self.dictionary = {
-      'var'  : self.variable,
-      '@'    : lambda: self.x_x(lambda x: self.variables[int(x)]),
-      '!'    : lambda: self.xx_(self.variableStore),
+      'variable' : self.variable,
+      '@'        : lambda: self.x_x(lambda x: self.variables[int(x)]),
+      '!'        : lambda: self.xx_(self.variableStore),
       ... }
 ```
 
@@ -293,11 +293,11 @@ Storing the value is a separate function because lambda expressions cannot do as
 
 ### Constants
 
-Constants can be defined like `3.1415926535 const pi`.
+Constants can be defined like `3.1415926535 constant pi`.
 
 ```python
     self.dictionary = {
-      'const': self.constant,
+      'constant' : self.constant,
       ... }
 ```
 
@@ -332,10 +332,10 @@ Finally, we can `dump` all of memory to an `image.bin` file. This will be used t
 
 ```python
     self.dictionary = {
-      'm@'   : lambda: self.x_x(lambda x: self.memory[int(x)]),
-      'm!'   : lambda: self.xx_(self.memoryStore),
-      '.m'   : lambda: print(self.memory[int(self.pop()):int(self.pop())]),
-      'dump' : self.dump,
+      'm@'       : lambda: self.x_x(lambda x: self.memory[int(x)]),
+      'm!'       : lambda: self.xx_(self.memoryStore),
+      '.m'       : lambda: print(self.memory[int(self.pop()):int(self.pop())]),
+      'dump'     : self.dump,
       ... }
 ```
 
@@ -360,7 +360,7 @@ Comments are in the form `( this is a comment )`, with `(` being another syntax 
 
 ```python
     self.dictionary = {
-      '('    : self.comment,
+      '('        : self.comment,
       ... }
 ```
 
@@ -387,9 +387,9 @@ Conditional code is expressed as `if ... then` or `if ... else ... then`. Think 
 
 ```python
     self.dictionary = {
-      'if'   : self.doif,
-      'else' : self.doelse,
-      'then' : self.dothen,
+      'if'       : self.doif,
+      'else'     : self.doelse,
+      'then'     : self.dothen,
       ... }
 ```
 
@@ -417,8 +417,8 @@ Counted loops are made with `10 0 do ... loop`. This will count from 0 to 9. The
 
 ```python
     self.dictionary = {
-      'do'   : lambda: self.xx_(self.doloop),
-      'i'    : lambda: self.push(self.index),
+      'do'       : lambda: self.xx_(self.doloop),
+      'i'        : lambda: self.push(self.index),
       ... }
 ```
 The current index (`i`) is maintained in state.
@@ -455,7 +455,7 @@ For example, `: square dup * ;` adds a new word `square` that when called perfor
 
 ```python
     self.dictionary = {
-      ':'    : self.define,
+      ':'        : self.define,
       ... }
 ```
 
@@ -485,9 +485,9 @@ Additionally, anonymous sequences of tokens surrounded by `[: ... :]` words may 
 
 ```python
     self.dictionary = {
-      '\''   : lambda: self._x(self.find),
-      '[:'   : self.anonymous,
-      'call' : lambda: self.x_(self.call),
+      '\''       : lambda: self._x(self.find),
+      '[:'       : self.anonymous,
+      'call'     : lambda: self.x_(self.call),
       ... }
 ```
 
@@ -514,14 +514,14 @@ Several miscellaneous words remain.
 * `emit` will output to the console (e.g. `104 emit 105 emit` will print "hi")
 * `sym` will deconstruct the following token into ASCII characters and length (e.g. `sym hi` results in 105 104 2 on the stack)
 * `words` prints the list of available words in currently the dictionary
-* `exit` halts the interpreter
+* `halt` halts the interpreter
 
 ```python
     self.dictionary = {
-      'emit' : lambda: self.x_(lambda x:stdout.write(chr(int(x)))),
-      'sym'  : self.symbol,
-      'words': self.words,
-      'exit' : lambda: exit(0) }
+      'emit'     : lambda: self.x_(lambda x:stdout.write(chr(int(x)))),
+      'sym'      : self.symbol,
+      'words'    : self.words,
+      'halt'     : lambda: exit(0) }
       ... }
 ```
 

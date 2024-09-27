@@ -1,11 +1,11 @@
 ( pixel graphics library using Unicode Braille characters )
 ( requires: prelude )
 
-160 const width
-160 const height
+160 constant width
+160 constant height
 
-width 2 / const columns
-width height * 8 / const size
+width 2 / constant columns
+width height * 8 / constant size
 
 ( init dot masks )
 : init-masks 8 0 do size i + m! loop ;
@@ -18,7 +18,7 @@ width height * 8 / const size
 : cell-mask 2dup cell -rot mask over m@ ;
 
 : set cell-mask or swap m! ;
-: reset cell-mask swap not and swap m! ;
+: reset cell-mask swap invert and swap m! ;
 
 : show
   size 0 do

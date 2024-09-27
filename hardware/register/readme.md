@@ -254,8 +254,8 @@ To help with debugging, this `debug` instruction will display internal state.
 A [Forth-based assembler is provided](./assembler.f), allowing the above program [to be expressed](./test.f) as:
 
 ```forth
-    0 const u
-    1 const c
+    0 constant u
+    1 constant c
 
       32 u ldc,
      label &start
@@ -276,7 +276,7 @@ In addition to the `label` mechanism to give names to addresses for backward jum
 Building an assembler in Forth is surprisingly easy.
 
 ```forth
-var dp ( dictionary pointer )
+variable dp ( dictionary pointer )
 : here dp @ ;
 : , here m! here 1 + dp ! ; ( append )
 ```
@@ -323,7 +323,7 @@ With just these, we can build words taking instruction operands from the stack a
 In a few places we do a `swap` to order the arguments in a _natural_ way. For example `z y x sub,` packs a subtraction instruction meaning _x = z - y_ (with _z_ and _y_ swapped), because this resembles the ordering for infix expressions (left minus right).
 
 ```forth
-: label here const ;
+: label here constant ;
 : ahead, here 1 + 0 jump, ; ( dummy jump, push address )
 : continue, here swap m! ; ( patch jump )
 ```
@@ -335,7 +335,7 @@ For now, we've added `lable` word that creates a constant giving a name to the c
 The `label` mechanism works for backward jumps, which may be most commont. The `ahead,` and `continue,` words allow us to skip over code. A little tricky, but `ahead,` packs a `jump,` with a dummy (`0`) value and pushes the address of the jump value (`here 1 +`). The `continue,` word is used wherever we want to jump _to_. It patches the jump value to do here (`here swap m!`; storing the current `here` at the previously pushed address).
 
 ```forth
-: assemble here . dump exit ;
+: assemble here . dump halt ;
 ```
 
 Finally, the `assemble` word dumps memory to an image file (and displays the current size of the dictionary).
@@ -364,7 +364,6 @@ In addition to numeric literals support, the following words are currently in th
 | `,`         | Append TOS to dictionary                                                                                        |
 | `literal`   | Compile inline literal from the stack                                                                           |
 | `find`      | Find following token in dictionary and push address                                                             |
-| `forget`    | Reset dictionary to following token                                                                             |
 | `dump`      | Core dump to `image.bin`                                                                                         |
 | `(`         | Begin comment, terminated by `)`                                                                                |
 

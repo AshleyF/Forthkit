@@ -56,35 +56,33 @@ create : compile create compile ; ( magic! )
 
 ( instruction words )
 
-: +    popxy [ x y x add, ] pushx ;
-: -    popxy [ x y x sub, ] pushx ;
-: *    popxy [ x y x mul, ] pushx ;
-: /    popxy [ x y x div, ] pushx ;
-: mod  popxy [ x y x mod, ] pushx ;
-: 2*   popxy [ x y x shl, ] pushx ;
-: 2/   popxy [ x y x shr, ] pushx ;
-: and  popxy [ x y x and, ] pushx ;
-: or   popxy [ x y x or,  ] pushx ;
-: xor  popxy [ x y x xor, ] pushx ;
-: not  popx [ x x not, ] pushx ;
-: 1+   popx [ x x inc, ] pushx ;
-: 1-   popx [ x x dec, ] pushx ;
-: exec popx [ x exec, ] ;
-: exit [ halt, ] ;
+: +       popxy [ x y x add,  ] pushx ;
+: -       popxy [ x y x sub,  ] pushx ;
+: *       popxy [ x y x mul,  ] pushx ;
+: /       popxy [ x y x div,  ] pushx ;
+: mod     popxy [ x y x mod,  ] pushx ;
+: 2*      popxy [ x y x shl,  ] pushx ;
+: 2/      popxy [ x y x shr,  ] pushx ;
+: and     popxy [ x y x and,  ] pushx ;
+: or      popxy [ x y x or,   ] pushx ;
+: xor     popxy [ x y x xor,  ] pushx ;
+: invert  popx  [   x x not,  ] pushx ;
+: 1+      popx  [   x x inc,  ] pushx ;
+: 1-      popx  [   x x dec,  ] pushx ;
+: execute popx  [     x exec, ] ;
+: halt [ halt, ] ;
 : dump [ dump, ] ;
 : debug [ debug, ] ;
 
 ( stack manipulation )
 
-: drop ( a- ) popx ;
-: 2drop ( ab- ) drop drop ;
-: dup ( a-aa ) popx pushx pushx ;
-: over ( ab-aba ) popxy pushx pushx [ y x cp, ] pushx swap ;
-: 2dup ( ab-abab ) over over ;
-: nip ( ab-b ) swap drop ;
-: tuck ( ab-bab ) swap over ;
-: -rot ( abc-cab ) swap popxy pushx [ y z cp, ] swap [ z x cp, ] pushx ;
-: rot ( abc-bca ) -rot -rot ;
+: drop popx ;
+: dup popx pushx pushx ;
+: over popxy pushx pushx [ y x cp, ] pushx swap ;
+: nip swap drop ;
+: tuck swap over ;
+: -rot swap popxy pushx [ y z cp, ] swap [ z x cp, ] pushx ;
+: rot -rot -rot ;
 
 ( vocabulary )
 
@@ -101,40 +99,32 @@ create : compile create compile ; ( magic! )
 
 : here [ d x cp, ] pushx ;
 
-: dp+6 here 6 + ;
-: const create literal ret, ;  ( e.g. 123 const foo -> foo3 . 0  LDC n 123  CALL &pushn  RET )
-: var create dp+6 literal ret, 0 , ;  ( e.g. var foo -> foo3 . 0  LDC n <addr>  CALL &pushn  RET  0 )
+: _dp+6 here 6 + ;
+: constant create literal ret, ;  ( e.g. 123 constant foo -> foo3 . 0  LDC n 123  CALL &pushn  RET )
+: variable create _dp+6 literal ret, 0 , ;  ( e.g. variable foo -> foo3 . 0  LDC n <addr>  CALL &pushn  RET  0 )
 
 : allot popx [ x d d add, ] ;
-: buffer create dp+6 literal ret, allot ;
 
 : if [ ' popx literal ] call, here 1+ zero x 0 beq, ; immediate
-: unless [ ' popxy literal ] call, here 1+ zero x 0 bne, ; immediate
 : else here 1+ 0 jump, swap here swap ! ; immediate
 : then here swap ! ; immediate
 
-: =  popxy 0 [ x y dp+6 bne, ] not ;
-: <> popxy 0 [ x y dp+6 beq, ] not ;
-: >  popxy 0 [ x y dp+6 ble, ] not ;
-: <  popxy 0 [ x y dp+6 bge, ] not ;
-: >= popxy 0 [ x y dp+6 blt, ] not ;
-: <= popxy 0 [ x y dp+6 bgt, ] not ;
-
-: sign 0 < if -1 else 1 then ;
-: /mod 2dup / -rot mod ;
-
-: min 2dup > if swap then drop ;
-: max 2dup < if swap then drop ;
+: =  popxy 0 [ x y _dp+6 bne, ] invert ;
+: <> popxy 0 [ x y _dp+6 beq, ] invert ;
+: >  popxy 0 [ x y _dp+6 ble, ] invert ;
+: <  popxy 0 [ x y _dp+6 bge, ] invert ;
+: >= popxy 0 [ x y _dp+6 blt, ] invert ;
+: <= popxy 0 [ x y _dp+6 bgt, ] invert ;
 
 : negate -1 * ;
 : abs dup 0 < if negate then ;
+: 2dup over over ;
+: /mod 2dup / -rot mod ;
 
-: .sign dup sign negate 44 + emit ; ( happens 44 +/- 1 is ASCII '-'/'+' )
-: .dig 10 /mod swap ;
-: .digemit 48 + emit ;  ( 48 is ASCII '0' )
-: . .sign abs .dig .dig .dig .dig .dig drop .digemit .digemit .digemit .digemit .digemit cr ;
-
-: ?dup dup unless drop then ;
+: _sign dup 0 < if -1 else 1 then negate 44 + emit ; ( happens 44 +/- 1 is ASCII '-'/'+' )
+: _dig 10 /mod swap ;
+: _digemit 48 + emit ;  ( 48 is ASCII '0' )
+: . _sign abs _dig _dig _dig _dig _dig drop _digemit _digemit _digemit _digemit _digemit cr ;
 
 : begin here ; immediate
 : until [ ' popxy literal ] call, zero x rot beq, ; immediate
@@ -142,7 +132,7 @@ create : compile create compile ; ( magic! )
 
 here
 32 allot
-var r r !
+variable r r !
 
 : >r r @ ! r @ 1+ r ! ;
 : r> r @ 1- r ! r @ @ ;
@@ -160,5 +150,3 @@ var r r !
 : [: here 7 + ( past LIT . . CALL . JUMP . ) literal 0 jump, here 1- ( jump address field ); immediate
 : :] ret, here swap ! ; immediate
 : call popx [ x exec, ] ;
-
-: factorial dup 1 > if dup 1- factorial * then ;

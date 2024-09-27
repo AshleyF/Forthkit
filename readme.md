@@ -8,8 +8,10 @@ Inspired by [Lispkit](https://github.com/AshleyF/Lispkit), build your own Forth 
     * Use this to do [turtle graphics](./library/turtle/) (in Forth)!
 2) Make [register-based "hardware"](./hardware/register/) (VM in C) and [assembler](./hardware/register/assembler.f) (in Forth)
 3) Use the assembler to [build an interpreter](./hardware/register/interpreter.f) (a bytecode image using Forth)
-4) TODO: Abandon the Python interpreter and bootstrap Forth to the new "hardware"
-    * TODO: Port turtle graphics to this
+4) Abandon the Python interpreter and [bootstrap](./hardware/register/bootstrap.f) Forth to the new "hardware"
+    * [Port pixel library](./hardware/register/pixels-adapter.f) to this
+    * [Port turtle graphics](./hardware/register/turtle-fixed-point.f) to this (using fixed point)
+    * TODO: Fill out the vocabulary to support the [standard core words](./core-words.md)
 5) TODO: Build an inner interpreter and take away `call`/`ret` from the "hardware"
     * TODO: Experiment with direct/indirect threading
     * TODO: Experiment with using the return stack for locals and loop counters
