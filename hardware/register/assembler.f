@@ -35,7 +35,7 @@ variable dp ( dictionary pointer )
 : ret,   28 , ;            (       ret,   →  pc = pop[]         )
 : halt,  29 , ;            (       halt,  →  halt machine       )
 : dump,  30 , ;            (       dump,  →  core to image.bin  )
-: debug, 31 , , , ;        (       debug, →  show machine state )
+: debug, 31 , ;            (       debug, →  show machine state )
 
 : label here constant ;
 : ahead, here 1 + 0 jump, ; ( dummy jump, push address )

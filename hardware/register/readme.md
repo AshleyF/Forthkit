@@ -317,7 +317,7 @@ With just these, we can build words taking instruction operands from the stack a
 : ret,   28 , ;            (       ret,   →  pc = pop[]         )
 : halt,  29 , ;            (       halt,  →  halt machine       )
 : dump,  30 , ;            (       dump,  →  core to image.bin  )
-: debug, 31 , , , ;        (       debug, →  show machine state )
+: debug, 31 , ;            (       debug, →  show machine state )
 ```
 
 In a few places we do a `swap` to order the arguments in a _natural_ way. For example `z y x sub,` packs a subtraction instruction meaning _x = z - y_ (with _z_ and _y_ swapped), because this resembles the ordering for infix expressions (left minus right).

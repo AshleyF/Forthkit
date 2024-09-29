@@ -52,7 +52,7 @@ create : compile create compile ; ( magic! )
 : ret,   28 , ;
 : halt,  29 , ;
 : dump,  30 , ;
-: debug, 31 , , , ;
+: debug, 31 , ;
 
 ( instruction words )
 
