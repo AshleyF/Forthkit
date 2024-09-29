@@ -49,7 +49,6 @@ The following primitive words are available:
 | `constant` |   x-      | Create constant                      |
 | `m@`       |   a-n     | Fetch memory address                 |
 | `m!`       |  xa-      | Store into memory address            |
-| `.m`       |    -      | Print memory range                   |
 | `dump`     |    -      | Dump memory to image file            |
 | `(`        |    -      | Start comment (to `)`)               |
 | `if`       |    -      | Start conditional (to `else`/`then`) |
@@ -334,7 +333,6 @@ Finally, we can `dump` all of memory to an `image.bin` file. This will be used t
     self.dictionary = {
       'm@'       : lambda: self.x_x(lambda x: self.memory[int(x)]),
       'm!'       : lambda: self.xx_(self.memoryStore),
-      '.m'       : lambda: print(self.memory[int(self.pop()):int(self.pop())]),
       'dump'     : self.dump,
       ... }
 ```

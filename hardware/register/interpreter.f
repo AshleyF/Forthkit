@@ -33,9 +33,9 @@
 23 constant cur                    ( cursor )
 24 constant lnk                    ( link pointer )
 25 constant s         32767 s ldc, ( stack pointer )                     ( LDC s 32767     0000 1900 FF7F )
-26 constant ldc                    ( ldc instruction [0] )
-27 constant call      26 call ldc, ( call instruction )                  ( LDC call 26     0000 1B00 1A00 )
-28 constant ret        28 ret ldc, ( ret instruction, 28 by luck )       ( LDC ret  28     0000 1C00 1C00 )
+26 constant ldc         1 ldc ldc, ( ldc instruction [0] )
+27 constant call      29 call ldc, ( call instruction )                  ( LDC call 26     0000 1B00 1A00 )
+28 constant ret        31 ret ldc, ( ret instruction, 28 by luck )       ( LDC ret  28     0000 1C00 1C00 )
 29 constant comp                   ( compiling flag )
 30 constant sign                   ( number sign while parsing )
 

@@ -14,45 +14,47 @@ create : compile create compile ; ( magic! )
 : [ interact ; immediate
 : ] compile ;
 
-: cp, 3 , , , ; 
+: cp, 6 , , , ; 
 : popxy popx [ x y cp, ] popx ;
 : pushxy pushx [ y x cp, ] pushx ;
 
-: xor, 15 , , , , ; 
+: xor, 18 , , , , ; 
 : swap popxy [ x y x xor, x y y xor, x y x xor, ] pushxy ;
 
-: ldc,    0 , , , ;
-: ld,     1 , , , ;
-: st,     2 , , , ;
+: halt,   0 , ;
+: ldc,    1 , , , ;
+: ld,     2 , , , ;
+: st,     3 , , , ;
+: ldb,    4 , , , ;
+: stb,    5 , , , ;
 ( cp,     defined above )
-: in,     4 , , ;
-: out,    5 , , ;
-: inc,    6 , , , ;
-: dec,    7 , , , ;
-: add,    8 , , , , ;
-: sub,    9 , , swap , , ;
-: mul,   10 , , , , ;
-: div,   11 , , swap , , ;
-: mod,   12 , , swap , , ;
-: and,   13 , , , , ;
-: or,    14 , , , , ;
+: in,     7 , , ;
+: out,    8 , , ;
+: inc,    9 , , , ;
+: dec,   10 , , , ;
+: add,   11 , , , , ;
+: sub,   12 , , swap , , ;
+: mul,   13 , , , , ;
+: div,   14 , , swap , , ;
+: mod,   15 , , swap , , ;
+: and,   16 , , , , ;
+: or,    17 , , , , ;
 ( xor    defined above )
-: not,   16 , , , ;
-: shl,   17 , , swap , , ;
-: shr,   18 , , swap , , ;
-: beq,   19 , , , , ;
-: bne,   20 , , , , ;
-: bgt,   21 , , swap , , ;
-: bge,   22 , , swap , , ;
-: blt,   23 , , swap , , ;
-: ble,   24 , , swap , , ;
-: jump,  25 , , ;
-: call,  26 , , ;
-: exec,  27 , , ;
-: ret,   28 , ;
-: halt,  29 , ;
-: dump,  30 , ;
-: debug, 31 , ;
+: not,   19 , , , ;
+: shl,   20 , , swap , , ;
+: shr,   21 , , swap , , ;
+: beq,   22 , , , , ;
+: bne,   23 , , , , ;
+: bgt,   24 , , swap , , ;
+: bge,   25 , , swap , , ;
+: blt,   26 , , swap , , ;
+: ble,   27 , , swap , , ;
+: jump,  28 , , ;
+: call,  29 , , ;
+: exec,  30 , , ;
+: ret,   31 , ;
+: dump,  32 , ;
+: debug, 33 , ;
 
 ( instruction words )
 

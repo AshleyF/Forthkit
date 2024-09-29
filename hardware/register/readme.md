@@ -10,38 +10,40 @@ Instructions are followed by zero to three operands - register indices, memory a
 
 | Mnumonic | Op Code |     |     |     | Effect           | Description                 |
 | -------- | ------- | --- | --- | --- | ---------------- | --------------------------- |
-| ldc      | 0       | x   | v   |     | x = v            | Load constant value         |
-| ld       | 1       | x   | a   |     | x = mem[a]       | Load from memory            |
-| st       | 2       | a   | x   |     | mem[a] = x       | Store to memory             |
-| cp       | 3       | x   | y   |     | x = y            | Copy between registers      |
-| in       | 4       | x   |     |     | x = getc()       | Read from console           |
-| out      | 5       | x   |     |     | putc(x)          | Write to console            |
-| inc      | 6       | x   | y   |     | x = y + 1        | Increment register          |
-| dec      | 7       | x   | y   |     | x = y - 1        | Decrement register          |
-| add      | 8       | x   | y   | z   | x = y + z        | Addition                    |
-| sub      | 9       | x   | y   | z   | x = y - z        | Subtraction                 |
-| mul      | 10      | x   | y   | z   | x = y × z        | Multiplication              |
-| div      | 11      | x   | y   | z   | x = y ÷ z        | Division                    |
-| mod      | 12      | x   | y   | z   | x = y mod z      | Modulus                     |
-| and      | 13      | x   | y   | z   | x = y ∧ z        | Logical/bitwise and         |
-| or       | 14      | x   | y   | z   | x = y ∨ z        | Logical/bitwise or          |
-| xor      | 15      | x   | y   | z   | x = y ⊕ z        | Logical/bitwise xor         |
-| not      | 16      | x   | y   |     | x = ¬y           | Logical/bitwise not         |
-| shl      | 17      | x   | y   | z   | x = y << z       | Bitwise shift-left          |
-| shr      | 18      | x   | y   | z   | x = y >> z       | Bitwise shift-right         |
-| beq      | 19      | a   | x   | y   | pc = a if x = y  | Branch if equal             |
-| bne      | 20      | a   | x   | y   | pc = a if x ≠ y  | Branch if not equal         |
-| bgt      | 21      | a   | x   | y   | pc = a if x > y  | Branch if greater than      |
-| bge      | 22      | a   | x   | y   | pc = a if x ≥ y | Branch if greater or equal  |
-| blt      | 23      | a   | x   | y   | pc = a if x < y  | Branch if less than         |
-| ble      | 24      | a   | x   | y   | pc = a if x ≤ y | Branch if less or equal     |
-| exec     | 25      | x   |     |     | pc = [x]         | Jump to address in register |
-| jump     | 26      | a   |     |     | pc = a           | Jump to address             |
-| call     | 27      | a   |     |     | push(pc), pc = a | Call address, save return   |
-| ret      | 28      |     |     |     | pc = pop()       | Return from call            |
-| halt     | 29      |     |     |     |                  | Halt machine                |
-| dump     | 30      |     |     |     |                  | Dump core to image.bin      |
-| debug    | 31      |     |     |     |                  | Print machine state         |
+| halt     |  0      |     |     |     |                  | Halt machine                |
+| ldc      |  1      | x   | v   |     | x = v            | Load constant value         |
+| ld       |  2      | x   | a   |     | xx = mem[a]      | Load from memory            |
+| st       |  3      | a   | x   |     | mem[a] = xx      | Store to memory             |
+| cp       |  4      | x   | y   |     | x = y            | Copy between registers      |
+| ldb      |  5      | x   | a   |     | x = mem[a]       | Load byte from memory       |
+| stb      |  6      | a   | x   |     | mem[a] = x       | Store byte to memory        |
+| in       |  7      | x   |     |     | x = getc()       | Read from console           |
+| out      |  8      | x   |     |     | putc(x)          | Write to console            |
+| inc      |  9      | x   | y   |     | x = y + 1        | Increment register          |
+| dec      | 10      | x   | y   |     | x = y - 1        | Decrement register          |
+| add      | 11      | x   | y   | z   | x = y + z        | Addition                    |
+| sub      | 12      | x   | y   | z   | x = y - z        | Subtraction                 |
+| mul      | 13      | x   | y   | z   | x = y × z        | Multiplication              |
+| div      | 14      | x   | y   | z   | x = y ÷ z        | Division                    |
+| mod      | 15      | x   | y   | z   | x = y mod z      | Modulus                     |
+| and      | 16      | x   | y   | z   | x = y ∧ z        | Logical/bitwise and         |
+| or       | 17      | x   | y   | z   | x = y ∨ z        | Logical/bitwise or          |
+| xor      | 18      | x   | y   | z   | x = y ⊕ z        | Logical/bitwise xor         |
+| not      | 19      | x   | y   |     | x = ¬y           | Logical/bitwise not         |
+| shl      | 20      | x   | y   | z   | x = y << z       | Bitwise shift-left          |
+| shr      | 21      | x   | y   | z   | x = y >> z       | Bitwise shift-right         |
+| beq      | 22      | a   | x   | y   | pc = a if x = y  | Branch if equal             |
+| bne      | 23      | a   | x   | y   | pc = a if x ≠ y  | Branch if not equal         |
+| bgt      | 24      | a   | x   | y   | pc = a if x > y  | Branch if greater than      |
+| bge      | 25      | a   | x   | y   | pc = a if x ≥ y | Branch if greater or equal  |
+| blt      | 26      | a   | x   | y   | pc = a if x < y  | Branch if less than         |
+| ble      | 27      | a   | x   | y   | pc = a if x ≤ y | Branch if less or equal     |
+| exec     | 28      | x   |     |     | pc = [x]         | Jump to address in register |
+| jump     | 29      | a   |     |     | pc = a           | Jump to address             |
+| call     | 30      | a   |     |     | push(pc), pc = a | Call address, save return   |
+| ret      | 31      |     |     |     | pc = pop()       | Return from call            |
+| dump     | 32      |     |     |     |                  | Dump core to image.bin      |
+| debug    | 33      |     |     |     |                  | Print machine state         |
 
 The machine loads an `image.bin` dump of little-endian encoded memory cells at startup and begins executing at address zero.
 
@@ -286,38 +288,40 @@ We start with a _dictionary pointer_ (so named because we'll soon use this assem
 With just these, we can build words taking instruction operands from the stack and packing into the dictionary.
 
 ```forth
-: ldc,    0 , , , ;        (   v x ldc,   →  x = v              )
-: ld,     1 , , , ;        (   a x ld,    →  x = mem[a]         )
-: st,     2 , , , ;        (   x a st,    →  mem[a] = x         )
-: cp,     3 , , , ;        (   y x cp,    →  x = y              )
-: in,     4 , , ;          (     x in,    →  x = getc           )
-: out,    5 , , ;          (     x out,   →  putc x             )
-: inc,    6 , , , ;        (   y x inc,   →  x = y + 1          )
-: dec,    7 , , , ;        (   y x dec,   →  x = y - 1          )
-: add,    8 , , , , ;      ( z y x add,   →  x = z + y          )
-: sub,    9 , , swap , , ; ( z y x sub,   →  x = z - y          )
-: mul,   10 , , , , ;      ( z y x mul,   →  x = z × y          )
-: div,   11 , , swap , , ; ( z y x div,   →  x = z ÷ y          )
-: mod,   12 , , swap , , ; ( z y x mod,   →  x = z mod y        )
-: and,   13 , , , , ;      ( z y x and,   →  x = z and y        )
-: or,    14 , , , , ;      ( z y x or,    →  x = z or  y        )
-: xor,   15 , , , , ;      ( z y x xor,   →  x = z xor y        )
-: not,   16 , , , ;        (   y x not,   →  x = not y          )
-: shl,   17 , , swap , , ; ( z y x shl,   →  x = z << y         )
-: shr,   18 , , swap , , ; ( z y x shr,   →  x = z >> y         )
-: beq,   19 , , , , ;      ( x y a beq,   →  pc = a if x = y    )
-: bne,   20 , , , , ;      ( x y a bne,   →  pc = a if x ≠ y    )
-: bgt,   21 , , swap , , ; ( x y a bgt,   →  pc = a if x > y    )
-: bge,   22 , , swap , , ; ( x y a bge,   →  pc = a if x ≥ y    )
-: blt,   23 , , swap , , ; ( x y a blt,   →  pc = a if x < y    )
-: ble,   24 , , swap , , ; ( x y a ble,   →  pc = a if x ≤ y    )
-: jump,  25 , , ;          (     a jump,  →  pc = a             )
-: call,  26 , , ;          (     a call,  →  push[pc], pc = a   )
-: exec,  27 , , ;          (     x exec,  →  push[pc], pc = [x] )
-: ret,   28 , ;            (       ret,   →  pc = pop[]         )
-: halt,  29 , ;            (       halt,  →  halt machine       )
-: dump,  30 , ;            (       dump,  →  core to image.bin  )
-: debug, 31 , ;            (       debug, →  show machine state )
+: halt,   0 , ;            (       halt,  →  halt machine       )
+: ldc,    1 , , , ;        (   v x ldc,   →  x = v              )
+: ld,     2 , , , ;        (   a x ld,    →  x = mem[a]         )
+: st,     3 , , , ;        (   x a st,    →  mem[a] = x         )
+: ldb,    4 , , , ;        (   a x ldb,   →  x = mem[a]         )
+: stb,    5 , , , ;        (   x a stb,   →  mem[a] = x         )
+: cp,     6 , , , ;        (   y x cp,    →  x = y              )
+: in,     7 , , ;          (     x in,    →  x = getc           )
+: out,    8 , , ;          (     x out,   →  putc x             )
+: inc,    9 , , , ;        (   y x inc,   →  x = y + 1          )
+: dec,   10 , , , ;        (   y x dec,   →  x = y - 1          )
+: add,   11 , , , , ;      ( z y x add,   →  x = z + y          )
+: sub,   12 , , swap , , ; ( z y x sub,   →  x = z - y          )
+: mul,   13 , , , , ;      ( z y x mul,   →  x = z × y          )
+: div,   14 , , swap , , ; ( z y x div,   →  x = z ÷ y          )
+: mod,   15 , , swap , , ; ( z y x mod,   →  x = z mod y        )
+: and,   16 , , , , ;      ( z y x and,   →  x = z and y        )
+: or,    17 , , , , ;      ( z y x or,    →  x = z or  y        )
+: xor,   18 , , , , ;      ( z y x xor,   →  x = z xor y        )
+: not,   19 , , , ;        (   y x not,   →  x = not y          )
+: shl,   20 , , swap , , ; ( z y x shl,   →  x = z << y         )
+: shr,   21 , , swap , , ; ( z y x shr,   →  x = z >> y         )
+: beq,   22 , , , , ;      ( x y a beq,   →  pc = a if x = y    )
+: bne,   23 , , , , ;      ( x y a bne,   →  pc = a if x ≠ y    )
+: bgt,   24 , , swap , , ; ( x y a bgt,   →  pc = a if x > y    )
+: bge,   25 , , swap , , ; ( x y a bge,   →  pc = a if x ≥ y    )
+: blt,   26 , , swap , , ; ( x y a blt,   →  pc = a if x < y    )
+: ble,   27 , , swap , , ; ( x y a ble,   →  pc = a if x ≤ y    )
+: jump,  28 , , ;          (     a jump,  →  pc = a             )
+: call,  29 , , ;          (     a call,  →  push[pc], pc = a   )
+: exec,  30 , , ;          (     x exec,  →  pc = [x]           )
+: ret,   31 , ;            (       ret,   →  pc = pop[]         )
+: dump,  32 , ;            (       dump,  →  core to image.bin  )
+: debug, 33 , ;            (       debug, →  show machine state )
 ```
 
 In a few places we do a `swap` to order the arguments in a _natural_ way. For example `z y x sub,` packs a subtraction instruction meaning _x = z - y_ (with _z_ and _y_ swapped), because this resembles the ordering for infix expressions (left minus right).
