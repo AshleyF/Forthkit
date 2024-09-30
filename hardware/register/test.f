@@ -4,7 +4,7 @@
 0 constant u
 1 constant c
 
-  32 u ldc,
+  u 32 ldc,
  label &start
      c in,
  c u c sub,

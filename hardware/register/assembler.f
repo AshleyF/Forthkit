@@ -6,7 +6,7 @@ variable dp ( dictionary pointer )
 : c, here c! here 1 + dp ! ; ( append byte )
 
 : halt,   0 c, ;               (       halt,  →  halt machine       )
-: ldc,    1 c, c, , ;          (   v x ldc,   →  x = v              )
+: ldc,    1 c,  , c, ;         (   x v ldc,   →  x = v              )
 : ld,     2 c, c, c, ;         (   a x ld,    →  x = mem[a]         )
 : st,     3 c, c, c, ;         (   x a st,    →  mem[a] = x         )
 : ldb,    4 c, c, c, ;         (   a x ldb,   →  x = mem[a]         )

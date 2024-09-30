@@ -48,7 +48,7 @@ int main(void)
         switch(NEXT)
         {
             case  0:        return 0; // halt
-            case  1: X; V;  Rx = v;               break; // ldc (x = v) // TODO: swap x <-> v
+            case  1: V; X;  Rx = v;               break; // ldc (x = v) // TODO: swap x <-> v
             case  2: XY;    Rx = getcell(Ry);     break; // ld (x = m[y])
             case  3: XY;    setcell(Rx, Ry);      break; // st (m[x] = y)
             case  4: XY;    Rx = mem[Ry];         break; // ldb (x = m[y])

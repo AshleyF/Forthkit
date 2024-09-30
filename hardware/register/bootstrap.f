@@ -22,7 +22,7 @@ create : compile create compile ; ( magic! )
 : swap popxy [ x y x xor, x y y xor, x y x xor, ] pushxy ;
 
 : halt,   0 c, ;
-: ldc,    1 c, c,  , ;
+: ldc,    1 c,  , c, ;
 : ld,     2 c, c, c, ;
 : st,     3 c, c, c, ;
 : ldb,    4 c, c, c, ;
@@ -103,8 +103,8 @@ create : compile create compile ; ( magic! )
 
 : here [ d x cp, ] pushx ;
 
-: constant create literal ret, ;  ( e.g. 123 constant foo -> foo3 . 0  LDC n 123  CALL &pushn  RET )
-: variable create here 9 + literal ret, 0 , ;  ( e.g. variable foo -> foo3 . 0  LDC n <addr>  CALL &pushn  RET  0 )
+: constant create literal ret, ;  ( e.g. 123 constant foo -> foo3 . 0  LDC 123 n  CALL &pushn  RET )
+: variable create here 9 + literal ret, 0 , ;  ( e.g. variable foo -> foo3 . 0  LDC <addr> n  CALL &pushn  RET  0 )
 
 : allot popx [ x d d add, ] ;
 

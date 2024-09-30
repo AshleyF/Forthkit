@@ -9,17 +9,17 @@
  3 constant m
 
  4 constant zero                   ( constant 0 )
- 5 constant one         1 one ldc, ( constant 1 )                        ( LDC one 1       0000 0500 0100 )
- 6 constant two         2 two ldc, ( constant 2 )                        ( LDC two 2       0000 0600 0200 )
- 7 constant ten        10 ten ldc, ( number ten decimal by default )     ( LDC ten 10      0000 0700 0A00 )
+ 5 constant one         one 1 ldc, ( constant 1 )                        ( LDC one 1       0000 0500 0100 )
+ 6 constant two         two 2 ldc, ( constant 2 )                        ( LDC two 2       0000 0600 0200 )
+ 7 constant ten        ten 10 ldc, ( number ten decimal by default )     ( LDC ten 10      0000 0700 0A00 )
 
- 8 constant true      -1 true ldc, ( truth value - all bits set )        ( LDC true -1     0000 0800 FFFF )
+ 8 constant true      true -1 ldc, ( truth value - all bits set )        ( LDC true -1     0000 0800 FFFF )
  9 constant false                  ( false value )
 
-10 constant zeroch  48 zeroch ldc, ( '0' ASCII )                         ( LDC zeroch 48   0000 0A00 3000 )
-11 constant rparch  41 rparch ldc, ( right parenthesis ASCII )           ( LDC rparch 41   0000 0B00 2900 )
-12 constant spch    32 spch   ldc, ( space ASCII )                       ( LDC spch   32   0000 0C00 2000 )
-13 constant negch   45 negch  ldc, ( '-' ASCII )                         ( LDC negch  45   0000 0D00 2D00 )
+10 constant zeroch  zeroch 48 ldc, ( '0' ASCII )                         ( LDC zeroch 48   0000 0A00 3000 )
+11 constant rparch  rparch 41 ldc, ( right parenthesis ASCII )           ( LDC rparch 41   0000 0B00 2900 )
+12 constant spch    spch   32 ldc, ( space ASCII )                       ( LDC spch   32   0000 0C00 2000 )
+13 constant negch   negch  45 ldc, ( '-' ASCII )                         ( LDC negch  45   0000 0D00 2D00 )
 
 14 constant c                      ( char last read )
 15 constant tib                    ( terminal input buffer )
@@ -32,10 +32,10 @@
 22 constant c'                     ( char being compared )
 23 constant cur                    ( cursor )
 24 constant lnk                    ( link pointer )
-25 constant s         32767 s ldc, ( stack pointer )                     ( LDC s 32767     0000 1900 FF7F )
-26 constant ldc         1 ldc ldc, ( ldc instruction [0] )
-27 constant call      29 call ldc, ( call instruction )                  ( LDC call 26     0000 1B00 1A00 )
-28 constant ret        31 ret ldc, ( ret instruction, 28 by luck )       ( LDC ret  28     0000 1C00 1C00 )
+25 constant s         s 32767 ldc, ( stack pointer )                     ( LDC s 32767     0000 1900 FF7F )
+26 constant ldc         ldc 1 ldc, ( ldc instruction [0] )
+27 constant call      call 29 ldc, ( call instruction )                  ( LDC call 26     0000 1B00 1A00 )
+28 constant ret        ret 31 ldc, ( ret instruction, 28 by luck )       ( LDC ret  28     0000 1C00 1C00 )
 29 constant comp                   ( compiling flag )
 30 constant sign                   ( number sign while parsing )
 
@@ -111,7 +111,7 @@ zero cur &nomatch beq,             ( no match if start of dict )         ( BEQ <
               d d inc, ( * )       ( advance to next char )              ( INC d d         0600 0200 0200 )
           len len dec,             ( decrement length )                  ( DEC len len     0700 1000 1000 )
   len zero &error bgt,             ( if more, continue )                 ( BGT <addr> . .  1500 ADDR 1000 0400 )
-             63 c ldc,             ( load question mark [63] )           ( LDC c 63        0000 1400 3F00 )
+             c 63 ldc,             ( load question mark [63] )           ( LDC c 63        0000 1400 3F00 )
                 c out,             ( output question mark )              ( OUT c           0500 1400 )
                   halt,            ( halt! )                             ( HALT            1D00 )
 
@@ -163,13 +163,13 @@ zero cur &nomatch beq,             ( no match if start of dict )         ( BEQ <
             label &litn            ( compile literal )
               ldc appendc,         ( append ldc instruction )            ( ST d ldc        0200 0200 1A00 )
                                                                          ( INC d d         0600 0200 0200 )
-             zero appendc,         ( append n register number [0] )      ( ST d zero       0200 0200 0400 )
-                                                                         ( INC d d         0600 0200 0200 )
                 n append,          ( append value )                      ( ST d n          0200 0200 0000 )
+                                                                         ( INC d d         0600 0200 0200 )
+             zero appendc,         ( append n register number [0] )      ( ST d zero       0200 0200 0400 )
                                                                          ( INC d d         0600 0200 0200 )
              call appendc,         ( append call instruction )           ( ST d call       0200 0200 1B00 )
                                                                          ( INC d d         0600 0200 0200 )
-         &pushn m ldc,             ( load address of &pushn )            ( LDC m <addr>    0000 0300 ADDR )
+         m &pushn ldc,             ( load address of &pushn )            ( LDC m <addr>    0000 0300 ADDR )
                 m append,          ( append pushn address )              ( ST d m          0200 0200 0300 )
                                                                          ( INC d d         0600 0200 0200 )
                   ret,                                                   ( RET             1C00 )
@@ -301,8 +301,8 @@ rparch n &comment bne,             ( continue until right-paren )        ( BNE <
 
 continue,                          ( patch jump ahead, )
 
-       link @ lnk ldc,             ( compile-time link to runtime lnk )  ( LDC lnk link    0000 1800 E601 )
-      here 10 + d ldc,             ( runtime d just past this code )     ( LDC d here+10   0000 0200 F701 )
+       lnk link @ ldc,             ( compile-time link to runtime lnk )  ( LDC lnk link    0000 1800 E601 )
+      d here 10 + ldc,             ( runtime d just past this code )     ( LDC d here+10   0000 0200 F701 )
 
             &repl jump,            ( start the REPL )                    ( JUMP <addr>     1A00 ADDR )
 
