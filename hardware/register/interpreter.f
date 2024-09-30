@@ -49,8 +49,8 @@ ahead,                             ( jump over dictionary )
                   ret,
       
             label &name            ( read input name into buffer )
-            c tib st,              ( append char )
-      two tib tib add, ( * )       ( advance tib )
+            c tib stb,             ( append char )
+          tib tib inc,             ( advance tib )
           len len inc,             ( increment length )
                 c in,              ( read char )
      c spch &name bgt,             ( continue until whitespace )
@@ -70,28 +70,26 @@ ahead,                             ( jump over dictionary )
                   ret,
       
             label &compcs          ( compare chars to input word )
-              p c ld,              ( get char of input word )
-            p' c' ld,              ( get char of dictionary word )
+              p c ldb,             ( get char of input word )
+            p' c' ldb,             ( get char of dictionary word )
     c c' &nomatch bne,             ( don't match? )
-        two p' p' add, ( * )       ( next char of dictionary word )
-          two p p add, ( * )       ( next char of input word )
+            p' p' inc, ( * )       ( next char of dictionary word )
+              p p inc, ( * )       ( next char of input word )
     p tib &compcs blt,             ( not end of word? continue... )
                   ret,             ( we have a match! )
       
             label &nextw           ( advance to next word )
           cur cur ld,              ( follow link address )
                                    ( fall through to &comp )
-      
+
             label &comp
 zero cur &nomatch beq,             ( no match if start of dict )
         tib len p sub,             ( point p at start of token )
-          p len p sub, ( * )       ( point p at start of token )
            cur p' dec,             ( point p' at length field TODO sub two )
             p' p' dec, ( * )       ( point p' at length field )
           p' len' ld,              ( get length )
   len' len &nextw bne,             ( lengths don't match? )
         p' len p' sub,             ( move to beginning of word )
-        p' len p' sub, ( * )       ( move to beginning of word )
          false nm cp,              ( reset no-match flag )
           &compcs call,            ( compare characters )
    true nm &nextw beq,             ( if no match, try next word )
@@ -105,10 +103,9 @@ zero cur &nomatch beq,             ( no match if start of dict )
 ( --- number processing ------------------------------------------ )
 
             label &error           ( print invalid word and halt! )
-              d c ld,              ( load char of word )
+              d c ldb,             ( load char of word )
                 c out,             ( output char )
               d d inc,             ( advance to next char )
-              d d inc, ( * )       ( advance to next char )
           len len dec,             ( decrement length )
   len zero &error bgt,             ( if more, continue )
              c 63 ldc,             ( load question mark [63] )
@@ -118,28 +115,25 @@ zero cur &nomatch beq,             ( no match if start of dict )
             label &negate          ( set negative sign )
         true sign cp,              ( note: `true` is -1 )
               p p inc,             ( next char )
-              p p inc, ( * )       ( next char )
                                    ( fall through to &digits )
 
             label &digits          ( parse digits )
-              p c ld,              ( get char )
+              p c ldb,             ( get char )
        c zeroch c sub,             ( convert to digit )
      c ten &error bge,             ( error if non-digit )
     c zero &error blt,             ( error if non-digit )
           n ten n mul,             ( base ten shift left )
             n c n add,             ( add in one's place )
               p p inc,             ( next char )
-              p p inc, ( * )       ( next char )
     p tib &digits blt,             ( not end? continue... )
          sign n n mul,             ( multiply by sign )
                   ret,
       
             label &parsenum        ( parse token as number )
         tib len p sub,             ( point p at start of word )
-          p len p sub, ( * )       ( point p at start of word )
            zero n cp,              ( init number )
          one sign cp,              ( init sign )
-              p c ld,              ( get char )
+              p c ldb,             ( get char )
   c negch &negate beq,             ( set negative sign )
           &digits jump,            ( parse digits )
       
@@ -178,7 +172,7 @@ zero cur &nomatch beq,             ( no match if start of dict )
 
             label &exec            ( execute word )
         two cur m add,             ( point to code field )
-          two m m add, ( * )       ( point to code field )
+          two m m add,             ( point to code field TODO 3+ )
                 m exec,            ( exec word )
                   ret,
       
@@ -186,10 +180,10 @@ zero cur &nomatch beq,             ( no match if start of dict )
             cur n inc,             ( point to immediate flag TODO two add )
               n n inc, ( * )       ( point to immediate flag )
               n m ld,              ( read immediate flag )
-     true m &exec beq,             ( execute if immediate )
+    false m &exec bne,             ( execute if immediate -- not 255 )
              call appendc,         ( append call instruction )
               n n inc,             ( point to code field )
-              n n inc, ( * )       ( point to code field )
+              n n inc,             ( point to code field )
                 n append,          ( append code field address )
                   ret,
       
@@ -212,7 +206,7 @@ zero cur &nomatch beq,             ( no match if start of dict )
 ( --- initial dictionary ----------------------------------------- )
 
 variable link
-: header, dup 0 do swap , loop , link @ here link ! , , ;
+: header, dup 0 do swap c, loop , ( length ) link @ here link ! , ( link ) , ( flag ) ;
 
      0 sym create header,          ( word to create words )
            &token call,            ( read a token )

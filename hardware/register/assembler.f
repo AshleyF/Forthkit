@@ -2,7 +2,7 @@
 
 variable dp ( dictionary pointer )
 : here dp @ ;
-: , here m! here 2 + dp ! ; ( append )
+:  , here m! here 2 + dp ! ; ( append )
 : c, here c! here 1 + dp ! ; ( append byte )
 
 : halt,   0 c, ;               (       halt,  →  halt machine       )
