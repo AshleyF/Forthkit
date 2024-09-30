@@ -103,7 +103,7 @@ The above `clear`, `set` and `reset` words don't display anything on the screen.
 Before we get into proper [turtle graphics](../turtle/), let's at least draw a graphic of a turtle. We'll start by making a mechanism to draw from bitmaps in code.
 
 ```forth
-var x var y
+variable x variable y
 
 : start clear 0 x ! 0 y ! ;
 : | 0 do 35 = if x @ y @ set then 1 x +! loop 0 x ! 1 y +! ;

@@ -2,7 +2,7 @@
 
 variable dp ( dictionary pointer )
 : here dp @ ;
-: , here m! here 1 + dp ! ; ( append )
+: , here m! here 2 + dp ! ; ( append )
 
 : halt,   0 , ;            (       halt,  →  halt machine       )
 : ldc,    1 , , , ;        (   v x ldc,   →  x = v              )
@@ -40,7 +40,7 @@ variable dp ( dictionary pointer )
 : debug, 33 , ;            (       debug, →  show machine state )
 
 : label here constant ;
-: ahead, here 1 + 0 jump, ; ( dummy jump, push address )
+: ahead, here 2 + 0 jump, ; ( dummy jump, push address )
 : continue, here swap m! ; ( patch jump )
 
 : assemble here . dump halt ;

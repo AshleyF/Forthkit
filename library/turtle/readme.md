@@ -27,8 +27,8 @@ Test it with some demos: [`sh ./test.sh`](./test.sh) or play with it interactive
 Turtle graphics is based on a _turtle_ that leaves a trail as it moves (we don't support raising the pen). The turtle maintains a heading and starts at the center of the canvas, which we consider to be coordinate 0, 0.
 
 ```forth
-var x var y var theta
-var dx var dy
+variable x variable y variable theta
+variable dx variable dy
 ```
 
  The complete turtle pose can be expressed with three numbers `x`, `y` and `theta`. We will also maintain a delta x/y to avoid recomputing while the heading hasn't changed.

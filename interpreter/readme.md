@@ -270,7 +270,7 @@ An area is set aside for `variable` storage. We may create variables with `varia
 
 This is quite different to how variables normally work in Forth. Normally a variable is merely a memory address and fetch (`@`) and store (`!`) are general operators for addressing memory. We want to keep the moving parts cleanly separated for now.
 
-The `var` word creates a variable by the name of the following token (e.g. `var something`). It does this by getting the next token as the name. This is the first of several words that interact with parsing by intercepting tokens before `evaluate()` sees them. So this adds _syntax_ to the language: `var {name}`. It created a slot in `self.variables` and also adds a word to the dictionary that pushes the index of the variable.
+The `variable` word creates a variable by the name of the following token (e.g. `variable something`). It does this by getting the next token as the name. This is the first of several words that interact with parsing by intercepting tokens before `evaluate()` sees them. So this adds _syntax_ to the language: `variable {name}`. It created a slot in `self.variables` and also adds a word to the dictionary that pushes the index of the variable.
 
 ```python
   def variable(self):
@@ -280,7 +280,7 @@ The `var` word creates a variable by the name of the following token (e.g. `var 
     self.dictionary[name] = lambda: self.push(index)
 ```
 
-This means that `var foo` creates the variable slot and word, while `foo` thereafter pushes the slot index. Fetch (`@`) then takes a slot number so `foo @` will fetch the value. Store (`!`) takes a value and a slot index and sets the slot's value, so the expression `42 foo !` pushes the value (`42`) followed by the slot number (by calling `foo`) and fetch (`!`) retrieves it.
+This means that `variable foo` creates the variable slot and word, while `foo` thereafter pushes the slot index. Fetch (`@`) then takes a slot number so `foo @` will fetch the value. Store (`!`) takes a value and a slot index and sets the slot's value, so the expression `42 foo !` pushes the value (`42`) followed by the slot number (by calling `foo`) and fetch (`!`) retrieves it.
 
 By the way, the standard Forth word is `variable` rather than `var` but I like the shorter version. Chuck Moore's Forths have never followed a standard and nor do ours. Make it your own. Liberating!
 
@@ -325,8 +325,6 @@ Similar to variables, we have a memory-fetch (`m@`) and memory-store (`m!`). If 
 
 To store a `42` into address `123`, we say `42 123 m!`. To retrieve it we say `123 m@`.
 
-To take a look at a portion of memory we say something like `130 120 .m` which will show ten cells from address 120-130 (including the value we just stored).
-
 Finally, we can `dump` all of memory to an `image.bin` file. This will be used to create the seed image for our VM in the future. 
 
 ```python
@@ -349,7 +347,7 @@ Dumping to a image file is straight forward. Memory cells are packed as little-e
   def dump(self):
     with open('image.bin', 'wb') as f:
       for m in self.memory:
-        f.write(struct.pack('h', m))
+        f.write(struct.pack('B', m))
 ```
 
 ### Comments

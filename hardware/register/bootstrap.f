@@ -97,26 +97,28 @@ create : compile create compile ; ( magic! )
 : space 32 emit ;
 
 : @ popx [ x x ld, ] pushx ;
+: c@ popx [ x x ldb, ] pushx ;
 : ! popxy [ x y st, ] ;
+: c! popxy [ x y stb, ] ;
 
 : here [ d x cp, ] pushx ;
 
-: _dp+6 here 6 + ;
+: _dp+12 here 12 + ; ( * )
 : constant create literal ret, ;  ( e.g. 123 constant foo -> foo3 . 0  LDC n 123  CALL &pushn  RET )
-: variable create _dp+6 literal ret, 0 , ;  ( e.g. variable foo -> foo3 . 0  LDC n <addr>  CALL &pushn  RET  0 )
+: variable create _dp+12 literal ret, 0 , ;  ( e.g. variable foo -> foo3 . 0  LDC n <addr>  CALL &pushn  RET  0 )
 
-: allot popx [ x d d add, ] ;
+: allot popx [ x d d add, x d d add, ( * ) ] ;
 
-: if [ ' popx literal ] call, here 1+ zero x 0 beq, ; immediate
-: else here 1+ 0 jump, swap here swap ! ; immediate
+: if [ ' popx literal ] call, here 2 + ( * ) zero x 0 beq, ; immediate
+: else here 2 + ( * ) 0 jump, swap here swap ! ; immediate
 : then here swap ! ; immediate
 
-: =  popxy 0 [ x y _dp+6 bne, ] invert ;
-: <> popxy 0 [ x y _dp+6 beq, ] invert ;
-: >  popxy 0 [ x y _dp+6 ble, ] invert ;
-: <  popxy 0 [ x y _dp+6 bge, ] invert ;
-: >= popxy 0 [ x y _dp+6 blt, ] invert ;
-: <= popxy 0 [ x y _dp+6 bgt, ] invert ;
+: =  popxy 0 [ x y _dp+12 bne, ] invert ;
+: <> popxy 0 [ x y _dp+12 beq, ] invert ;
+: >  popxy 0 [ x y _dp+12 ble, ] invert ;
+: <  popxy 0 [ x y _dp+12 bge, ] invert ;
+: >= popxy 0 [ x y _dp+12 blt, ] invert ;
+: <= popxy 0 [ x y _dp+12 bgt, ] invert ;
 
 : negate -1 * ;
 : abs dup 0 < if negate then ;
@@ -129,26 +131,26 @@ create : compile create compile ; ( magic! )
 : . _sign abs _dig _dig _dig _dig _dig drop _digemit _digemit _digemit _digemit _digemit cr ;
 
 : begin here ; immediate
-: until [ ' popxy literal ] call, zero x rot beq, ; immediate
-: again [ ' popxy literal ] call, jump, ; immediate
+: until [ ' popx literal ] call, zero x rot beq, ; immediate
+: again [ ' popx literal ] call, jump, ; immediate
 
 here
 32 allot
 variable r r !
 
-: >r r @ ! r @ 1+ r ! ;
-: r> r @ 1- r ! r @ @ ;
-: r@ r @ 1- @ ;
+: >r r @ ! r @ 2 + ( * ) r ! ;
+: r> r @ 2 - ( * ) r ! r @ @ ;
+: r@ r @ 2 - ( * ) @ ;
 
 : _do swap >r >r ;
 : do [ ' _do literal ] call, here ; immediate
-: _loop0 r> 1+ dup >r r @ 2 - @ >= popx ;
+: _loop0 r> 1+ dup >r r @ 4 ( * ) - @ >= popx ;
 : _loop1 r> r> drop drop ;
 : loop [ ' _loop0 literal ] call, zero x rot beq, [ ' _loop1 literal ] call, ; immediate
 
-: i r @ 1- @ ;
-: j r @ 3 - @ ;
+: i r @ 2 - ( * ) @ ;
+: j r @ 6 - ( * ) @ ;
 
-: [: here 7 + ( past LIT . . CALL . JUMP . ) literal 0 jump, here 1- ( jump address field ); immediate
+: [: here 14 + ( * ) ( past LIT . . CALL . JUMP . ) literal 0 jump, here 2 - ( * ) ( jump address field ); immediate
 : :] ret, here swap ! ; immediate
 : call popx [ x exec, ] ;

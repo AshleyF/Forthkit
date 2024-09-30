@@ -50,7 +50,7 @@ ahead,                             ( jump over dictionary )              ( JUMP 
       
             label &name            ( read input name into buffer )
             c tib st,              ( append char )                       ( ST tib c        0200 0F00 1400 )
-          tib tib inc,             ( advance tib )                       ( INC tib tib     0600 0F00 0F00 )
+      two tib tib add, ( * )       ( advance tib )                       ( INC tib tib     0600 0F00 0F00 )
           len len inc,             ( increment length )                  ( INC len len     0600 1000 1000 )
                 c in,              ( read char )                         ( IN c            0400 1400 )
      c spch &name bgt,             ( continue until whitespace )         ( BGT <addr> . .  1500 ADDR 1400 0C00 )
@@ -73,8 +73,8 @@ ahead,                             ( jump over dictionary )              ( JUMP 
               p c ld,              ( get char of input word )            ( LD c  p         0100 1400 1300 )
             p' c' ld,              ( get char of dictionary word )       ( LD c' p'        0100 1600 1500 )
     c c' &nomatch bne,             ( don't match? )                      ( BNE <addr> . .  1400 ADDR 1600 1400 )
-            p' p' inc,             ( next char of dictionary word )      ( INC p' p'       0600 1500 1500 )
-              p p inc,             ( next char of input word )           ( INC p  p        0600 1300 1300 )
+        two p' p' add, ( * )       ( next char of dictionary word )      ( INC p' p'       0600 1500 1500 )
+          two p p add, ( * )       ( next char of input word )           ( INC p  p        0600 1300 1300 )
     p tib &compcs blt,             ( not end of word? continue... )      ( BLT <addr> . .  1700 ADDR 1300 0F00 )
                   ret,             ( we have a match! )                  ( RET             1C00 )
       
@@ -85,10 +85,13 @@ ahead,                             ( jump over dictionary )              ( JUMP 
             label &comp
 zero cur &nomatch beq,             ( no match if start of dict )         ( BEQ <addr> . .  1300 ADDR 1700 0400 )
         tib len p sub,             ( point p at start of token )         ( SUB p tib len   0900 1300 0F00 1000 )
+          p len p sub, ( * )       ( point p at start of token )         ( SUB p tib len   0900 1300 0F00 1000 )
            cur p' dec,             ( point p' at length field )          ( DEC p' cur      0700 1500 1700 )
+            p' p' dec, ( * )       ( point p' at length field )          ( DEC p' cur      0700 1500 1700 )
           p' len' ld,              ( get length )                        ( LD len' p'      0100 1100 1500 )
   len' len &nextw bne,             ( lengths don't match? )              ( BNE <addr> . .  1400 ADDR 1000 1100 )
         p' len p' sub,             ( move to beginning of word )         ( SUB p' p' len   0900 1500 1500 1000 )
+        p' len p' sub, ( * )       ( move to beginning of word )         ( SUB p' p' len   0900 1500 1500 1000 )
          false nm cp,              ( reset no-match flag )               ( CP nm false     0300 1200 0900 )
           &compcs call,            ( compare characters )                ( CALL <addr>     1B00 ADDR )
    true nm &nextw beq,             ( if no match, try next word )        ( BEQ <addr> . .  1300 ADDR 1200 0800 )
@@ -104,6 +107,7 @@ zero cur &nomatch beq,             ( no match if start of dict )         ( BEQ <
               d c ld,              ( load char of word )                 ( LD c d          0100 1400 0200 )
                 c out,             ( output char )                       ( OUT c           0500 1400 )
               d d inc,             ( advance to next char )              ( INC d d         0600 0200 0200 )
+              d d inc, ( * )       ( advance to next char )              ( INC d d         0600 0200 0200 )
           len len dec,             ( decrement length )                  ( DEC len len     0700 1000 1000 )
   len zero &error bgt,             ( if more, continue )                 ( BGT <addr> . .  1500 ADDR 1000 0400 )
              63 c ldc,             ( load question mark [63] )           ( LDC c 63        0000 1400 3F00 )
@@ -113,6 +117,7 @@ zero cur &nomatch beq,             ( no match if start of dict )         ( BEQ <
             label &negate          ( set negative sign )
         true sign cp,              ( note: `true` is -1 )                ( CP sign true    0300 1E00 0800 )
               p p inc,             ( next char )                         ( INC p p         0600 1300 1300 )
+              p p inc, ( * )       ( next char )                         ( INC p p         0600 1300 1300 )
                                    ( fall through to &digits )
 
             label &digits          ( parse digits )
@@ -123,12 +128,14 @@ zero cur &nomatch beq,             ( no match if start of dict )         ( BEQ <
           n ten n mul,             ( base ten shift left )               ( MUL n ten n     0A00 0000 0700 0000 )
             n c n add,             ( add in one's place )                ( ADD n c n       0800 0000 1400 0000 )
               p p inc,             ( next char )                         ( INC p p         0600 1300 1300 )
+              p p inc, ( * )       ( next char )                         ( INC p p         0600 1300 1300 )
     p tib &digits blt,             ( not end? continue... )              ( BLT <addr> . .  1700 ADDR 1300 0F00 )
          sign n n mul,             ( multiply by sign )                  ( MUL n n sign    0A00 0000 0000 1E00 )
                   ret,                                                   ( RET             1C00 )
       
             label &parsenum        ( parse token as number )
         tib len p sub,             ( point p at start of word )          ( SUB p tib len   0900 1300 0F00 1000 )
+          p len p sub, ( * )       ( point p at start of word )          ( SUB p tib len   0900 1300 0F00 1000 )
            zero n cp,              ( init number )                       ( CP n zero       0300 0000 0400 )
          one sign cp,              ( init sign )                         ( CP sign one     0300 1E00 0500 )
               p c ld,              ( get char )                          ( LD c p          0100 1400 1300 )
@@ -138,16 +145,18 @@ zero cur &nomatch beq,             ( no match if start of dict )         ( BEQ <
             label &pushn           ( push interactive number )
               n s st,              ( store n at stack pointer )          ( ST s n          0200 1900 0000 )
               s s dec,             ( adjust stack pointer )              ( DEC s s         0700 1900 1900 )
+              s s dec, ( * )       ( adjust stack pointer )              ( DEC s s         0700 1900 1900 )
                   ret,                                                   ( RET             1C00 )
       
             label &popn            ( pop number )
               s s inc,             ( adjust stack pointer )              ( INC s s         0600 1900 1900 )
+              s s inc, ( * )       ( adjust stack pointer )              ( INC s s         0600 1900 1900 )
               s n ld,              ( load value )                        ( LD n s          0100 0000 1900 )
                   ret,                                                   ( RET             1C00 )
 
 ( --- literals --------------------------------------------------- )
 
-: append, d st, d d inc, ;         ( macro: append and advance d )
+: append, d st, d d inc, d d inc, ( * ) ;         ( macro: append and advance d )
 
             label &litn            ( compile literal )
               ldc append,          ( append ldc instruction )            ( ST d ldc        0200 0200 1A00 )
@@ -172,16 +181,19 @@ zero cur &nomatch beq,             ( no match if start of dict )         ( BEQ <
 
             label &exec            ( execute word )
         two cur m add,             ( point to code field )               ( ADD m cur two   0800 0300 1700 0600 )
+          two m m add, ( * )       ( point to code field )               ( ADD m cur two   0800 0300 1700 0600 )
                 m exec,            ( exec word )                         ( EXEC m          1900 0300 )
                   ret,                                                   ( RET             1C00 )
       
             label &compw           ( compile word )
             cur n inc,             ( point to immediate flag )           ( INC n cur       0600 0000 1700 )
+              n n inc, ( * )       ( point to immediate flag )           ( INC n cur       0600 0000 1700 )
               n m ld,              ( read immediate flag )               ( LD m n          0100 0300 0000 )
      true m &exec beq,             ( execute if immediate )              ( BEQ <addr> . .  1300 ADDR 0300 0800 )
              call append,          ( append call instruction )           ( ST d call       0200 0200 1B00 )
                                                                          ( INC d d         0600 0200 0200 )
               n n inc,             ( point to code field )               ( INC n n         0600 0000 0000 )
+              n n inc, ( * )       ( point to code field )               ( INC n n         0600 0000 0000 )
                 n append,          ( append code field address )         ( ST d n          0200 0200 0000 )
                                                                          ( INC d d         0600 0200 0200 )
                   ret,                                                   ( RET             1C00 )
@@ -211,15 +223,18 @@ variable link
            &token call,            ( read a token )                      ( CALL <addr>     1B00 ADDR )
             tib d cp,              ( move dict ptr to end of name )      ( CP d tib        0300 0200 0F00 )
               d d inc,             ( move past length field )            ( INC d d         0600 0200 0200 )
+              d d inc, ( * )       ( move past length field )            ( INC d d         0600 0200 0200 )
             lnk d st,              ( append link address )               ( ST d lnk        0200 0200 1800 )
             d lnk cp,              ( update link to here )               ( CP lnk d        0300 1800 0200 )
               d d inc,             ( advance dictionary pointer )        ( INC d d         0600 0200 0200 )
+              d d inc, ( * )       ( advance dictionary pointer )        ( INC d d         0600 0200 0200 )
              zero append,          ( append 0 immediate flag )           ( ST d zero       0200 0200 0400 )
                                                                          ( INC d d         0600 0200 0200 )
                   ret,                                                   ( RET             1C00 )
 
   0 sym immediate header,          ( set immediate flag )                ( immediate9 . 0  6900 6D00 6D00 6500 6400 6900 6100 7400 6500 0900 LINK 0000 )
             lnk n inc,             ( point to immediate flag )           ( INC n lnk       0600 0000 1800 )
+              n n inc, ( * )       ( point to immediate flag )           ( INC n lnk       0600 0000 1800 )
            true n st,              ( set immediate flag )                ( ST n true       0200 0000 0800 )
                   ret,                                                   ( RET             1C00 )
 
@@ -261,6 +276,7 @@ variable link
             &find call,            ( find token )                        ( CALL <addr>     1B00 ADDR )
             cur n cp,              ( prep to push cursor )               ( CP n cur        0300 0000 1700 )
           two n n add,             ( address of code field )             ( ADD n n two     0800 0000 0000 0600 )
+          two n n add, ( * )       ( address of code field )             ( ADD n n two     0800 0000 0000 0600 )
            &pushn jump,            ( push cursor )                       ( JUMP <addr>     1A00 ADDR )
 
           -1 40 1 header,          ( skip comment, 40=left paren ASCII ) ( 40 1 0 -1       2800 0100 LINK FFFF )
@@ -272,7 +288,7 @@ rparch n &comment bne,             ( continue until right-paren )        ( BNE <
 continue,                          ( patch jump ahead, )
 
        link @ lnk ldc,             ( compile-time link to runtime lnk )  ( LDC lnk link    0000 1800 E601 )
-       here 5 + d ldc,             ( runtime d just past this code )     ( LDC d here+5    0000 0200 F701 )
+      here 10 + d ldc,             ( runtime d just past this code )     ( LDC d here+10   0000 0200 F701 )
 
             &repl jump,            ( start the REPL )                    ( JUMP <addr>     1A00 ADDR )
 

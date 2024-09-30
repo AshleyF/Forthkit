@@ -1,7 +1,7 @@
 ( test plotting with pixels )
 ( requires: pixels )
 
-var x var y
+variable x variable y
 
 : start clear 0 x ! 0 y ! ;
 : | 0 do 35 = if x @ y @ set then 1 x +! loop 0 x ! 1 y +! ;

@@ -2,8 +2,8 @@ here
 3208 allot ( 80×40+8 )
 constant buffer
 
-: m@ buffer + @ ;
-: m! buffer + ! ;
+: b@ buffer + c@ ;
+: b! buffer + c! ;
 
 : floor ; ( integer math already )
 

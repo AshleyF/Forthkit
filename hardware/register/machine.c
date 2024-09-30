@@ -20,17 +20,17 @@ int main(void)
 
     short x, y, z;
 
-    void setcell(short a, short y)
+    void setcell(unsigned short a, short y)
     {
         //printf("setcell %i -> %i\n", x, y);
-        mem[a * 2] = y & 0x00FF;
-        mem[a * 2 + 1] = (y >> 8) & 0x00FF;
+        mem[a] = y & 0x00FF;
+        mem[a + 1] = (y >> 8) & 0x00FF;
     }
 
-    short getcell(short a)
+    short getcell(unsigned short a)
     {
-        short low = mem[a * 2];
-        short high = mem[a * 2 + 1];
+        short low = mem[a];
+        short high = mem[a + 1];
         short c = low | (high << 8);
         //printf("getcell %i -> %i\n", x, c);
         return c;
@@ -38,7 +38,8 @@ int main(void)
 
     short getinst()
     {
-        short c = getcell(pc++);
+        short c = getcell(pc);
+        pc += 2;
         //printf("getinst %i -> %i\n", pc, c);
         return c;
     }

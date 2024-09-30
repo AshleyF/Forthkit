@@ -8,7 +8,7 @@ class Forth:
   def __init__(self):
     self.index = 0
     self.variables = []
-    self.memory = [0] * 32 * 1024
+    self.memory = bytearray(64 * 1024)
     self.stack = []
     self.dictionary = {
       '.'        : lambda: print(self.pop()),
@@ -45,9 +45,10 @@ class Forth:
       '@'        : lambda: self.x_x(lambda x: self.variables[int(x)]),
       '!'        : lambda: self.xx_(self.variableStore),
       'constant' : self.constant,
-      'm@'       : lambda: self.x_x(lambda x: self.memory[int(x)]),
+      'm@'       : lambda: self.x_x(lambda x: (self.memory[int(x)] | self.memory[int(x + 1)] << 8)),
       'm!'       : lambda: self.xx_(self.memoryStore),
-      '.m'       : lambda: print(self.memory[int(self.pop()):int(self.pop())]),
+      'b@'       : lambda: self.x_x(lambda x: self.memory[int(x)]),
+      'b!'       : lambda: self.xx_(self.memoryStoreByte),
       'dump'     : self.dump,
       '('        : self.comment,
       'if'       : self.doif,
@@ -96,7 +97,8 @@ class Forth:
   def xx_(self, f): self.flip2(f, self.pop(), self.pop())
 
   def variableStore(self, val, addr): self.variables[addr] = val
-  def memoryStore(self, val, addr): self.memory[int(addr)] = int(val)
+  def memoryStore(self, val, addr): self.memory[int(addr)] = int(val) & 0xFF; self.memory[int(addr) + 1] = (int(val) >> 8) & 0xFF
+  def memoryStoreByte(self, val, addr): self.memory[int(addr)] = int(val) & 0xFF
 
   def variable(self):
     name = next(self.tokens)
@@ -112,7 +114,7 @@ class Forth:
   def dump(self):
     with open('image.bin', 'wb') as f:
       for m in self.memory:
-        f.write(struct.pack('h', m))
+        f.write(struct.pack('B', m))
 
   def scan(self):
     while True:
