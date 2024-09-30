@@ -20,4 +20,4 @@
 
 : /mod 2dup / -rot mod ;
 
-: factorial dup 1 > if dup 1- factorial * then ;
+: factorial dup 1 > if dup 1- recurse * then ;

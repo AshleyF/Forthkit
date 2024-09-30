@@ -4,7 +4,7 @@
 
 int main(void)
 {
-    short reg[32] = {};
+    short reg[64] = {};
     unsigned char mem[0x10000];
     short rstack[256] = {};
     short* r = rstack;
@@ -22,7 +22,6 @@ int main(void)
 
     void setcell(unsigned short a, short y)
     {
-        //printf("setcell %i -> %i\n", x, y);
         mem[a] = y & 0x00FF;
         mem[a + 1] = (y >> 8) & 0x00FF;
     }
@@ -32,7 +31,6 @@ int main(void)
         short low = mem[a];
         short high = mem[a + 1];
         short c = low | (high << 8);
-        //printf("getcell %i -> %i\n", x, c);
         return c;
     }
 
@@ -40,7 +38,6 @@ int main(void)
     {
         short c = getcell(pc);
         pc += 2;
-        //printf("getinst %i -> %i\n", pc, c);
         return c;
     }
 

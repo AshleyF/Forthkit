@@ -153,7 +153,7 @@ class Forth:
 
   def define(self):
     name = next(self.tokens)
-    code = list(takewhile(lambda t: t != ';', self.scan()))
+    code = list(map(lambda w: name if w == 'recurse' else w, takewhile(lambda t: t != ';', self.scan())))
     self.dictionary[name] = (lambda: self.execute(code))
     if not name in self.names: self.names.append([name])
 

@@ -8,8 +8,8 @@ create : compile create compile ; ( magic! )
 : x 1 ; ( shared by interpreter )
 : d 2 ; ( dictionary pointer - shared by interpreter )
 : zero 4 ; ( shared by interpreter )
-: y 30 ; 
-: z 31 ; 
+: y 31 ; ( beyond registers in interpreter )
+: z 32 ; 
 
 : [ interact ; immediate
 : ] compile ;
@@ -107,7 +107,7 @@ create : compile create compile ; ( magic! )
 : constant create literal ret, ;  ( e.g. 123 constant foo -> foo3 . 0  LDC n 123  CALL &pushn  RET )
 : variable create _dp+12 literal ret, 0 , ;  ( e.g. variable foo -> foo3 . 0  LDC n <addr>  CALL &pushn  RET  0 )
 
-: allot popx [ x d d add, x d d add, ( * ) ] ;
+: allot popx [ x d d add, ] ;
 
 : if [ ' popx literal ] call, here 2 + ( * ) zero x 0 beq, ; immediate
 : else here 2 + ( * ) 0 jump, swap here swap ! ; immediate
@@ -135,7 +135,7 @@ create : compile create compile ; ( magic! )
 : again [ ' popx literal ] call, jump, ; immediate
 
 here
-32 allot
+64 allot
 variable r r !
 
 : >r r @ ! r @ 2 + ( * ) r ! ;

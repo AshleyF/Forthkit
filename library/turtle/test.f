@@ -30,7 +30,7 @@
 : petal 2 0 do 4 6 16 arc 1 -6 16 arc 180 turn loop ;
 : flower start [: petal :] 15 spin show ;  ( TODO ' petal instead of [: petal :] )
 
-: spiral-rec 1 + dup move 92 turn dup 110 < if spiral-rec then ;
+: spiral-rec 1 + dup move 92 turn dup 110 < if recurse then ;
 : spiral start 1 spiral-rec show ;
 
 burst shapes squaral spiro stars rose flower spiral

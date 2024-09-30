@@ -99,6 +99,7 @@ zero cur &nomatch beq,             ( no match if start of dict )         ( BEQ <
                   
             label &find            ( find word [tib within dictionary] )
           lnk cur cp,              ( initialize cursor to last )         ( CP cur lnk      0300 1700 1800 )
+ true comp &nextw beq,             ( skip current word if compiling )
             &comp jump,            ( compare with tib )                  ( JUMP <addr>     1A00 ADDR )
       
 ( --- number processing ------------------------------------------ )
@@ -284,6 +285,13 @@ variable link
                 n in,              ( next char )                         ( IN n            0400 0000 )
 rparch n &comment bne,             ( continue until right-paren )        ( BNE <addr> . .  1400 ADDR 0000 0B00 )
                   ret,                                                   ( RET             1C00 )
+
+   -1 sym recurse header,
+             call append,          ( append call instruction )
+          two lnk n add,           ( point to code field )
+            two n n add,           ( point to code field )
+                n append,          ( append code field address )
+                  ret,
 
 continue,                          ( patch jump ahead, )
 
