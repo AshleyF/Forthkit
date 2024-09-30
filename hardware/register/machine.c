@@ -22,16 +22,13 @@ int main(void)
 
     void setcell(unsigned short a, short y)
     {
-        mem[a] = y & 0x00FF;
-        mem[a + 1] = (y >> 8) & 0x00FF;
+        mem[a] = y;
+        mem[a + 1] = y >> 8;
     }
 
     short getcell(unsigned short a)
     {
-        short low = mem[a];
-        short high = mem[a + 1];
-        short c = low | (high << 8);
-        return c;
+        return mem[a] | (mem[a + 1] << 8);
     }
 
     short getinst()
@@ -54,7 +51,7 @@ int main(void)
     while (1)
     {
         //printf("%04X -> %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X \n", pc, mem[pc], mem[pc+1], mem[pc+2], mem[pc+3], mem[pc+4], mem[pc+5], mem[pc+6], mem[pc+7], mem[pc+8], mem[pc+9]);
-        switch(NEXT)
+        switch(mem[pc++])
         {
             case  0:      return 0; // halt
             case  1: XY;  Rx = y;               break; // ldc (x = v)
@@ -101,7 +98,7 @@ int main(void)
                 printf("Inst: %i Reg: %04x %04x %04x %04x %04x %04x %04x Stack: %04x %04x %04x %04x %04x %04x %04x %04x Return: %i %i %i %i %i %i %i %i\n", mem[pc], reg[0], reg[1], reg[2], reg[3], reg[4], reg[5], reg[6], mem[32767], mem[32766], mem[32765], mem[32764], mem[32763], mem[32762], mem[32761], mem[32760], mem[32255], mem[32254], mem[32253], mem[32252], mem[32251], mem[32250], mem[32249], mem[32248]);
                 break;
             default:
-                printf("Invalid instruction! (pc=%04X [%04X])\n", pc - 1, getcell(pc - 1));
+                printf("Invalid instruction! (pc=%04X [%04X])\n", pc - 2, getcell(pc - 2));
                 return 1;
         }
     }

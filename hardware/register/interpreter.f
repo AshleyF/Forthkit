@@ -158,15 +158,16 @@ zero cur &nomatch beq,             ( no match if start of dict )         ( BEQ <
 ( --- literals --------------------------------------------------- )
 
 : append, d st, d d inc, d d inc, ( * ) ;         ( macro: append and advance d )
+: appendc, d st, d d inc, ;        ( macro: append byte and advance d )
 
             label &litn            ( compile literal )
-              ldc append,          ( append ldc instruction )            ( ST d ldc        0200 0200 1A00 )
+              ldc appendc,         ( append ldc instruction )            ( ST d ldc        0200 0200 1A00 )
                                                                          ( INC d d         0600 0200 0200 )
              zero append,          ( append n register number [0] )      ( ST d zero       0200 0200 0400 )
                                                                          ( INC d d         0600 0200 0200 )
                 n append,          ( append value )                      ( ST d n          0200 0200 0000 )
                                                                          ( INC d d         0600 0200 0200 )
-             call append,          ( append call instruction )           ( ST d call       0200 0200 1B00 )
+             call appendc,         ( append call instruction )           ( ST d call       0200 0200 1B00 )
                                                                          ( INC d d         0600 0200 0200 )
          &pushn m ldc,             ( load address of &pushn )            ( LDC m <addr>    0000 0300 ADDR )
                 m append,          ( append pushn address )              ( ST d m          0200 0200 0300 )
@@ -191,7 +192,7 @@ zero cur &nomatch beq,             ( no match if start of dict )         ( BEQ <
               n n inc, ( * )       ( point to immediate flag )           ( INC n cur       0600 0000 1700 )
               n m ld,              ( read immediate flag )               ( LD m n          0100 0300 0000 )
      true m &exec beq,             ( execute if immediate )              ( BEQ <addr> . .  1300 ADDR 0300 0800 )
-             call append,          ( append call instruction )           ( ST d call       0200 0200 1B00 )
+             call appendc,         ( append call instruction )           ( ST d call       0200 0200 1B00 )
                                                                          ( INC d d         0600 0200 0200 )
               n n inc,             ( point to code field )               ( INC n n         0600 0000 0000 )
               n n inc, ( * )       ( point to code field )               ( INC n n         0600 0000 0000 )
@@ -249,7 +250,7 @@ variable link
                   ret,                                                   ( RET             1C00 )
 
          -1 sym ; header,          ( return )                            ( ;1 . -1         3B00 0100 LINK FFFF )
-              ret append,          ( append ret instruction )            ( ST d ret        0200 0200 1C00 )
+             ret appendc,          ( append ret instruction )            ( ST d ret        0200 0200 1C00 )
                                                                          ( INC d d         0600 0200 0200 )
         &interact jump,            ( switch out of compiling mode )      ( JUMP <addr>     1A00 ADDR )
        
@@ -272,6 +273,11 @@ variable link
                                                                          ( INC d d         0600 0200 0200 )
                   ret,                                                   ( RET             1C00 )
        
+         0 sym c, header,          ( append byte value from stack )
+            &popn call,            ( pop value from stack )
+               n appendc,          ( append n )
+                  ret,
+       
           0 sym ' header,          ( find word - nm set if not found )   ( '1 . 0          2700 0100 LINK 0000 )
            &token call,            ( read a token )                      ( CALL <addr>     1B00 ADDR )
             &find call,            ( find token )                        ( CALL <addr>     1B00 ADDR )
@@ -287,7 +293,7 @@ rparch n &comment bne,             ( continue until right-paren )        ( BNE <
                   ret,                                                   ( RET             1C00 )
 
    -1 sym recurse header,
-             call append,          ( append call instruction )
+            call appendc,          ( append call instruction )
           two lnk n add,           ( point to code field )
             two n n add,           ( point to code field )
                 n append,          ( append code field address )
