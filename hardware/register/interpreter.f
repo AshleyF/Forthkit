@@ -54,7 +54,7 @@ ahead,                             ( jump over dictionary )
           len len inc,             ( increment length )
                 c in,              ( read char )
      c spch &name bgt,             ( continue until whitespace )
-          len tib st,              ( append length )
+          len tib stb,             ( append length )
                   ret,
       
             label &token           ( read token into buffer )
@@ -86,8 +86,7 @@ ahead,                             ( jump over dictionary )
 zero cur &nomatch beq,             ( no match if start of dict )
         tib len p sub,             ( point p at start of token )
            cur p' dec,             ( point p' at length field TODO sub two )
-            p' p' dec, ( * )       ( point p' at length field )
-          p' len' ld,              ( get length )
+          p' len' ldb,             ( get length )
   len' len &nextw bne,             ( lengths don't match? )
         p' len p' sub,             ( move to beginning of word )
          false nm cp,              ( reset no-match flag )
@@ -206,13 +205,12 @@ zero cur &nomatch beq,             ( no match if start of dict )
 ( --- initial dictionary ----------------------------------------- )
 
 variable link
-: header, dup 0 do swap c, loop , ( length ) link @ here link ! , ( link ) , ( flag ) ;
+: header, dup 0 do swap c, loop c, ( length ) link @ here link ! , ( link ) , ( flag ) ;
 
      0 sym create header,          ( word to create words )
            &token call,            ( read a token )
             tib d cp,              ( move dict ptr to end of name )
               d d inc,             ( move past length field )
-              d d inc, ( * )       ( move past length field )
             lnk d st,              ( append link address )
             d lnk cp,              ( update link to here )
               d d inc,             ( advance dictionary pointer )
