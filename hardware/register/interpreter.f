@@ -109,7 +109,7 @@ zero cur &nomatch beq,             ( no match if start of dict )
   len zero &error bgt,             ( if more, continue )
              c 63 ldc,             ( load question mark [63] )
                 c out,             ( output question mark )
-                  halt,            ( halt! )
+                  halt,            ( halt! TODO: recover )
 
             label &negate          ( set negative sign )
         true sign cp,              ( note: `true` is -1 )
@@ -151,7 +151,7 @@ zero cur &nomatch beq,             ( no match if start of dict )
 ( --- literals --------------------------------------------------- )
 
 : append, d st, d d inc, d d inc, ( * ) ;  ( macro: append and advance d )
-: appendc, d st, d d inc, ;        ( macro: append byte and advance d )
+: appendc, d stb, d d inc, ;        ( macro: append byte and advance d )
 
             label &litn            ( compile literal )
               ldc appendc,         ( append ldc instruction )
@@ -168,20 +168,19 @@ zero cur &nomatch beq,             ( no match if start of dict )
            &pushn jump,            ( else, push literal )
       
 ( --- word handling ----------------------------------------------- )
-
+            
             label &exec            ( execute word )
         two cur m add,             ( point to code field )
-          two m m add,             ( point to code field TODO 3+ )
+              m m inc,             ( point to code field TODO 3+ )
                 m exec,            ( exec word )
                   ret,
       
             label &compw           ( compile word )
             cur n inc,             ( point to immediate flag TODO two add )
               n n inc, ( * )       ( point to immediate flag )
-              n m ld,              ( read immediate flag )
+              n m ldb,             ( read immediate flag )
     false m &exec bne,             ( execute if immediate -- not 255 )
              call appendc,         ( append call instruction )
-              n n inc,             ( point to code field )
               n n inc,             ( point to code field )
                 n append,          ( append code field address )
                   ret,
@@ -205,7 +204,7 @@ zero cur &nomatch beq,             ( no match if start of dict )
 ( --- initial dictionary ----------------------------------------- )
 
 variable link
-: header, dup 0 do swap c, loop c, ( length ) link @ here link ! , ( link ) , ( flag ) ;
+: header, dup 0 do swap c, loop c, ( length ) link @ here link ! , ( link ) c, ( flag ) ;
 
      0 sym create header,          ( word to create words )
            &token call,            ( read a token )
@@ -215,13 +214,13 @@ variable link
             d lnk cp,              ( update link to here )
               d d inc,             ( advance dictionary pointer )
               d d inc, ( * )       ( advance dictionary pointer )
-             zero append,          ( append 0 immediate flag )
+             zero appendc,         ( append 0 immediate flag )
                   ret,
 
   0 sym immediate header,          ( set immediate flag )
             lnk n inc,             ( point to immediate flag )
               n n inc, ( * )       ( point to immediate flag )
-           true n st,              ( set immediate flag )
+           true n stb,             ( set immediate flag )
                   ret,
 
     0 sym compile header,          ( switch to compiling mode )
@@ -265,7 +264,7 @@ variable link
             &find call,            ( find token )
             cur n cp,              ( prep to push cursor )
           two n n add,             ( address of code field )
-          two n n add, ( * )       ( address of code field )
+              n n inc,             ( address of code field TODO 3+ )
            &pushn jump,            ( push cursor )
 
           -1 40 1 header,          ( skip comment, 40=left paren ASCII )
@@ -275,9 +274,9 @@ rparch n &comment bne,             ( continue until right-paren )
                   ret,
 
    -1 sym recurse header,
-            call appendc,          ( append call instruction )
-          two lnk n add,           ( point to code field )
-            two n n add,           ( point to code field )
+             call appendc,         ( append call instruction )
+        two lnk n add,             ( point to code field )
+              n n inc,             ( point to code field TODO 3+ )
                 n append,          ( append code field address )
                   ret,
 

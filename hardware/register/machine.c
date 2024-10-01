@@ -39,6 +39,7 @@ int main(void)
     #define Rx reg[x]
     #define Ry reg[y]
     #define Rz reg[z]
+    #define OUT wprintf(L"%lc", Rx); fflush(stdout)
 
     setlocale(LC_ALL, "");
 
@@ -55,7 +56,7 @@ int main(void)
             case  5: XY;    mem[Rx] = Ry;         break; // stb (m[x] = y)
             case  6: XY;    Rx = Ry;              break; // cp (x = y)
             case  7: X;     Rx = getc(stdin);     break; // in (x = getc())
-            case  8: X;     wprintf(L"%lc", Rx);  break; // out (putc(x)())
+            case  8: X;     OUT;                  break; // out (putc(x)())
             case  9: XY;    Rx = Ry + 1;          break; // inc (x = ++y)
             case 10: XY;    Rx = Ry - 1;          break; // dec (x = --y)
             case 11: XYZ;   Rx = Ry + Rz;         break; // add (x = y + z)
