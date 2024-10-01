@@ -37,11 +37,11 @@ variable dp ( dictionary pointer )
 : call,  29 c,  , ;            (     a call,  →  push[pc], pc = a   )
 : exec,  30 c, c, ;            (     x exec,  →  pc = [x]           )
 : ret,   31 c, ;               (       ret,   →  pc = pop[]         )
-: dump,  32 c, ;               (       dump,  →  core to image.bin  )
+: dump,  32 c, c, c, ;         (       dump,  →  core to image.bin  )
 : debug, 33 c, ;               (       debug, →  show machine state )
 
 : label here constant ;
 : ahead, here 1 + 0 jump, ; ( dummy jump, push address )
 : continue, here swap m! ; ( patch jump )
 
-: assemble here . dump halt ;
+: assemble 0 here dump halt ;

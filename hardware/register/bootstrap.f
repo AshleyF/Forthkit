@@ -9,7 +9,7 @@ create : compile create compile ; ( magic! )
 : d 2 ; ( dictionary pointer - shared by interpreter )
 : zero 4 ; ( shared by interpreter )
 : y 31 ; ( beyond registers in interpreter )
-: z 32 ; 
+: z 32 ;
 
 : [ interact ; immediate
 : ] compile ;
@@ -53,7 +53,7 @@ create : compile create compile ; ( magic! )
 : call,  29 c,  , ;
 : exec,  30 c, c, ;
 : ret,   31 c, ;
-: dump,  32 c, ;
+: dump,  32 c, c, c, ;
 : debug, 33 c, ;
 
 ( instruction words )
@@ -73,7 +73,7 @@ create : compile create compile ; ( magic! )
 : 1-      popx  [   x x dec,  ] pushx ;
 : execute popx  [     x exec, ] ;
 : halt [ halt, ] ;
-: dump [ dump, ] ;
+: dump popxy [ x y dump, ] ;
 : debug [ debug, ] ;
 
 ( stack manipulation )

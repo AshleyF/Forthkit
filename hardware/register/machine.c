@@ -11,7 +11,10 @@ int main(void)
     short pc = 0;
 
     FILE *file = fopen("image.bin", "r");
-    if (!file || !fread(&mem, sizeof(mem), 1, file))
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+    if (!file || !fread(&mem, size, 1, file)) // assumes size <= sizeof(mem)
     {
         printf("Could not open boot image.\n");
         return 1;
@@ -80,9 +83,9 @@ int main(void)
             case 29: V;     *(r++) = pc; pc = v;  break; // call (jsr(v))
             case 30: X;     *(r++) = pc; pc = Rx; break; // exec (jsr(x))
             case 31:        pc = *(--r);          break; // return (ret)
-            case 32: // dump
+            case 32: XY; // dump
                 file = fopen("image.bin", "w");
-                if (!file || !fwrite(&mem, sizeof(mem), 1, file))
+                if (!file || !fwrite(&mem + Ry, Rx - Ry, 1, file))
                 {
                     printf("Could not write boot image.\n");
                     return 1;

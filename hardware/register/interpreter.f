@@ -241,7 +241,7 @@ variable link
            &pushn jump,            ( jump to push )
        
        0 sym popx header,          ( pop number from stack to x )
-            &popn call,            ( jump pop )
+            &popn call,            ( call pop )
               n x cp,              ( interpreter to bootstrap reg )
                   ret,
 
