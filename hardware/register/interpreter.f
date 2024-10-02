@@ -73,8 +73,8 @@ ahead,                             ( jump over dictionary )
               p c ldb,             ( get char of input word )
             p' c' ldb,             ( get char of dictionary word )
     c c' &nomatch bne,             ( don't match? )
-            p' p' inc, ( * )       ( next char of dictionary word )
-              p p inc, ( * )       ( next char of input word )
+            p' p' inc,             ( next char of dictionary word )
+              p p inc,             ( next char of input word )
     p tib &compcs blt,             ( not end of word? continue... )
                   ret,             ( we have a match! )
       
@@ -138,20 +138,18 @@ zero cur &nomatch beq,             ( no match if start of dict )
       
             label &pushn           ( push interactive number )
               n s st,              ( store n at stack pointer )
-              s s dec,             ( adjust stack pointer TODO two sub )
-              s s dec, ( * )       ( adjust stack pointer )
+            s two s sub,           ( adjust stack pointer TODO two sub )
                   ret,
       
             label &popn            ( pop number )
-              s s inc,             ( adjust stack pointer TODO two add )
-              s s inc, ( * )       ( adjust stack pointer )
+          s two s add,             ( adjust stack pointer TODO two add )
               s n ld,              ( load value )
                   ret,
 
 ( --- literals --------------------------------------------------- )
 
-: append, d st, d d inc, d d inc, ( * ) ;  ( macro: append and advance d )
-: appendc, d stb, d d inc, ;        ( macro: append byte and advance d )
+: append, d st, d two d add, ;     ( macro: append and advance d )
+: appendc, d stb, d d inc, ;       ( macro: append byte and advance d )
 
             label &litn            ( compile literal )
               ldc appendc,         ( append ldc instruction )
@@ -176,8 +174,7 @@ zero cur &nomatch beq,             ( no match if start of dict )
                   ret,
       
             label &compw           ( compile word )
-            cur n inc,             ( point to immediate flag TODO two add )
-              n n inc, ( * )       ( point to immediate flag )
+        cur two n add,             ( point to immediate flag TODO two add )
               n m ldb,             ( read immediate flag )
     false m &exec bne,             ( execute if immediate -- not 255 )
              call appendc,         ( append call instruction )
@@ -212,14 +209,12 @@ variable link
               d d inc,             ( move past length field )
             lnk d st,              ( append link address )
             d lnk cp,              ( update link to here )
-              d d inc,             ( advance dictionary pointer )
-              d d inc, ( * )       ( advance dictionary pointer )
+          d two d add,             ( advance dictionary pointer )
              zero appendc,         ( append 0 immediate flag )
                   ret,
 
   0 sym immediate header,          ( set immediate flag )
-            lnk n inc,             ( point to immediate flag )
-              n n inc, ( * )       ( point to immediate flag )
+        lnk two n add,             ( point to immediate flag )
            true n stb,             ( set immediate flag )
                   ret,
 
