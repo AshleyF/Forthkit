@@ -33,4 +33,5 @@
 : spiral-rec 1 + dup move 92 turn dup 110 < if recurse then ;
 : spiral start 1 spiral-rec show ;
 
-burst shapes squaral spiro stars rose flower spiral
+: demo burst shapes squaral spiro stars rose flower spiral ;
+demo

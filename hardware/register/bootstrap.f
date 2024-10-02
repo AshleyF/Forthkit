@@ -7,7 +7,8 @@ create : compile create compile ; ( magic! )
 
 : x 1 ; ( shared by interpreter )
 : d 2 ; ( dictionary pointer - shared by interpreter )
-: zero 4 ; ( shared by interpreter )
+: lnk 3 ; ( link pointer - shared by interpreter )
+: zero 5 ; ( shared by interpreter )
 : y 31 ; ( beyond registers in interpreter )
 : z 32 ;
 
@@ -72,8 +73,8 @@ create : compile create compile ; ( magic! )
 : 1+      popx  [   x x inc,  ] pushx ;
 : 1-      popx  [   x x dec,  ] pushx ;
 : execute popx  [     x exec, ] ;
-: halt [ halt, ] ;
 : dump popxy [ x y dump, ] ;
+: halt [ halt, ] ;
 : debug [ debug, ] ;
 
 ( stack manipulation )
@@ -102,6 +103,8 @@ create : compile create compile ; ( magic! )
 : c! popxy [ x y stb, ] ;
 
 : here [ d x cp, ] pushx ;
+
+: save [ x 5 ldc, lnk x st, x 1 ldc, d x st, ] 0 here dump ; ( store at magic address for image )
 
 : constant create literal ret, ;  ( e.g. 123 constant foo -> foo3 . 0  LDC 123 n  CALL &pushn  RET )
 : variable create here 9 + literal ret, 0 , ;  ( e.g. variable foo -> foo3 . 0  LDC <addr> n  CALL &pushn  RET  0 )

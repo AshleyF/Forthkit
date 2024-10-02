@@ -5,33 +5,35 @@
 
  0 constant n                      ( number parsing - assumed 0 below )
  1 constant x                      ( shared by bootstrap )
- 2 constant d                      ( dictionary pointer )
- 3 constant m
+ 2 constant d             d 0 ldc, ( dictionary pointer - shared by bootstrap - magic address )
+ 3 constant lnk         lnk 0 ldc, ( link pointer - magic address )
+ 4 constant m
+ 
+ ( magic addresses: d at 1, lnk at 5 )
 
- 4 constant zero                   ( constant 0 )
- 5 constant one         one 1 ldc, ( constant 1 )
- 6 constant two         two 2 ldc, ( constant 2 )
- 7 constant ten        ten 10 ldc, ( number ten decimal by default )
+ 5 constant zero                   ( constant 0 - shared by bootstrap )
+ 6 constant one         one 1 ldc, ( constant 1 )
+ 7 constant two         two 2 ldc, ( constant 2 )
+ 8 constant ten        ten 10 ldc, ( number ten decimal by default )
 
- 8 constant true      true -1 ldc, ( truth value - all bits set )
- 9 constant false                  ( false value )
+ 9 constant true      true -1 ldc, ( truth value - all bits set )
+10 constant false                  ( false value )
 
-10 constant zeroch  zeroch 48 ldc, ( '0' ASCII )
-11 constant rparch  rparch 41 ldc, ( right parenthesis ASCII )
-12 constant spch    spch   32 ldc, ( space ASCII )
-13 constant negch   negch  45 ldc, ( '-' ASCII )
+11 constant zeroch  zeroch 48 ldc, ( '0' ASCII )
+12 constant rparch  rparch 41 ldc, ( right parenthesis ASCII )
+13 constant spch    spch   32 ldc, ( space ASCII )
+14 constant negch   negch  45 ldc, ( '-' ASCII )
 
-14 constant c                      ( char last read )
-15 constant tib                    ( terminal input buffer )
-16 constant len                    ( token length )
-17 constant len'                   ( name length )
-18 constant nm                     ( match flag for search )
-19 constant p                      ( pointer )
-20 constant c                      ( char being compared )
-21 constant p'                     ( pointer )
-22 constant c'                     ( char being compared )
-23 constant cur                    ( cursor )
-24 constant lnk                    ( link pointer )
+15 constant c                      ( char last read )
+16 constant tib                    ( terminal input buffer )
+17 constant len                    ( token length )
+18 constant len'                   ( name length )
+19 constant nm                     ( match flag for search )
+20 constant p                      ( pointer )
+21 constant c                      ( char being compared )
+22 constant p'                     ( pointer )
+23 constant c'                     ( char being compared )
+24 constant cur                    ( cursor )
 25 constant s         s 32767 ldc, ( stack pointer )
 26 constant ldc         ldc 1 ldc, ( ldc instruction [0] )
 27 constant call      call 29 ldc, ( call instruction )
@@ -277,8 +279,10 @@ rparch n &comment bne,             ( continue until right-paren )
 
 continue,                          ( patch jump ahead, )
 
+     d zero &repl bne,             ( loading from image with dictionary in place )
+
        lnk link @ ldc,             ( compile-time link to runtime lnk )
-      d here 10 + ldc,             ( runtime d just past this code )
+      d here 13 + ldc,             ( runtime d just past this code )
 
             &repl jump,            ( start the REPL )
 
