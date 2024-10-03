@@ -51,7 +51,7 @@ int main(void)
         //printf("%04X -> %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X \n", pc, mem[pc], mem[pc+1], mem[pc+2], mem[pc+3], mem[pc+4], mem[pc+5], mem[pc+6], mem[pc+7], mem[pc+8], mem[pc+9]);
         switch(NEXT)
         {
-            case  0:        return 0; // halt
+            case  0:        return 0;                    // halt
             case  1: V; X;  Rx = v;               break; // ldc (x = v) // TODO: swap x <-> v
             case  2: XY;    Rx = getcell(Ry);     break; // ld (x = m[y])
             case  3: XY;    setcell(Rx, Ry);      break; // st (m[x] = y)
@@ -85,7 +85,7 @@ int main(void)
             case 31:        pc = *(--r);          break; // return (ret)
             case 32: XY; // dump
                 file = fopen("image.bin", "w");
-                if (!file || !fwrite(&mem + Ry, Rx - Ry, 1, file))
+                if (!file || !fwrite(mem + Ry, 1, Rx - Ry, file))
                 {
                     printf("Could not write boot image.\n");
                     return 1;
