@@ -1,4 +1,4 @@
-( interpreter - reads tokens, compiles headers, literals, ... )
+( kernel - outer interpreter reads tokens, compiles headers, literals, ... )
 ( requires assembler )
 
 ( --- register allocation/init ----------------------------------- )

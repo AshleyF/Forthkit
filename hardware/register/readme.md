@@ -346,7 +346,7 @@ Finally, the `assemble` word dumps memory to an image file (and displays the cur
 
 ## Interpreter
 
-An [interpreter](./interpreter.f) may be assembled with [`./interpreter.sh`](./interpreter.sh). This reads Forth tokens, compiles dictionary headers and literals, and manages a stack.
+A [kerel](./kernel.f) may be assembled with [`./kernel.sh`](./kernel.sh). This reads Forth tokens, compiles dictionary headers and literals, and manages a stack.
 
 The dictionary format is as follows. Words are length-suffixed characters followed by a "link" field pointing to the link field of the previous word (or `0` if the first word), followed by an "immediate flag" indicating whether the word should be executed even in compiling mode, followed by machine code (VM bytecode) and presumably a `ret` instruction.
 

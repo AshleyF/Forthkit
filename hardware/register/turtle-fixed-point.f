@@ -1,9 +1,6 @@
 ( turtle graphics )
 ( requires: pixels-adapter.f pixels.f )
 
-: c@ _c@ ; ( restore after pixels adapter remapping )
-: c! _c! ;
-
 here
 255 c, 255 c, 255 c, 255 c, 254 c, 254 c, 254 c, 253 c, 253 c, 252 c,
 251 c, 250 c, 249 c, 248 c, 247 c, 246 c, 245 c, 244 c, 242 c, 241 c,

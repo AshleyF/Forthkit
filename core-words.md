@@ -5,7 +5,7 @@
 
 ## Implemented
 
-- [interpreter.f](./hardware/register/interpreter.f)
+- [kernel.f](./hardware/register/kernel.f)
     - `create`
     - `immediate`
     - `compile` (non-standard)

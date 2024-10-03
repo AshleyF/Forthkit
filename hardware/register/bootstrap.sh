@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-. ./image.sh
+. ./kernel.sh
 echo "Running bootstrap..."
 cat ./bootstrap.f - | ./machine

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
-. ./image.sh
-echo "Running bootstrap..."
+. ./machine.sh
+. ./kernel.sh
+echo "Running turtle test..."
 cat ./bootstrap.f ../../library/prelude.f pixels-adapter.f ../../library/pixels/pixels.f turtle-fixed-point.f ../../library/turtle/test.f - | ./machine
