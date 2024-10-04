@@ -11,6 +11,8 @@ Inspired by [Lispkit](https://github.com/AshleyF/Lispkit), build your own Forth 
 4) Abandon the Python interpreter and [bootstrap](./hardware/register/bootstrap.f) Forth to the new "hardware"
     * [Port pixel library](./hardware/register/pixels-adapter.f) to this
     * [Port turtle graphics](./hardware/register/turtle-fixed-point.f) to this (using fixed point)
+    * [Port kernel itself](./hardware/register/kernel-adapter.f) to this
+    * [Achieve meta-circularity!](./hardware/register/meta.sh) That is, build the kernel using Python, then use that kernel to build a new (identical for now) kernel. Iterate.
     * TODO: Fill out the vocabulary to support the [standard core words](./core-words.md)
 5) TODO: Build an inner interpreter and take away `call`/`ret` from the "hardware"
     * TODO: Experiment with direct/indirect threading

@@ -113,7 +113,7 @@ class Forth:
 
   def dump(self, start, end):
     with open('image.bin', 'wb') as f:
-      for m in self.memory[int(start):int(end)+1]:
+      for m in self.memory[int(start):int(end)]:
         f.write(struct.pack('B', m))
 
   def scan(self):
