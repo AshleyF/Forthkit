@@ -60,7 +60,6 @@
     - `ret,` (non-standard, assembly)
     - `halt,` (non-standard, assembly)
     - `dump,` (non-standard, assembly)
-    - `debug,` (non-standard, assembly)
     - `+`
     - `-`
     - `*`
@@ -77,7 +76,6 @@
     - `execute`
     - `halt` (non-standard)
     - `dump` (non-standard)
-    - `debug` (non-standard)
     - `drop`
     - `dup`
     - `over`

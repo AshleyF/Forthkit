@@ -3,10 +3,15 @@
 rm ./image.bin
 rm ./kernel.bin
 
-. ./kernel.sh
+. ./kernel.sh # build kernel using Python
 mv ./image.bin ./kernel.bin
 
-. ./meta.sh
+. ./meta.sh # build kernel using machine
+
+diff -s <(xxd image.bin) <(xxd kernel.bin)
+
+# go around again!
+cat ./bootstrap.f assembler-adapter.f ./assembler.f kernel-adapter.f kernel.f | ./machine
 
 diff -s <(xxd image.bin) <(xxd kernel.bin)
 
