@@ -204,6 +204,11 @@ zero cur 'nomatch beq,             ( no match if start of dict )
 variable link
 : header, dup 0 do swap c, loop c, ( length ) link @ here link ! , ( link ) c, ( flag ) ;
 
+    -1 sym ascii header,           ( word to get ASCII value of next word )
+           'token call,            ( read a word )
+              d n ldb,             ( load first char into n )
+            'litn jump,            ( compile literal n )
+
      0 sym create header,          ( word to create words )
            'token call,            ( read a token )
             tib d cp,              ( move dict ptr to end of name )

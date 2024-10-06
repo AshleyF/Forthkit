@@ -91,7 +91,8 @@ create : compile create compile ; ( magic! )
 
 : key [ x in, ] pushx ;
 : emit popx [ x out, ] ;
-: cr 10 emit ;
+: lf 10 emit ;
+: cr 13 emit ;
 : space 32 emit ;
 
 : @ popx [ x x ld, ] pushx ;
@@ -125,10 +126,11 @@ create : compile create compile ; ( magic! )
 : 2dup over over ;
 : /mod 2dup / -rot mod ;
 
-: _sign dup 0 < if -1 else 1 then negate 44 + emit ; ( happens 44 +/- 1 is ASCII '-'/'+' )
-: _dig 10 /mod swap ;
-: _digemit 48 + emit ;  ( 48 is ASCII '0' )
-: . _sign abs _dig _dig _dig _dig _dig drop _digemit _digemit _digemit _digemit _digemit cr ;
+: _.d 10 /mod swap ;
+: _.z ascii 0 + emit ;
+: _.e dup if swap _.z else swap dup 0 = if drop else _.z drop true then then ;
+: num dup 0 < if ascii - emit then abs _.d _.d _.d _.d _.d drop false _.e _.e _.e _.e drop _.z ;
+: . num cr ;
 
 : begin here ; immediate
 : until [ ' popx literal ] call, zero x rot beq, ; immediate
