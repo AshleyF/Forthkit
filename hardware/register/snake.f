@@ -18,7 +18,7 @@ variable head up head !
 variable tx 40 tx !
 variable ty 20 ty !
 
-variable len 20 len !
+variable len 8 len !
 variable count 0 count !
 
 32768 constant rndmod
@@ -63,8 +63,8 @@ variable rndseed
   square hx @ hy @ set ( make head into body )
   hx @ dx @ + hx !
   hy @ dy @ + hy !
-  count @ 1+ count ! ( grow! )
-  hx @ hy @ get circle = if len @ 5 + len ! food then ( eat food )
+  count @ 1+ count !
+  hx @ hy @ get circle = if len @ 2 * len ! food then ( eat food )
   head @ hx @ hy @ set ( draw head )
 ;
 
