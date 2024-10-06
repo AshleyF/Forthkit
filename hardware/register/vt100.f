@@ -6,6 +6,7 @@
 
 : vthome ( cr- ) esc bracket 1+ . semi 1+ . ascii H emit ; ( TODO: multi-digit )
 : vtclear esc bracket ascii 2 emit ascii J emit ;
+: vtreset esc ascii c emit ;
 
 : vtattribs esc bracket dup 0 do swap num dup i 1+ > if semi then loop ascii m emit ;
 : vtattrib 1 vtattribs ;

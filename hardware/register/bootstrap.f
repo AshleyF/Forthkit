@@ -130,7 +130,7 @@ create : compile create compile ; ( magic! )
 : _.z ascii 0 + emit ;
 : _.e dup if swap _.z else swap dup 0 = if drop else _.z drop true then then ;
 : num dup 0 < if ascii - emit then abs _.d _.d _.d _.d _.d drop false _.e _.e _.e _.e drop _.z ;
-: . num cr ;
+: . num cr lf ;
 
 : begin here ; immediate
 : until [ ' popx literal ] call, zero x rot beq, ; immediate
