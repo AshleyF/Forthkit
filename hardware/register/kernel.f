@@ -14,31 +14,33 @@
  5 constant zero                   ( constant 0 - shared by bootstrap )
  6 constant one         one 1 ldc, ( constant 1 )
  7 constant two         two 2 ldc, ( constant 2 )
- 8 constant ten        ten 10 ldc, ( number ten decimal by default )
+ 8 constant three     three 3 ldc, ( constant 3 )
+ 9 constant ten        ten 10 ldc, ( number ten decimal by default )
 
- 9 constant true      true -1 ldc, ( truth value - all bits set )
-10 constant false                  ( false value )
+10 constant true      true -1 ldc, ( truth value - all bits set )
+11 constant false                  ( false value )
 
-11 constant zeroch  zeroch 48 ldc, ( '0' ASCII )
-12 constant rparch  rparch 41 ldc, ( right parenthesis ASCII )
-13 constant spch    spch   32 ldc, ( space ASCII )
-14 constant negch   negch  45 ldc, ( '-' ASCII )
+12 constant zeroch  zeroch 48 ldc, ( '0' ASCII )
+13 constant rparch  rparch 41 ldc, ( right parenthesis ASCII )
+14 constant spch    spch   32 ldc, ( space ASCII )
+15 constant negch   negch  45 ldc, ( '-' ASCII )
 
-15 constant tib                    ( terminal input buffer )
-16 constant len                    ( token length )
-17 constant len'                   ( name length )
-18 constant nm                     ( match flag for search )
-19 constant p                      ( pointer )
-20 constant c                      ( char being compared )
-21 constant p'                     ( pointer )
-22 constant c'                     ( char being compared )
-23 constant cur                    ( cursor )
-24 constant s         s 32767 ldc, ( stack pointer )
-25 constant ldc         ldc 1 ldc, ( ldc instruction [0] )
-26 constant call      call 29 ldc, ( call instruction )
-27 constant ret        ret 31 ldc, ( ret instruction, 28 by luck )
-28 constant comp                   ( compiling flag )
-29 constant sign                   ( number sign while parsing )
+16 constant tib                    ( terminal input buffer )
+17 constant len                    ( token length )
+18 constant len'                   ( name length )
+19 constant nm                     ( match flag for search )
+20 constant p                      ( pointer )
+21 constant c                      ( char being compared )
+22 constant p'                     ( pointer )
+23 constant c'                     ( char being compared )
+24 constant cur                    ( cursor )
+25 constant s         s 32767 ldc, ( stack pointer )
+26 constant ldc         ldc 1 ldc, ( ldc instruction [0] )
+27 constant jump      jump 28 ldc, ( jump instruction )
+28 constant call      call 29 ldc, ( call instruction )
+29 constant ret        ret 31 ldc, ( ret instruction, 28 by luck )
+30 constant comp                   ( compiling flag )
+31 constant sign                   ( number sign while parsing )
 
 ahead,                             ( jump over dictionary )
 
@@ -53,7 +55,9 @@ ahead,                             ( jump over dictionary )
             c tib stb,             ( append char )
           tib tib inc,             ( advance tib )
           len len inc,             ( increment length )
+            label 'skipnone
                 c in,              ( read char )
+ c zero 'skipnone blt,             ( skip no key values )
      c spch 'name bgt,             ( continue until whitespace )
           len tib stb,             ( append length )
                   ret,
@@ -169,8 +173,7 @@ zero cur 'nomatch beq,             ( no match if start of dict )
 ( --- word handling ----------------------------------------------- )
             
             label 'exec            ( execute word )
-        two cur m add,             ( point to code field )
-              m m inc,             ( point to code field TODO 3+ )
+      three cur m add,             ( point to code field )
                 m exec,            ( exec word )
                   ret,
       
@@ -191,7 +194,7 @@ zero cur 'nomatch beq,             ( no match if start of dict )
             'find call,            ( try to find in dictionary )
      true nm 'num beq,             ( if not found, assume number )
             'word jump,            ( else, process as a word )
-      
+
 ( --- REPL ------------------------------------------------------- )
 
             label 'repl            ( loop forever )
@@ -234,7 +237,7 @@ variable link
                   ret,
 
          -1 sym ; header,          ( return )
-             ret appendc,          ( append ret instruction )
+              ret appendc,         ( append ret instruction )
         'interact jump,            ( switch out of compiling mode )
        
       0 sym pushx header,          ( push number to stack from x )
@@ -264,8 +267,7 @@ variable link
            'token call,            ( read a token )
             'find call,            ( find token )
             cur n cp,              ( prep to push cursor )
-          two n n add,             ( address of code field )
-              n n inc,             ( address of code field TODO 3+ )
+        three n n add,             ( address of code field )
            'pushn jump,            ( push cursor )
 
           -1 40 1 header,          ( skip comment, 40=left paren ASCII )
@@ -275,9 +277,14 @@ rparch n 'comment bne,             ( continue until right-paren )
                   ret,
 
    -1 sym recurse header,
-             call appendc,         ( append call instruction )
-        two lnk n add,             ( point to code field )
-              n n inc,             ( point to code field TODO 3+ )
+             call appendc,         ( append jump instruction )
+      three lnk n add,             ( point to code field )
+                n append,          ( append code field address )
+                  ret,
+
+-1 sym recurse-tail header,
+             jump appendc,         ( append jump instruction -- TCO! )
+      three lnk n add,             ( point to code field )
                 n append,          ( append code field address )
                   ret,
 

@@ -12,7 +12,7 @@ variable hx 40 hx !
 variable hy 20 hy !
 
 variable dx 0 dx !
-variable dy -1 dy !
+variable dy 0 dy !
 variable head up head !
 
 variable tx 40 tx !
@@ -59,12 +59,15 @@ variable rndseed
   else circle -rot set then
 ;
 
+variable speed 10 speed !
+: delay speed @ 0 do 10000 0 do loop loop ;
+
 : snake
   square hx @ hy @ set ( make head into body )
   hx @ dx @ + hx !
   hy @ dy @ + hy !
   count @ 1+ count !
-  hx @ hy @ get circle = if len @ 2 * len ! food then ( eat food )
+  hx @ hy @ get circle = if len @ 2 * len ! food speed @ 1- speed ! then ( eat food )
   head @ hx @ hy @ set ( draw head )
 ;
 
@@ -86,9 +89,12 @@ variable rndseed
   dup ascii r = if  0 dx !  1 dy !  down head ! else
   dup ascii s = if  1 dx !  0 dy ! right head ! else
   then then then then then drop
-  snake tail update recurse
+  dx @ dy @ or 0 <> if
+    snake tail update delay
+  then
+  recurse-tail
 ;
 
 : start init border update vtgreen vtfg food update input ;
 
-0 here dump start
+start

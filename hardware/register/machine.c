@@ -2,8 +2,39 @@
 #include <wchar.h>
 #include <locale.h>
 
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 int main(void)
 {
+    // Set stdin to non-blocking mode
+    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+
+/*
+    while (1) {
+        printf("Reading...");
+        int result = getc(stdin);  // Attempt to read a character
+        printf("RESULT %i\n", result);
+        
+        if (result != EOF) {
+            printf("Read character: %c\n", result);
+            if (result == 'q') {  // Exit on 'q'
+                break;
+            }
+        } else {
+            if (feof(stdin)) {
+                clearerr(stdin);  // Clear EOF flag if EOF reached
+            }
+            // If EOF and no input is ready, handle it
+            printf("No input available, doing other work...\n");
+            sleep(1);  // Sleep to avoid busy-waiting
+        }
+    }
+
+    return 0;
+    */
     short reg[64] = {};
     unsigned char mem[0x10000];
     short rstack[256] = {};
@@ -43,6 +74,7 @@ int main(void)
     #define Ry reg[y]
     #define Rz reg[z]
     #define OUT wprintf(L"%lc", Rx); fflush(stdout)
+    #define IN Rx = getc(stdin); if (feof(stdin)) { clearerr(stdin); }
 
     setlocale(LC_ALL, "");
 
@@ -58,7 +90,7 @@ int main(void)
             case  4: XY;    Rx = mem[Ry];         break; // ldb (x = m[y])
             case  5: XY;    mem[Rx] = Ry;         break; // stb (m[x] = y)
             case  6: XY;    Rx = Ry;              break; // cp (x = y)
-            case  7: X;     Rx = getc(stdin);     break; // in (x = getc())
+            case  7: X;     IN;                   break; // in (x = getc())
             case  8: X;     OUT;                  break; // out (putc(x)())
             case  9: XY;    Rx = Ry + 1;          break; // inc (x = ++y)
             case 10: XY;    Rx = Ry - 1;          break; // dec (x = --y)

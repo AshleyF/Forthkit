@@ -9,8 +9,8 @@ create : compile create compile ; ( magic! )
 : d 2 ; ( dictionary pointer - shared by interpreter )
 : lnk 3 ; ( link pointer - shared by interpreter )
 : zero 5 ; ( shared by interpreter )
-: y 30 ; ( beyond registers in interpreter )
-: z 31 ;
+: y 32 ; ( beyond registers in interpreter )
+: z 33 ;
 
 : [ interact ; immediate
 : ] compile ;
