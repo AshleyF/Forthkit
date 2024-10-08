@@ -12,29 +12,6 @@ int main(void)
     int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
     fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
 
-/*
-    while (1) {
-        printf("Reading...");
-        int result = getc(stdin);  // Attempt to read a character
-        printf("RESULT %i\n", result);
-        
-        if (result != EOF) {
-            printf("Read character: %c\n", result);
-            if (result == 'q') {  // Exit on 'q'
-                break;
-            }
-        } else {
-            if (feof(stdin)) {
-                clearerr(stdin);  // Clear EOF flag if EOF reached
-            }
-            // If EOF and no input is ready, handle it
-            printf("No input available, doing other work...\n");
-            sleep(1);  // Sleep to avoid busy-waiting
-        }
-    }
-
-    return 0;
-    */
     short reg[64] = {};
     unsigned char mem[0x10000];
     short rstack[256] = {};

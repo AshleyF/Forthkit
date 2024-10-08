@@ -4,10 +4,10 @@
 ( --- register allocation/init ----------------------------------- )
 
  0 constant n                      ( number parsing - assumed 0 below )
- 1 constant x                      ( shared by bootstrap )
- 2 constant d             d 0 ldc, ( dictionary pointer - shared by bootstrap - magic address )
- 3 constant lnk         lnk 0 ldc, ( link pointer - magic address )
- 4 constant m
+ 1 constant m                      ( temp number )
+ 2 constant x                      ( shared by bootstrap )
+ 3 constant d             d 0 ldc, ( dictionary pointer - shared by bootstrap - magic address )
+ 4 constant lnk         lnk 0 ldc, ( link pointer - magic address - shared by bootstrap )
  
  ( magic addresses: d at 1, lnk at 5 )
 
@@ -90,7 +90,7 @@ ahead,                             ( jump over dictionary )
             label 'comp
 zero cur 'nomatch beq,             ( no match if start of dict )
         tib len p sub,             ( point p at start of token )
-           cur p' dec,             ( point p' at length field TODO sub two )
+           cur p' dec,             ( point p' at length field )
           p' len' ldb,             ( get length )
   len' len 'nextw bne,             ( lengths don't match? )
         p' len p' sub,             ( move to beginning of word )
@@ -143,11 +143,11 @@ zero cur 'nomatch beq,             ( no match if start of dict )
       
             label 'pushn           ( push interactive number )
               n s st,              ( store n at stack pointer )
-            s two s sub,           ( adjust stack pointer TODO two sub )
+          s two s sub,             ( adjust stack pointer )
                   ret,
       
             label 'popn            ( pop number )
-          s two s add,             ( adjust stack pointer TODO two add )
+          s two s add,             ( adjust stack pointer )
               s n ld,              ( load value )
                   ret,
 
@@ -178,7 +178,7 @@ zero cur 'nomatch beq,             ( no match if start of dict )
                   ret,
       
             label 'compw           ( compile word )
-        cur two n add,             ( point to immediate flag TODO two add )
+        cur two n add,             ( point to immediate flag )
               n m ldb,             ( read immediate flag )
     false m 'exec bne,             ( execute if immediate -- not 255 )
              call appendc,         ( append call instruction )
@@ -241,12 +241,12 @@ variable link
         'interact jump,            ( switch out of compiling mode )
        
       0 sym pushx header,          ( push number to stack from x )
-              x n cp,              ( bootstrap to interpreter reg )
+              x n cp,              ( bootstrap to kernel reg )
            'pushn jump,            ( jump to push )
        
        0 sym popx header,          ( pop number from stack to x )
             'popn call,            ( call pop )
-              n x cp,              ( interpreter to bootstrap reg )
+              n x cp,              ( kernel to bootstrap reg )
                   ret,
 
     0 sym literal header,          ( compile literal from stack )

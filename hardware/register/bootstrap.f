@@ -1,15 +1,15 @@
-( bootstrap remainder of interpreter )
-( load into machine running interpreter image )
+( bootstrap remainder of kernel )
+( load into machine running kernel image )
 
 create : compile create compile ; ( magic! )
 
 ( assembler )
 
-: x 1 ; ( shared by interpreter )
-: d 2 ; ( dictionary pointer - shared by interpreter )
-: lnk 3 ; ( link pointer - shared by interpreter )
-: zero 5 ; ( shared by interpreter )
-: y 32 ; ( beyond registers in interpreter )
+: x 2 ; ( shared by kernel )
+: d 3 ; ( dictionary pointer - shared by kernel )
+: lnk 4 ; ( link pointer - shared by kernel )
+: zero 5 ; ( shared by kernel )
+: y 32 ; ( beyond registers in kernel )
 : z 33 ;
 
 : [ interact ; immediate
