@@ -6,6 +6,21 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+unsigned char mem[0x10000];
+
+void setcell(unsigned short a, short y)
+{
+    extern unsigned char mem[];
+    mem[a] = y;
+    mem[a + 1] = y >> 8;
+}
+
+short getcell(unsigned short a)
+{
+    extern unsigned char mem[];
+    return mem[a] | (mem[a + 1] << 8);
+}
+
 int main(void)
 {
     // Set stdin to non-blocking mode
@@ -13,7 +28,6 @@ int main(void)
     fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
 
     short reg[64] = {};
-    unsigned char mem[0x10000];
     short rstack[256] = {};
     short* r = rstack;
     short pc = 0;
@@ -30,17 +44,6 @@ int main(void)
     fclose(file);
 
     short x, y, z, v;
-
-    void setcell(unsigned short a, short y)
-    {
-        mem[a] = y;
-        mem[a + 1] = y >> 8;
-    }
-
-    short getcell(unsigned short a)
-    {
-        return mem[a] | (mem[a + 1] << 8);
-    }
 
     #define NEXT mem[pc++]
     #define X x = NEXT;
