@@ -49,7 +49,7 @@ class Forth:
       'm!'       : lambda: self.xx_(self.memoryStore),
       'b@'       : lambda: self.x_x(lambda x: self.memory[int(x)]),
       'b!'       : lambda: self.xx_(self.memoryStoreByte),
-      'dump'     : lambda: self.xx_(self.dump),
+      'write'    : lambda: self.xxx_(self.write),
       '('        : self.comment,
       'if'       : self.doif,
       'else'     : self.doelse,
@@ -95,6 +95,7 @@ class Forth:
   def x_(self, f): f(self.pop())
   def _x(self, f): self.push(f())
   def xx_(self, f): self.flip2(f, self.pop(), self.pop())
+  def xxx_(self, f): self.flip3(f, self.pop(), self.pop(), self.pop())
 
   def variableStore(self, val, addr): self.variables[addr] = val
   def memoryStore(self, val, addr): self.memory[int(addr)] = int(val) & 0xFF; self.memory[int(addr) + 1] = (int(val) >> 8) & 0xFF
@@ -111,9 +112,9 @@ class Forth:
     val = self.pop()
     self.dictionary[name] = lambda: self.push(val)
 
-  def dump(self, start, end):
-    with open('image.bin', 'wb') as f:
-      for m in self.memory[int(start):int(end)]:
+  def write(self, block, size, address):
+    with open(f'block{int(block)}.bin', 'wb') as f:
+      for m in self.memory[int(address):int(address + size)]:
         f.write(struct.pack('B', m))
 
   def scan(self):

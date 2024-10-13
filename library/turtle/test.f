@@ -35,3 +35,47 @@
 
 : demo burst shapes squaral spiro stars rose flower spiral ;
 demo
+
+(
+variable 'koch
+: curve dup 0 > if 2dup 1 - swap 3 / swap 'koch @ execute else drop move then ;
+: koch 2dup curve -60 turn 2dup curve 120 turn 2dup curve -60 turn 2dup curve 2drop ;
+' koch 'koch !
+
+start
+-80 0 go
+50 1 curve
+show
+
+start
+-80 0 go
+100 2 curve
+show
+
+start
+-80 0 go
+200 3 curve
+show
+
+start
+-80 0 go
+400 4 curve
+show
+
+: snowflake 3 0 do 2dup curve 120 turn loop 2drop ;
+
+start
+-80 0 go
+80 0 snowflake
+show
+
+start
+-80 0 go
+50 1 snowflake
+show
+
+start
+-80 0 go
+50 2 snowflake
+show
+)

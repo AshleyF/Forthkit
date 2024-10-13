@@ -42,13 +42,14 @@ Instructions are followed by zero to three operands - register indices, memory a
 | jump     | 29      | a   |     |     | pc = a           | Jump to address             |
 | call     | 30      | a   |     |     | push(pc), pc = a | Call address, save return   |
 | ret      | 31      |     |     |     | pc = pop()       | Return from call            |
-| dump     | 32      |     |     |     |                  | Dump core to image.bin      |
+| read     | 32      |     |     |     |                  | File (b) of (s) to core (a) |
+| write    | 33      | b   | s   | a   |                  | Core (a) of (s) to file (b) |
 
-The machine loads an `image.bin` dump of little-endian encoded memory cells at startup and begins executing at address zero.
+The machine loads an `block0.bin` of little-endian encoded memory cells at startup and begins executing at address zero.
 
 ## Demo
 
-A demo `image.bin` may be built (see Assembler section below) which will simply capitalize console input by subtracting 32 from input characters:
+A demo `block0.bin` may be built (see Assembler section below) which will simply capitalize console input by subtracting 32 from input characters:
 
 | Assembly    | Op  |     |     |     | Encoded             |
 | ----------- | --- | --- | --- | --- | ------------------- |
@@ -58,9 +59,9 @@ A demo `image.bin` may be built (see Assembler section below) which will simply 
 | `out c`     | 5   | 1   |     |     | 0500                |
 | `jump 0003` | 26  | 3   |     |     | 1a00 0300           |
 
-The encoding could be more compact, but we're more concerned with keeping things simple. The full `image.bin` contains the following bytes (in pairs forming 16-bit `short` memory cells): `0000 0000 2000 0400 0100 0900 0100 0100 0000 0500 0100 1a00 0300`
+The encoding could be more compact, but we're more concerned with keeping things simple. The full `block0.bin` contains the following bytes (in pairs forming 16-bit `short` memory cells): `0000 0000 2000 0400 0100 0900 0100 0100 0000 0500 0100 1a00 0300`
 
-After assembling a `image.bin` (see Assembler section below), we may run the machine and type something (e.g. `hello`):
+After assembling a `block0.bin` (see Assembler section below), we may run the machine and type something (e.g. `hello`):
 
     $ ./machine
     hello
@@ -81,10 +82,10 @@ This is a register-based machines, like many popular architectures today (e.g. I
 We have 32 registers, 16K cells of memory, and a 256 element deep return stack and `r` pointer to support the `call` instruction, and a program counter (`pc`) pointing to instructions to be executed.
 
 ```c
-    FILE *file = fopen("image.bin", "r");
+    FILE *file = fopen("block0.bin", "r");
     if (!file || !fread(&mem, sizeof(mem), 1, file))
     {
-        printf("Could not open boot image.\n");
+        printf("Could not open boot block.\n");
         return 1;
     }
     fclose(file);
@@ -220,15 +221,8 @@ We can executle (`exec`) an indirect address through a register, or we can `jump
         switch(NEXT)
         {
             ...
-            case 30: // dump
-                file = fopen("image.bin", "w");
-                if (!file || !fwrite(&mem, sizeof(mem), 1, file))
-                {
-                    printf("Could not write boot image.\n");
-                    return 1;
-                }
-                fclose(file);
-                break;
+            case 32: XYZ;   readBlock(x, y, z);   break; // read
+            case 33: XYZ;   writeBlock(x, y, z);  break; // write
             default:
                 printf("Invalid instruction! (pc=%i [%i])\n", pc - 1, mem[pc - 1]);
                 return 1;
@@ -236,7 +230,7 @@ We can executle (`exec`) an indirect address through a register, or we can `jump
         }
 ```
 
-The `dump` instruction will facilitate using this machine to build boot images.
+The `read` and `write` instructions allow loading and saving block files and will facilitate using this machine to build boot images.
 
 ## Assembler
 
@@ -256,7 +250,7 @@ A [Forth-based assembler is provided](./assembler.f), allowing the above program
 
 This is a pretty nice assembly format, leaving all the power of Forth available as a "macro assembler."
 
-A new `image.bin` may be build with [`./test.sh`](./test.sh).
+A new `block0.bin` may be build with [`./test.sh`](./test.sh).
 
 In addition to the `label` mechanism to give names to addresses for backward jumps (most common), there are `ahead,` and `continue,` words to skip over code (likely for library routines).
 
@@ -307,7 +301,8 @@ With just these, we can build words taking instruction operands from the stack a
 : call,  29 c,  , ;            (     a call,  →  push[pc], pc = a   )
 : exec,  30 c, c, ;            (     x exec,  →  pc = [x]           )
 : ret,   31 c, ;               (       ret,   →  pc = pop[]         )
-: dump,  32 c, ;               (       dump,  →  core to image.bin  )
+: read,  32 c, c, c, c, ;      (       read,  →  block file to core )
+: write, 33 c, c, c, c, ;      (      write,  →  core to block file )
 ```
 
 In a few places we do a `swap` to order the arguments in a _natural_ way. For example `z y x sub,` packs a subtraction instruction meaning _x = z - y_ (with _z_ and _y_ swapped), because this resembles the ordering for infix expressions (left minus right).
@@ -325,14 +320,14 @@ For now, we've added `lable` word that creates a constant giving a name to the c
 The `label` mechanism works for backward jumps, which may be most commont. The `ahead,` and `continue,` words allow us to skip over code. A little tricky, but `ahead,` packs a `jump,` with a dummy (`0`) value and pushes the address of the jump value (`here 1 +`). The `continue,` word is used wherever we want to jump _to_. It patches the jump value to do here (`here swap m!`; storing the current `here` at the previously pushed address).
 
 ```forth
-: assemble here . dump halt ;
+: assemble 0 here 0 write halt ;
 ```
 
-Finally, the `assemble` word dumps memory to an image file (and displays the current size of the dictionary).
+Finally, the `assemble` word writes memory to an image file (and displays the current size of the dictionary).
 
 ## Disassembler
 
-A [disassembler](./disassembler.fs) is included that makes a best effort to disassemble the [image file](./image.bin). Some constructs that allocate data space within the dictionary confuse it. Mappings for label locations and register names in the [kernel](./kernel.f) are maintained friendly naming.
+A [disassembler](./disassembler.fs) is included that makes a best effort to disassemble the [image file](./block0.bin). Some constructs that allocate data space within the dictionary confuse it. Mappings for label locations and register names in the [kernel](./kernel.f) are maintained friendly naming.
 
 ## Interpreter
 
@@ -358,7 +353,8 @@ In addition to numeric literals support, the following words are currently in th
 | `,`         | Append TOS to dictionary                                                                                        |
 | `literal`   | Compile inline literal from the stack                                                                           |
 | `find`      | Find following token in dictionary and push address                                                             |
-| `dump`      | Core dump to `image.bin`                                                                                         |
+| `read`      | Block file to core |
+| `write`     | Core to block file |
 | `(`         | Begin comment, terminated by `)`                                                                                |
 
 These should be enough to bootstrap a new assembler and meta-circular interpreter!

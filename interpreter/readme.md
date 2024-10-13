@@ -49,7 +49,8 @@ The following primitive words are available:
 | `constant` |   x-      | Create constant                      |
 | `m@`       |   a-n     | Fetch memory address                 |
 | `m!`       |  xa-      | Store into memory address            |
-| `dump`     |    -      | Dump memory to image file            |
+| `read`     | asb-      | Read block file to core              |
+| `write`    | asb-      | Write core to block file             |
 | `(`        |    -      | Start comment (to `)`)               |
 | `if`       |    -      | Start conditional (to `else`/`then`) |
 | `else`     |    -      | Start alternative (to `then`)        |
@@ -325,13 +326,13 @@ Similar to variables, we have a memory-fetch (`m@`) and memory-store (`m!`). If 
 
 To store a `42` into address `123`, we say `42 123 m!`. To retrieve it we say `123 m@`.
 
-Finally, we can `dump` all of memory to an `image.bin` file. This will be used to create the seed image for our VM in the future. 
+Finally, we can `write` all of memory to an `block0.bin` file. This will be used to create the seed image for our VM in the future. 
 
 ```python
     self.dictionary = {
       'm@'       : lambda: self.x_x(lambda x: self.memory[int(x)]),
       'm!'       : lambda: self.xx_(self.memoryStore),
-      'dump'     : self.dump,
+      'write'    : self.write,
       ... }
 ```
 
@@ -341,12 +342,12 @@ Again like with `variableStore`, `memoryStore` is a separate function because la
   def memoryStore(self, val, addr): self.memory[int(addr)] = int(val)
 ```
 
-Dumping to a image file is straight forward. Memory cells are packed as little-endian 2-byte signed `short` values.
+Writing to a block file is straight forward. Memory cells are packed as little-endian 2-byte signed `short` values.
 
 ```python
-  def dump(self):
-    with open('image.bin', 'wb') as f:
-      for m in self.memory:
+  def write(self, block, size, address):
+    with open(f'block{block}.bin', 'wb') as f:
+      for m in self.memory[int(address):int(address + size)]:
         f.write(struct.pack('B', m))
 ```
 

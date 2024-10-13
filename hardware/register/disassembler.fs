@@ -122,10 +122,11 @@ and disassemble labels addr =
     | 29uy :: x :: y           :: t -> printfn $"{hex addr} CALL {nm x y}"                               ; disassemble labels (addr + 3) t
     | 30uy :: x                :: t -> printfn $"{hex addr} EXEC pc = {reg x}"                           ; disassemble labels (addr + 2) t
     | 31uy                     :: t -> printfn $"{hex addr} RET"                                         ; disassemble labels (addr + 1) t
-    | 32uy                     :: t -> printfn $"{hex addr} DUMP"                                        ; disassemble labels (addr + 1) t
+    | 32uy :: x :: y :: z      :: t -> printfn $"{hex addr} READ ({x},{y},{z})"                          ; disassemble labels (addr + 1) t
+    | 33uy :: x :: y :: z      :: t -> printfn $"{hex addr} WRITE ({x},{y},{z})"                         ; disassemble labels (addr + 1) t
     | 255uy :: x :: y          :: t -> printfn $"{hex addr} ALLOT {valuexy x y}"                         ; disassemble labels (addr + 3 + (valuexy x y)) (List.skip (valuexy x y) t)
     |                             t -> word labels addr [] t
 
-File.ReadAllBytes("../../../image.bin")
+File.ReadAllBytes("../../../block0.bin")
 |> List.ofArray
 |> disassemble known 0

@@ -17,6 +17,7 @@ create : compile create compile ; ( magic! )
 
 : cp, 6 c, c, c, ; 
 : popxy popx [ x y cp, ] popx ;
+: popxyz popxy [ y z cp, x y cp, ] popx ;
 : pushxy pushx [ y x cp, ] pushx ;
 
 : xor, 18 c, c, c, c, ; 
@@ -54,7 +55,8 @@ create : compile create compile ; ( magic! )
 : call,  29 c,  , ;
 : exec,  30 c, c, ;
 : ret,   31 c, ;
-: dump,  32 c, c, c, ;
+: read,  32 c, c, c, c, ;
+: write, 33 c, c, c, c, ;
 
 ( instruction words )
 
@@ -102,7 +104,9 @@ create : compile create compile ; ( magic! )
 
 : here [ d x cp, ] pushx ;
 
-: dump [ x 5 ldc, lnk x st, x 1 ldc, d x st, ] popxy [ x y dump, ] ; ( store at magic address for image )
+: magic [ x 5 ldc, lnk x st, x 1 ldc, d x st, ] ; ( store at magic address for image )
+: read popxyz [ x y z read, ] ;
+: write popxyz [ x y z write, ] ;
 
 : constant create literal ret, ;  ( e.g. 123 constant foo -> foo3 . 0  LDC 123 n  CALL &pushn  RET )
 : variable create here 8 + literal ret, 0 , ;  ( e.g. variable foo -> foo3 . 0  LDC <addr> n  CALL &pushn  RET  0 )

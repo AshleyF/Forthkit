@@ -30,6 +30,7 @@ variable rndseed
 : rand
   rndseed @ rndmult * rndinc + rndmod mod
   dup rndseed !
+  dup 8 2/ xor ( Add some bit mixing )
 ;
 
 : init

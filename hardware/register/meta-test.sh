@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
-rm ./image.bin
+rm ./block0.bin
 rm ./kernel.bin
 
 . ./kernel.sh # build kernel using Python
-mv ./image.bin ./kernel.bin
+mv ./block0.bin ./kernel.bin
 
 . ./meta.sh # build kernel using machine
 
-diff -s <(xxd image.bin) <(xxd kernel.bin)
+diff -s <(xxd block0.bin) <(xxd kernel.bin)
 
 # go around again!
 cat ./bootstrap.f assembler-adapter.f ./assembler.f kernel-adapter.f kernel.f | ./machine
 
-diff -s <(xxd image.bin) <(xxd kernel.bin)
+diff -s <(xxd block0.bin) <(xxd kernel.bin)
 
 rm ./kernel.bin
 
