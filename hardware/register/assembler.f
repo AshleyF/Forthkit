@@ -37,8 +37,8 @@ variable dp ( dictionary pointer )
 : call,  29 c,  , ;            (     a call,  →  push[pc], pc = a   )
 : exec,  30 c, c, ;            (     x exec,  →  pc = [x]           )
 : ret,   31 c, ;               (       ret,   →  pc = pop[]         )
-: read,  32 c, c, c, c, ;      (       read,  →  block file to core )
-: write, 33 c, c, c, c, ;      (      write,  →  core to block file )
+: read,  32 c, c, c, c, ;      ( a s b read,  →  block file to core )
+: write, 33 c, c, c, c, ;      ( a s b write, →  core to block file )
 
 : label here constant ;
 : ahead, here 1 + 0 jump, ; ( dummy jump, push address )

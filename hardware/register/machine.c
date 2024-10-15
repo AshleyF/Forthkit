@@ -39,7 +39,6 @@ void readBlock(short block, short maxsize, short address)
 
 void writeBlock(short block, short size, short address)
 {
-    printf("block=%i size=%i address=%i \n", block, size, address);
     char filename[16];
     snprintf(filename, sizeof(filename), "block%d.bin", block);
     FILE *file = fopen(filename, "w");

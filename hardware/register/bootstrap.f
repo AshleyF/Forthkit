@@ -1,7 +1,7 @@
 ( bootstrap remainder of kernel )
 ( load into machine running kernel image )
 
-create : compile create compile ; ( magic! )
+header : compile header compile ; ( magic! )
 
 ( assembler )
 
@@ -9,8 +9,8 @@ create : compile create compile ; ( magic! )
 : d 3 ; ( dictionary pointer - shared by kernel )
 : lnk 4 ; ( link pointer - shared by kernel )
 : zero 5 ; ( shared by kernel )
-: y 32 ; ( beyond registers in kernel )
-: z 33 ;
+: y 33 ; ( beyond registers in kernel )
+: z 34 ;
 
 : [ interact ; immediate
 : ] compile ;
@@ -108,8 +108,8 @@ create : compile create compile ; ( magic! )
 : read popxyz [ x y z read, ] ;
 : write popxyz [ x y z write, ] ;
 
-: constant create literal ret, ;  ( e.g. 123 constant foo -> foo3 . 0  LDC 123 n  CALL &pushn  RET )
-: variable create here 8 + literal ret, 0 , ;  ( e.g. variable foo -> foo3 . 0  LDC <addr> n  CALL &pushn  RET  0 )
+: constant header literal ret, ;  ( e.g. 123 constant foo -> foo3 . 0  LDC 123 n  CALL &pushn  RET )
+: variable header here 8 + literal ret, 0 , ;  ( e.g. variable foo -> foo3 . 0  LDC <addr> n  CALL &pushn  RET  0 )
 
 : allot popx [ x d d add, ] ;
 
@@ -157,6 +157,6 @@ variable r r !
 : i r @ 2 - ( * ) @ ;
 : j r @ 6 - ( * ) @ ;
 
-: [: here 10 + ( * ) ( past LIT . . CALL . JUMP . ) literal here 1 + 0 jump, ( jump address field ); immediate
+: [: here 10 + ( * ) ( past LIT . . CALL . JUMP . ) literal here 1 + 0 jump, ( jump address field ) ; immediate
 : :] ret, here swap ! ; immediate
 : call popx [ x exec, ] ;
