@@ -1,8 +1,20 @@
 ( shared library )
 
 : 2dup over over ;
-
 : 2drop drop drop ;
+
+: dup 0 pick ;
+: over 1 pick ;
+: swap 1 roll ;
+: rot 2 roll ;
+: -rot rot rot ;
+
+: invert dup nand ;
+: and nand invert ;
+: or invert swap invert nand ;
+: xor 2dup and invert -rot or and ;
+: nor or invert ;
+: xnor xor invert ;
 
 : min 2dup > if swap then drop ;
 : max 2dup < if swap then drop ;

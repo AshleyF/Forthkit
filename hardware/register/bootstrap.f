@@ -9,8 +9,8 @@ header : compile header compile ; ( magic! )
 : d 3 ; ( dictionary pointer - shared by kernel )
 : lnk 4 ; ( link pointer - shared by kernel )
 : zero 5 ; ( shared by kernel )
-: y 33 ; ( beyond registers in kernel )
-: z 34 ;
+: y 18 ; ( beyond registers in kernel )
+: z 19 ;
 
 : [ interact ; immediate
 : ] compile ;
@@ -131,9 +131,9 @@ header : compile header compile ; ( magic! )
 : /mod 2dup / -rot mod ;
 
 : _.d 10 /mod swap ;
-: _.z ascii 0 + emit ;
+: _.z char 0 + emit ;
 : _.e dup if swap _.z else swap dup 0 = if drop else _.z drop true then then ;
-: num dup 0 < if ascii - emit then abs _.d _.d _.d _.d _.d drop false _.e _.e _.e _.e drop _.z ;
+: num dup 0 < if char - emit then abs _.d _.d _.d _.d _.d drop false _.e _.e _.e _.e drop _.z ;
 : . num cr lf ;
 
 : begin here ; immediate

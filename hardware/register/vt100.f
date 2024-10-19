@@ -1,14 +1,14 @@
 ( VT100 terminal commands )
 
 : esc 27 emit ;
-: bracket ascii [ emit ;
-: semi ascii ; emit ;
+: bracket char [ emit ;
+: semi char ; emit ;
 
-: vthome ( cr- ) esc bracket 1+ . semi 1+ . ascii H emit ; ( TODO: multi-digit )
-: vtclear esc bracket ascii 2 emit ascii J emit ;
-: vtreset esc ascii c emit ;
+: vthome ( cr- ) esc bracket 1+ . semi 1+ . char H emit ; ( TODO: multi-digit )
+: vtclear esc bracket char 2 emit char J emit ;
+: vtreset esc char c emit ;
 
-: vtattribs esc bracket dup 0 do swap num dup i 1+ > if semi then loop ascii m emit ;
+: vtattribs esc bracket dup 0 do swap num dup i 1+ > if semi then loop char m emit ;
 : vtattrib 1 vtattribs ;
 
 30 constant vtblack
@@ -32,5 +32,5 @@
 : vtbg ( b- ) 10 + vtattrib ; ( background = foreground + 10 )
 : vtcolors ( fb- ) 10 + 2 vtattribs ; ( background = foreground + 10 )
 
-: vthide esc bracket ascii ? emit 25 num ascii l emit ;
-: vtshow esc bracket ascii ? emit 25 num ascii h emit ;
+: vthide esc bracket char ? emit 25 num char l emit ;
+: vtshow esc bracket char ? emit 25 num char h emit ;

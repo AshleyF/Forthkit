@@ -84,11 +84,11 @@ variable speed 10 speed !
 
 : input
   key
-  dup ascii x = if halt else
-  dup ascii w = if  0 dx ! -1 dy !    up head ! else
-  dup ascii a = if -1 dx !  0 dy !  left head ! else
-  dup ascii r = if  0 dx !  1 dy !  down head ! else
-  dup ascii s = if  1 dx !  0 dy ! right head ! else
+  dup char x = if halt else
+  dup char w = if  0 dx ! -1 dy !    up head ! else
+  dup char a = if -1 dx !  0 dy !  left head ! else
+  dup char r = if  0 dx !  1 dy !  down head ! else
+  dup char s = if  1 dx !  0 dy ! right head ! else
   then then then then then drop
   dx @ dy @ or 0 <> if
     snake tail update delay

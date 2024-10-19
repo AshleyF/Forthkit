@@ -3,53 +3,38 @@
 
 ( --- register allocation/init ----------------------------------- )
 
+ ( magic addresses: d at 1, lnk at 5 )
+
  0 constant n                      ( number parsing - assumed 0 below )
  1 constant m                      ( temp number )
  2 constant x                      ( shared by bootstrap )
  3 constant d             d 0 ldc, ( dictionary pointer - shared by bootstrap - magic address )
  4 constant lnk         lnk 0 ldc, ( link pointer - magic address - shared by bootstrap )
- 
- ( magic addresses: d at 1, lnk at 5 )
-
  5 constant zero                   ( constant 0 - shared by bootstrap )
- 6 constant one         one 1 ldc, ( constant 1 )
- 7 constant two         two 2 ldc, ( constant 2 )
- 8 constant three     three 3 ldc, ( constant 3 )
- 9 constant ten        ten 10 ldc, ( number ten decimal by default )
-10 constant flag     flag 128 ldc, ( immediate flag )
+ 6 constant two         two 2 ldc, ( constant 2 )
+ 7 constant tib                    ( terminal input buffer )
+ 8 constant len                    ( token length )
+ 9 constant len'                   ( name length )
+10 constant nm                     ( match flag for search )
+11 constant p                      ( pointer )
+12 constant c                      ( char being compared )
+13 constant p'                     ( pointer )
+14 constant c'                     ( char being compared )
+15 constant cur                    ( cursor )
 
-11 constant true      true -1 ldc, ( truth value - all bits set )
-12 constant false                  ( false value )
-
-13 constant zeroch  zeroch 48 ldc, ( '0' ASCII )
-14 constant rparch  rparch 41 ldc, ( right parenthesis ASCII )
-15 constant spch    spch   32 ldc, ( space ASCII )
-16 constant negch   negch  45 ldc, ( '-' ASCII )
-
-17 constant tib                    ( terminal input buffer )
-18 constant len                    ( token length )
-19 constant len'                   ( name length )
-20 constant nm                     ( match flag for search )
-21 constant p                      ( pointer )
-22 constant c                      ( char being compared )
-23 constant p'                     ( pointer )
-24 constant c'                     ( char being compared )
-25 constant cur                    ( cursor )
-26 constant s         s 32767 ldc, ( stack pointer )
-27 constant ldc         ldc 1 ldc, ( ldc instruction [0] )
-28 constant jump      jump 28 ldc, ( jump instruction )
-29 constant call      call 29 ldc, ( call instruction )
-30 constant ret        ret 31 ldc, ( ret instruction, 28 by luck )
-31 constant comp                   ( compiling flag )
-32 constant sign                   ( number sign while parsing )
+16 constant s         s 32767 ldc, ( stack pointer )
+17 constant comp                   ( compiling flag )
 
 ahead,                             ( jump over dictionary )
+
+: zero, dup dup xor, ;  ( zero out register )
 
 ( --- tokenization ----------------------------------------------- )
 
             label 'skipws          ( skip until non-whitespace )
                 c in,              ( read char )
-   c spch 'skipws ble,             ( keep skipping whitespace )
+             x 32 ldc,             ( space ASCII )
+      c x 'skipws ble,             ( keep skipping whitespace )
                   ret,
       
             label 'name            ( read input name into buffer )
@@ -58,21 +43,24 @@ ahead,                             ( jump over dictionary )
           len len inc,             ( increment length )
             label 'skipnone
                 c in,              ( read char )
- c zero 'skipnone blt,             ( skip no key values )
-     c spch 'name bgt,             ( continue until whitespace )
+                x zero,            ( constant 0 )
+    c x 'skipnone blt,             ( skip no key values )
+             x 32 ldc,             ( space ASCII )
+        c x 'name bgt,             ( continue until whitespace )
           len tib stb,             ( append length -- no flag )
                   ret,
       
             label 'token           ( read token into buffer )
             d tib cp,              ( end of dictionary as buffer )
-         zero len cp,              ( initial zero length )
+              len zero,            ( initial zero length )
           'skipws call,            ( skip initial whitespace )
             'name jump,            ( append name )
 
 ( --- dictionary search ------------------------------------------ )
       
             label 'nomatch
-          true nm cp,              ( set no-match flag )
+               nm zero,            ( nm = zero )
+            nm nm not,             ( set no-match flag )
                   ret,
       
             label 'compcs          ( compare chars to input word )
@@ -93,18 +81,18 @@ zero cur 'nomatch beq,             ( no match if start of dict )
         tib len p sub,             ( point p at start of token )
            cur p' dec,             ( point p' at length field )
           p' len' ldb,             ( get length )
-           flag x not,             ( flag mask )
+            x 127 ldc,             ( flag mask )
       len' x len' and,             ( remove flag )
   len' len 'nextw bne,             ( lengths don't match? )
         p' len p' sub,             ( move to beginning of word )
-         false nm cp,              ( reset no-match flag )
+               nm zero,            ( reset no-match flag )
           'compcs call,            ( compare characters )
-   true nm 'nextw beq,             ( if no match, try next word )
+   zero nm 'nextw bne,             ( if no match, try next word )
                   ret,             ( we have a match! )
                   
             label 'find            ( find word [tib within dictionary] )
           lnk cur cp,              ( initialize cursor to last )
- true comp 'nextw beq,             ( skip current word if compiling )
+ zero comp 'nextw bne,             ( skip current word if compiling )
             'comp jump,            ( compare with tib )
       
 ( --- number processing ------------------------------------------ )
@@ -120,28 +108,32 @@ zero cur 'nomatch beq,             ( no match if start of dict )
                   halt,            ( halt! TODO: recover )
 
             label 'negate          ( set negative sign )
-        true sign cp,              ( note: `true` is -1 )
+                m zero,            ( constant 0 )
+              m m not,             ( note: `true` is -1 )
               p p inc,             ( next char )
                                    ( fall through to 'digits )
 
             label 'digits          ( parse digits )
               p c ldb,             ( get char )
-       c zeroch c sub,             ( convert to digit )
-     c ten 'error bge,             ( error if non-digit )
+             x 48 ldc,             ( '0' ASCII )
+            c x c sub,             ( convert to digit )
+             x 10 ldc,             ( number ten decimal by default )
+       c x 'error bge,             ( error if non-digit )
     c zero 'error blt,             ( error if non-digit )
-          n ten n mul,             ( base ten shift left )
+            n x n mul,             ( base ten shift left )
             n c n add,             ( add in one's place )
               p p inc,             ( next char )
     p tib 'digits blt,             ( not end? continue... )
-         sign n n mul,             ( multiply by sign )
+            m n n mul,             ( multiply by sign )
                   ret,
       
             label 'parsenum        ( parse token as number )
         tib len p sub,             ( point p at start of word )
-           zero n cp,              ( init number )
-         one sign cp,              ( init sign )
+                n zero,            ( init number = 0 )
+              m 1 ldc,             ( init sign )
               p c ldb,             ( get char )
-  c negch 'negate beq,             ( set negative sign )
+             x 45 ldc,             ( '-' ASCII )
+      c x 'negate beq,             ( set negative sign )
           'digits jump,            ( parse digits )
       
             label 'pushn           ( push interactive number )
@@ -160,17 +152,19 @@ zero cur 'nomatch beq,             ( no match if start of dict )
 : appendc, d stb, d d inc, ;       ( macro: append byte and advance d )
 
             label 'litn            ( compile literal )
-              ldc appendc,         ( append ldc instruction )
+              x 1 ldc,             ( ldc instruction [1] )
+                x appendc,         ( append ldc instruction )
                 n append,          ( append value )
              zero appendc,         ( append n register number [0] )
-             call appendc,         ( append call instruction )
+             m 29 ldc,             ( call instruction )
+                m appendc,         ( append call instruction )
          m 'pushn ldc,             ( load address of 'pushn )
                 m append,          ( append pushn address )
                   ret,
       
             label 'num             ( process token as number )
         'parsenum call,            ( parse number )
-  true comp 'litn beq,             ( if compiling, compile literal )
+  zero comp 'litn bne,             ( if compiling, compile literal )
            'pushn jump,            ( else, push literal )
       
 ( --- word handling ----------------------------------------------- )
@@ -183,20 +177,23 @@ zero cur 'nomatch beq,             ( no match if start of dict )
             label 'compw           ( compile word )
             cur n dec,             ( point to immediate flag/length )
               n m ldb,             ( read immediate flag/length )
-         m flag m and,             ( test flag )
-    false m 'exec bne,             ( execute if immediate -- not 0 )
-             call appendc,         ( append call instruction )
-        n three n add,             ( point to code field )
+            x 128 ldc,             ( flag bit )
+            m x m and,             ( test flag )
+     zero m 'exec bne,             ( execute if immediate -- not 0 )
+             m 29 ldc,             ( call instruction )
+                m appendc,         ( append call instruction )
+              m 3 ldc,             ( constant 3 )
+            n m n add,             ( point to code field )
                 n append,          ( append code field address )
                   ret,
       
             label 'word            ( process potential word token )
- true comp 'compw beq,             ( if compiling, compile word )
+ zero comp 'compw bne,             ( if compiling, compile word )
             'exec jump,            ( else, execute word )
       
             label 'eval            ( process input tokens )
             'find call,            ( try to find in dictionary )
-     true nm 'num beq,             ( if not found, assume number )
+     zero nm 'num bne,             ( if not found, assume number )
             'word jump,            ( else, process as a word )
 
 ( --- REPL ------------------------------------------------------- )
@@ -217,7 +214,7 @@ variable link
   link @ here link ! , ( link )
 ;
 
-    -1 sym ascii header,           ( word to get ASCII value of next word )
+      -1 sym char header,          ( word to get ASCII value of next word )
            'token call,            ( read a word )
               d n ldb,             ( load first char into n )
             'litn jump,            ( compile literal n )
@@ -234,21 +231,23 @@ variable link
   0 sym immediate header,          ( set immediate flag )
             lnk n dec,             ( point to immediate flag/length )
               n m ldb,             ( load flag/length )
-         m flag m or,              ( set flag )
+            x 128 ldc,             ( flag bit )
+            m x m or,              ( set flag )
               m n stb,             ( store immediate flag )
                   ret,
 
     0 sym compile header,          ( switch to compiling mode )
-        true comp cp,              ( set comp flag )
+        zero comp not,             ( set comp flag )
                   ret,
 
    0 sym interact header,          ( switch to interactive mode )
             label 'interact
-       false comp cp,              ( reset comp flag )
+        zero comp cp,              ( reset comp flag )
                   ret,
 
          -1 sym ; header,          ( return )
-              ret appendc,         ( append ret instruction )
+             x 31 ldc,             ( ret instruction, [31] )
+                x appendc,         ( append ret instruction )
         'interact jump,            ( switch out of compiling mode )
        
       0 sym pushx header,          ( push number to stack from x )
@@ -284,17 +283,20 @@ variable link
           -1 40 1 header,          ( skip comment, 40=left paren ASCII )
             label 'comment
                 n in,              ( next char )
-rparch n 'comment bne,             ( continue until right-paren )
+             x 41 ldc,             ( right parenthesis ASCII )
+     x n 'comment bne,             ( continue until right-paren )
                   ret,
 
    -1 sym recurse header,
-             call appendc,         ( append jump instruction )
+             m 29 ldc,             ( call instruction )
+                m appendc,         ( append jump instruction )
         lnk two n add,             ( point to code field )
                 n append,          ( append code field address )
                   ret,
 
 -1 sym recurse-tail header,
-             jump appendc,         ( append jump instruction -- TCO! )
+             x 28 ldc,             ( jump instruction [28] )
+                x appendc,         ( append jump instruction -- TCO! )
         lnk two n add,             ( point to code field )
                 n append,          ( append code field address )
                   ret,

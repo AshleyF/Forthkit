@@ -13,6 +13,7 @@ class Forth:
     self.dictionary = {
       '.'        : lambda: print(self.pop()),
       '.s'       : lambda: print(self.stack),
+      'nand'     : lambda: self.xx_x(lambda x,y: ~(int(x) & int(y))),
       '+'        : lambda: self.xx_x(operator.add),
       '-'        : lambda: self.xx_x(operator.sub),
       '*'        : lambda: self.xx_x(operator.mul),
@@ -31,16 +32,11 @@ class Forth:
       '>='       : lambda: self.xx_b(operator.ge),
       '<'        : lambda: self.xx_b(operator.lt),
       '<='       : lambda: self.xx_b(operator.le),
-      'and'      : lambda: self.xx_x(lambda x,y: int(x) & int(y)),
-      'or'       : lambda: self.xx_x(lambda x,y: int(x) | int(y)),
-      'xor'      : lambda: self.xx_x(lambda x,y: int(x) ^ int(y)),
-      'invert'   : lambda: self.x_x(lambda x: ~x),
-      'dup'      : lambda: self.x_xx(lambda x: (x,x)),
+      '<<'       : lambda: self.xx_x(lambda x,y: int(x) << int(y)),
+      '>>'       : lambda: self.xx_x(lambda x,y: int(x) >> int(y)),
+      'pick'     : lambda: self.x_(lambda x: self.stack.append(self.stack[int(-x - 1)])),
+      'roll'     : lambda: self.x_(lambda x: (self.stack.append(self.stack[int(-x - 1)]), self.stack.pop(int(-x - 2)))),
       'drop'     : lambda: self.x_(lambda _: None),
-      'swap'     : lambda: self.xx_xx(lambda x,y: (y,x)),
-      'over'     : lambda: self.xx_xxx(lambda x,y: (x,y,x)),
-      'rot'      : lambda: self.xxx_xxx(lambda x,y,z: (y,z,x)),
-      '-rot'     : lambda: self.xxx_xxx(lambda x,y,z: (z,x,y)),
       'variable' : self.variable,
       '@'        : lambda: self.x_x(lambda x: self.variables[int(x)]),
       '!'        : lambda: self.xx_(self.variableStore),
@@ -200,10 +196,8 @@ forth = Forth()
 print("Welcome to PyForth REPL")
 while True:
   try:
-    print('> ', end='')
     forth.read()
     forth.evaluate()
-    print('ok')
   except EOFError:
     print('done')
     exit()
