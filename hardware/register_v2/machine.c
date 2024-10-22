@@ -1,4 +1,5 @@
 // v2
+#define _VERBOSE
 
 #include <stdio.h>
 #include <wchar.h>
@@ -11,7 +12,7 @@
 
 typedef unsigned char byte;
 
-short reg[8] = {};
+short reg[16] = {};
 byte mem[0x8000];
 
 void readBlock(short block, short maxsize, short address)
@@ -57,36 +58,6 @@ byte high(byte b)
     return low(b >> 4);
 }
 
-short getValue(byte r)
-{
-    extern short reg[];
-    if ((r & 0x8) == 0)
-    {
-        return reg[r];
-    }
-    else
-    {
-        // TODO: fail if not aligned address?
-        short rv = reg[r & 0x7];
-        return mem[rv] | (mem[rv + 1] << 8); // little endian
-    }
-}
-
-void setValue(byte r, short v)
-{
-    if ((r & 0x8) == 0)
-    {
-        reg[r] = v;
-    }
-    else
-    {
-        // TODO: fail if not aligned address?
-        short rv = reg[r & 0x7];
-        mem[rv] = (v & 0xFF);
-        mem[rv + 1] = (v >> 8); // little endian
-    }
-}
-
 int main(void)
 {
     // Set stdin to non-blocking mode
@@ -96,88 +67,132 @@ int main(void)
 
     readBlock(0, SHRT_MAX, 0);
 
+#ifdef VERBOSE
     short max = 30;
     while (--max > 0)
+#else
+    while (1)
+#endif
     {
-        short pc = reg[0];
         byte c = next();
         byte j = next();
         byte i = high(c);
         byte x = low(c);
         byte y = high(j);
         byte z = low(j);
-        if ((i & 0b1000) != 0)
+        switch(i)
         {
-            printf("+");
-        }
-        else
-        {
-            printf(" ");
-        }
-        switch(i & 0b111)
-        {
-            case 0: // CCP
-                printf("CCP %2i=%2i if %2i=0            ", x, y, z);
-                if (getValue(z) == 0)
+            case 0: // HALT
+#ifdef VERBOSE
+                printf("HALT %2i\n", x);
+#endif
+                return reg[x];
+            case 1: // LDC
+#ifdef VERBOSE
+                printf("LDC %2i=%2i                      ", x, ((y << 4) | z));
+#endif
+                reg[x] = ((y << 4) | z);
+                break;
+            case 2: // LD+
+#ifdef VERBOSE
+                printf("LD+ %2i=[%2i] +%2i               ", z, y, x);
+#endif
+                reg[z] = mem[reg[y]];
+                reg[y] += reg[x];
+                break;
+            case 3: // ST+
+#ifdef VERBOSE
+                printf("ST+ [%2i]=%2i +%2i               ", z, y, x);
+#endif
+                mem[reg[z]] = reg[y];
+                reg[z] += reg[x];
+                break;
+            case 4: // CP?
+#ifdef VERBOSE
+                printf("CP? %2i=%2i if %2i=0             ", z, y, x);
+#endif
+                if (reg[x] == 0)
                 {
-                    setValue(x, getValue(y));
+                    reg[z] = reg[y];
                 }
                 break;
-            case 1: // ADD
-                printf("ADD %2i=%2i+%2i                 ", x, y, z);
-                setValue(x, getValue(y) + getValue(z));
+            case 5: // ADD
+#ifdef VERBOSE
+                printf("ADD %2i=%2i+%2i                 ", z, y, x);
+#endif
+                reg[z] = reg[y] + reg[x];
                 break;
-            case 2: // MUL
-                printf("MUL %2i=%2i*%2i                 ", x, y, z);
-                setValue(x, getValue(y) * getValue(z));
+            case 6: // SUB
+#ifdef VERBOSE
+                printf("SUB %2i=%2i-%2i                 ", z, y, x);
+#endif
+                reg[z] = reg[y] - reg[x];
                 break;
-            case 3: // DIV
-                printf("DIV %2i=%2i/%2i                 ", x, y, z);
-                setValue(x, getValue(y) / getValue(z));
+            case 7: // MUL
+#ifdef VERBOSE
+                printf("MUL %2i=%2i*%2i                 ", z, y, x);
+#endif
+                reg[z] = reg[y] * reg[x];
                 break;
-            case 4: // NAND
-                printf("NAND %2i=%2i&%2i                ", x, y, z);
-                setValue(x, ~(getValue(y) & getValue(z)));
+            case 8: // DIV
+#ifdef VERBOSE
+                printf("DIV %2i=%2i/%2i                 ", z, y, x);
+#endif
+                reg[z] = reg[y] / reg[x];
                 break;
-            case 5: // SHIFT
-                printf("SHL %2i=%2i<<>>%2i              ", x, y, z);
-                short zv = getValue(z);
-                if (zv < 0)
-                {
-                    setValue(x, getValue(y) << -zv);
-                }
-                else
-                {
-                    setValue(x, getValue(y) >> zv);
-                }
+            case 9: // NAND
+#ifdef VERBOSE
+                printf("NAND %2i=%2i&%2i                ", z, y, x);
+#endif
+                reg[z] = ~(reg[y] & reg[x]);
                 break;
-            case 6: // IN
-                printf("IN %2i->%2i (%2i)               ", x, y, z);
-                setValue(x, getc(stdin));
+            case 10: // SHL
+#ifdef VERBOSE
+                printf("SHL %2i=%2i<<%2i                ", z, y, x);
+#endif
+                reg[z] = reg[y] << reg[x];
+                break;
+            case 11: // SHR
+#ifdef VERBOSE
+                printf("SHR %2i=%2i>>%2i                ", z, y, x);
+#endif
+                reg[z] = reg[y] >> reg[x];
+                break;
+            case 12: // IN
+#ifdef VERBOSE
+                printf("IN ->%2i                        ", x);
+#endif
+                reg[0]--;
+                reg[x] = getc(stdin);
                 if (feof(stdin)) { clearerr(stdin); }
                 break;
-            case 7: // OUT
-                printf("OUT %2i<-%2i (%2i)              ", x, y, z);
-                wprintf(L"%lc", getValue(x));
+            case 13: // OUT
+#ifdef VERBOSE
+                printf("OUT %2i->                       ", x);
+#endif
+                reg[0]--;
+                wprintf(L"%lc", reg[x]);
                 fflush(stdout);
+                break;
+            case 14: // READ
+#ifdef VERBOSE
+                printf("READ ->%2i (%2i, %2i)          ", z, y, x);
+#endif
+                //readBlock(reg[z], reg[y], reg[x]);
+                break;
+            case 15: // WRITE
+#ifdef VERBOSE
+                printf("WRITE %2i-> (%2i, %2i)         ", z, y, x);
+#endif
+                //writeBlock(reg[z], reg[y], reg[x]);
                 break;
             default:
                 printf("Invalid instruction! (%i)\n", i);
                 return 1;
         }
-        if ((i & 0b1000) != 0)
-        {
-            if ((x & 0b1000) != 0) reg[x & 0b111] += 2;
-            if ((y & 0b1000) != 0) reg[y & 0b111] += 2;
-            if ((z & 0b1000) != 0) reg[z & 0b111] += 2;
-        }
-
-        printf("pc:%2i zero:%2i x:%2i y:%2i z:%2i 5:%2i 6:%2i 7:%2i m100:%2i m101:%2i m102:%2i\n", reg[0], reg[1], reg[2], reg[3], reg[4], reg[5], reg[6], reg[7], mem[100], mem[101], mem[102]);
-        if (reg[0] == pc)
-        {
-            printf("HALT!");
-            return 0;
-        }
+#ifdef VERBOSE
+        printf("pc:%i 1:%i 2:%i 3:%i 4:%i 5:%i 6:%i 7:%i 8:%i 9:%i 10:%i 11:%i 12:%i 13:%i 14:%i 15:%i m100:%2i m101:%2i m102:%2i\n", reg[0], reg[1], reg[2], reg[3], reg[4], reg[5], reg[6], reg[7], reg[8], reg[9], reg[10], reg[11], reg[12], reg[13], reg[14], reg[15], mem[100], mem[101], mem[102]);
+#endif
     }
 
     return 0;
