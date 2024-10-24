@@ -1,16 +1,32 @@
 init,
 
-11 constant x
-12 constant y
-13 constant z
-14 constant callsize
-15 constant r
+14 constant z
+13 constant y
+12 constant x
+11 constant u
+10 constant r
+ 9 constant d
+ 8 constant one
+ 7 constant four
+ 6 constant -four
 
-8 callsize ldc,
-32767 r lit,
+     1 one ldc,
+    4 four ldc,
+  -4 -four ldc,
 
-: call, a pc cp, a a callsize add, r r two sub, r a st, jmp, ;
-: ret, pc r two ld+, ;
+: push, ( rp- ) swap -four st+, ;
+: pop, ( rp- ) dup dup four add, ld, ;
+
+32764 d lit,
+: pushd, d push, ;
+: popd, d pop, ;
+
+32766 r lit,
+: pushr, r push, ;
+: popr, r pop, ;
+
+: call, pc pushr, jmp, ; ( 6 bytes! )
+: ret, t popr, t t four add, pc t cp, ; ( uses t, 8 bytes )
 
 128 constant FLAG
 variable latest
@@ -23,20 +39,30 @@ variable latest
 
 ahead,
 
-sym key 0 header,
-  label 'key
+sym key 0 header, label 'key
       x in,
-y x one add,
- 'key y jmz,
+z x one add,
+ 'key z jmz,
+      x pushd,
         ret,
 
 continue, ( patch jump ahead, )
 
-65 x lit,
-x out,
 'key call,
-x out,
+'key call,
+'key call,
 
-0 halt,
+x popd,
+y popd,
+z popd,
+
+x out,
+y out,
+z out,
+
+32767 t lit,
+one t zero write,
 
 assemble
+
+zero halt,

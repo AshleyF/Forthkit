@@ -33,8 +33,8 @@
 * Interesting:
   * Can get/set PC, so no JMP/CALL/EXEC needed
   * Single SHIFT instruction with positive (left)/negative (right)
-* HALT
-* Load/Store: LD, ST
+* HALT (with exit code)
+* Load/Store: LD, ST (address into register, register to address)
 * Conditional: A=B if C
 * ALU: ADD, SUB, MUL, DIV, AND, OR, XOR, NOT, SHL, SHR
 * I/O: char IN, OUT, disk READ, WRITE

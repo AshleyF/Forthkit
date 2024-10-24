@@ -1,11 +1,13 @@
 init,
 
+12 constant one
 13 constant x
 14 constant y
 15 constant z
 
         init,
-   32 y lit,
+  1 one ldc,
+   32 y ldc,
 
 label 'loop
       x in,

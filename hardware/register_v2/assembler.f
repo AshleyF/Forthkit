@@ -29,10 +29,8 @@ variable h
 
  0 constant pc
  1 constant zero
- 2 constant one
- 3 constant two
- 4 constant a
- 5 constant b
+ 2 constant two
+ 3 constant t
 
 : cp, zero cp?, ;
 : ld, zero ld+, ;
@@ -40,11 +38,11 @@ variable h
 
 : lit, pc two ld+, , ;
 : jmp, pc pc ld, , ;
-: jmz, swap a lit, pc a rot cp?, ;
+: jmz, swap t lit, pc t rot cp?, ; ( uses t )
 
 : not, over swap nand, ;
 : and, -rot 2 pick nand, dup not, ;
-: or, rot a not, swap over not, a over nand, ; ( uses a )
+: or, rot t not, swap over not, t over nand, ; ( uses t )
 ( TODO xor nor xnor )
 ( TODO *i variants )
 
@@ -53,11 +51,11 @@ variable h
 : one, 1 swap lit, ;
 : -one, -1 swap lit, ;
 
-: inc, a  one, a swap add, ; ( uses a )
-: dec, a -one, a swap add, ; ( uses a )
+: inc, t  one, t swap add, ; ( uses t )
+: dec, t -one, t swap add, ; ( uses t )
 
-: negate, swap over not, dup inc, ; ( uses a via inc, )
+: negate, swap over not, dup inc, ; ( uses t via inc, )
 
-: init, 1 one ldc, 2 two ldc, ;
+: init, 2 two ldc, ;
 : ahead, here 2 + 0 zero jmz, ; ( dummy jump, push address )
 : continue, here swap m! ; ( patch jump )

@@ -32,6 +32,7 @@ void readBlock(short block, short maxsize, short address)
 
 void writeBlock(short block, short size, short address)
 {
+    // printf("WRITE BLOCK %i size=%i addr=%i \n", block, size, address);
     char filename[16];
     snprintf(filename, sizeof(filename), "block%d.bin", block);
     FILE *file = fopen(filename, "w");
@@ -68,7 +69,7 @@ int main(void)
     readBlock(0, SHRT_MAX, 0);
 
 #ifdef VERBOSE
-    short max = 30;
+    short max = 100;
     while (--max > 0)
 #else
     while (1)
@@ -91,20 +92,21 @@ int main(void)
 #ifdef VERBOSE
                 printf("LDC %2i=%2i                      ", x, ((y << 4) | z));
 #endif
-                reg[x] = ((y << 4) | z);
+                reg[x] = (signed char)((y << 4) | z);
                 break;
             case 2: // LD+
 #ifdef VERBOSE
                 printf("LD+ %2i=[%2i] +%2i               ", z, y, x);
 #endif
-                reg[z] = mem[reg[y]];
+                reg[z] = (mem[reg[y]] | (mem[reg[y] + 1] << 8));
                 reg[y] += reg[x];
                 break;
             case 3: // ST+
 #ifdef VERBOSE
                 printf("ST+ [%2i]=%2i +%2i               ", z, y, x);
 #endif
-                mem[reg[z]] = reg[y];
+                mem[reg[z]] = reg[y]; // truncated to byte
+                mem[reg[z] + 1] = (reg[y] >> 8); // truncated to byte
                 reg[z] += reg[x];
                 break;
             case 4: // CP?
@@ -178,13 +180,13 @@ int main(void)
 #ifdef VERBOSE
                 printf("READ ->%2i (%2i, %2i)          ", z, y, x);
 #endif
-                //readBlock(reg[z], reg[y], reg[x]);
+                readBlock(reg[z], reg[y], reg[x]);
                 break;
             case 15: // WRITE
 #ifdef VERBOSE
                 printf("WRITE %2i-> (%2i, %2i)         ", z, y, x);
 #endif
-                //writeBlock(reg[z], reg[y], reg[x]);
+                writeBlock(reg[z], reg[y], reg[x]);
                 break;
             default:
                 printf("Invalid instruction! (%i)\n", i);
