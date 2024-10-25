@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
-. ./machine.sh
-
-echo "Building boot image..."
+echo "Building kernel image..."
 rm -f block0.bin
-cat ../../library/prelude.f ./assembler.f ./kernel.f | python ../../interpreter/interpreter.py # build kernel image
-
+cat ../../library/prelude-interpreter
+.f ./assembler.f ./kernel.f | python ../../interpreter/interpreter.py # build kernel image
+. ./machine.sh
 echo "Running kernel image..."
 ./machine

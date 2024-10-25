@@ -1,4 +1,4 @@
-( shared library )
+( shared library - interpreter prelude )
 
 : 2dup over over ;
 : 2drop drop drop ;

@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-cat ../prelude.f ./pixels.f ./test.f | python ../../interpreter/interpreter.py
+cat ../prelude-interpreter.f ./pixels.f ./test.f | python ../../interpreter/interpreter.py

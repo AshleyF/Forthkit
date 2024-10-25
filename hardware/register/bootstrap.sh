@@ -2,4 +2,4 @@
 
 . ./kernel.sh
 echo "Running bootstrap..."
-cat ./bootstrap.f ../../library/prelude.f - | ./machine
+cat ./bootstrap.f - | ./machine

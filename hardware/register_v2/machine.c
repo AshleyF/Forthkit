@@ -69,7 +69,7 @@ int main(void)
     readBlock(0, SHRT_MAX, 0);
 
 #ifdef VERBOSE
-    short max = 100;
+    short max = 1000;
     while (--max > 0)
 #else
     while (1)

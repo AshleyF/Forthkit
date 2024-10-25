@@ -131,7 +131,7 @@
     - `[:` (non-standard)
     - `:]` (non-standard)
     - `call` (non-standard)
-- [prelude.f](./library/prelude.f)
+- [prelude-interpreter.f](./library/prelude-interpreter.f) & [prelude-machine.f](./library/prelude-machine.f)
     - `2dup` (duplicated in bootstrap)
     - `2drop`
     - `min`

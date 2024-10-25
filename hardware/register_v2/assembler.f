@@ -32,6 +32,8 @@ variable h
  2 constant two
  3 constant t
 
+2 two ldc,
+
 : cp, zero cp?, ;
 : ld, zero ld+, ;
 : st, zero st+, ;
@@ -56,6 +58,5 @@ variable h
 
 : negate, swap over not, dup inc, ; ( uses t via inc, )
 
-: init, 2 two ldc, ;
 : ahead, here 2 + 0 zero jmz, ; ( dummy jump, push address )
 : continue, here swap m! ; ( patch jump )
