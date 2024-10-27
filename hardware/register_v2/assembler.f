@@ -42,16 +42,15 @@ variable h
 : jmp, pc pc ld, , ;
 : jmz, swap t lit, pc t rot cp?, ; ( uses t )
 
-: not, over swap nand, ;
-: and, -rot 2 pick nand, dup not, ;
-: or, rot t not, swap over not, t over nand, ; ( uses t )
+: not, dup nand, ;
+: and, 2 pick -rot nand, dup not, ;
+: or, dup dup not, over dup not, nand, ;
 ( TODO xor nor xnor )
-( TODO *i variants )
 
 ( TODO: needed? )
-: zero, 0 swap lit, ; ( TODO: with nand? )
-: one, 1 swap lit, ;
-: -one, -1 swap lit, ;
+: zero, 0 swap ldc, ; ( TODO: with nand? )
+: one, 1 swap ldc, ;
+: -one, -1 swap ldc, ;
 
 : inc, t  one, t swap add, ; ( uses t )
 : dec, t -one, t swap add, ; ( uses t )
