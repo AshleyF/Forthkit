@@ -128,10 +128,22 @@ sym 1+ 0 header, label '1+
         x x one add,
               x pushd,
                 ret,
+sym 1- 0 header, label '1-
+              x popd,
+        x x one sub,
+              x pushd,
+                ret,
+
 
 sym 2+ 0 header, label '2+
               x popd,
         x x two add,
+              x pushd,
+                ret,
+
+sym 2- 0 header, label '2-
+              x popd,
+        x x two sub,
               x pushd,
                 ret,
 
@@ -184,7 +196,20 @@ sym < 0 header, label 'less-than
                ret,
        'negate jmp, ( -1 if negative, 0 otherwise )
 
-sym word 0 header, label 'word
+: branch, 0 jmp, here 2 - ( pointer to address ) ;
+
+: 0branch, ( compile branch if TOS is 0, push address of branch address )
+  x popd, ( condition )
+  0 y lit, ( address )
+  here 2 - ( pointer to address )
+  pc y x cp?, ( branch to address if condition is zero )
+;
+
+: if, 0branch, ; ( compile branch if TOS is 0, push address of branch address )
+: then, here swap m! ; ( patch previous branch to here )
+: else, branch, swap then, ; ( patch previous branch to here and start unconditional branch over false condition )
+
+sym parse-name 0 header, label 'parse-name
           'key call,
             33 literal,
     'less-than call,
@@ -215,6 +240,11 @@ z out,
 'h call,
 'store call,
 
+0 x ldc,
+x pushd,
+
+if,
+
 42 x ldc,
 x pushd,
 'c-comma call,
@@ -231,11 +261,17 @@ x pushd,
 x pushd,
 'c-comma call,
 
+else,
+
 4 x ldc,
 x pushd,
 'c-comma call,
 
 5 x ldc,
+x pushd,
+'c-comma call,
+
+6 x ldc,
 x pushd,
 'c-comma call,
 
@@ -250,6 +286,8 @@ x pushd,
 999 x ldc,
 x pushd,
 'c-comma call,
+
+then,
 
 : foo
   'key call,

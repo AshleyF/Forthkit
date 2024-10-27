@@ -4,16 +4,13 @@
 #include <stdio.h>
 #include <wchar.h>
 #include <locale.h>
-
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <limits.h>
 
-typedef unsigned char byte;
-
 short reg[16] = {};
-byte mem[0x8000];
+unsigned char mem[0x8000];
 
 void readBlock(short block, short maxsize, short address)
 {
@@ -32,7 +29,6 @@ void readBlock(short block, short maxsize, short address)
 
 void writeBlock(short block, short size, short address)
 {
-    // printf("WRITE BLOCK %i size=%i addr=%i \n", block, size, address);
     char filename[16];
     snprintf(filename, sizeof(filename), "block%d.bin", block);
     FILE *file = fopen(filename, "w");
@@ -43,29 +39,14 @@ void writeBlock(short block, short size, short address)
     fclose(file);
 }
 
-byte next()
-{
-    extern short reg[];
-    return mem[reg[0]++];
-}
-
-byte low(byte b)
-{
-    return b & 0x0F;
-}
-
-byte high(byte b)
-{
-    return low(b >> 4);
-}
+#define NEXT mem[reg[0]++]
+#define LOW(b) b & 0x0F
+#define HIGH(b) LOW(b >> 4);
 
 int main(void)
 {
-    // Set stdin to non-blocking mode
-    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
-    fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
-    setlocale(LC_ALL, "");
-
+    fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL, 0) | O_NONBLOCK); // Set stdin to non-blocking mode
+    setlocale(LC_ALL, ""); // support unicode
     readBlock(0, SHRT_MAX, 0);
 
 #ifdef VERBOSE
@@ -75,12 +56,12 @@ int main(void)
     while (1)
 #endif
     {
-        byte c = next();
-        byte j = next();
-        byte i = high(c);
-        byte x = low(c);
-        byte y = high(j);
-        byte z = low(j);
+        unsigned char c = NEXT;
+        unsigned char j = NEXT;
+        unsigned char i = HIGH(c);
+        unsigned char x = LOW(c);
+        unsigned char y = HIGH(j);
+        unsigned char z = LOW(j);
         switch(i)
         {
             case 0: // HALT
@@ -113,10 +94,7 @@ int main(void)
 #ifdef VERBOSE
                 printf("CP? %2i=%2i if %2i=0             ", z, y, x);
 #endif
-                if (reg[x] == 0)
-                {
-                    reg[z] = reg[y];
-                }
+                if (reg[x] == 0) reg[z] = reg[y];
                 break;
             case 5: // ADD
 #ifdef VERBOSE
@@ -197,5 +175,5 @@ int main(void)
 #endif
     }
 
-    return 0;
+    return 0; // TODO: not needed (halt is the only way out)
 }
