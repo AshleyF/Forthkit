@@ -154,7 +154,7 @@
 - ☒ [`(`](https://forth-standard.org/standard/core/p)
 - ☒ [`:`](https://forth-standard.org/standard/core/Colon)
 - ☒ [`[`](https://forth-standard.org/standard/core/Bracket)
-- ☒ [`]`](https://forth-standard.org/standard/core/right-bracket)
+- ☒ [`\]`](https://forth-standard.org/standard/core/right-bracket)
 - ☒ [`SWAP`](https://forth-standard.org/standard/core/SWAP)
 - ☒ [`+`](https://forth-standard.org/standard/core/Plus)
 - ☒ [`-`](https://forth-standard.org/standard/core/Minus)

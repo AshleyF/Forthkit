@@ -46,7 +46,7 @@
 : NEGATE 0 SWAP - ;
 : TRUE -1 ;
 : FALSE 0 ;
-: NOT 0= ;
+: NOT 0= ; ( wrong! and not a standard word, but wrong for INVERT )
 : LITERAL IMMEDIATE ' LIT , , ;
 : ':' [ CHAR : ] LITERAL ;
 : ';' [ CHAR ; ] LITERAL ;
@@ -67,7 +67,7 @@
 : AGAIN IMMEDIATE ' BRANCH , HERE @ - , ;
 : WHILE IMMEDIATE ' 0BRANCH , HERE @ 0 , ;
 : REPEAT IMMEDIATE ' BRANCH , SWAP HERE @ - , DUP HERE @ SWAP - SWAP ! ;
-: UNLESS IMMEDIATE ' NOT , [COMPILE] IF ;
+: UNLESS IMMEDIATE ' NOT , [COMPILE] IF ; ( not a standard word )
 : ( IMMEDIATE 1 BEGIN KEY DUP '(' = IF DROP 1+ ELSE ')' = IF 1- THEN THEN DUP 0= UNTIL DROP ;
 : NIP SWAP DROP ;
 : TUCK SWAP OVER ;

@@ -69,6 +69,19 @@ sym ! 0 header, label 'store
             x y st,
                 ret,
 
+sym and 0 header, label 'and
+              x popd,
+              y popd,
+          z x y and,
+              z pushd,
+                ret,
+
+sym not 0 header, label 'not
+              x popd,
+            x x not,
+              x pushd,
+                ret,
+
 sym c@ 0 header, label 'c-fetch
               x popd,
             x x ld,
@@ -89,14 +102,6 @@ sym c! 0 header, label 'c-store
             x y st,
                 ret,
 
-sym c! 0 header, label 'cc-store
-              x popd, ( x = address )
-              y popd, ( y = values to store )
-          255 z lit,
-          y y z and,
-            x y st,
-                ret,
-          
 sym dup 0 header, label 'dup
               x popd,
               x pushd,
@@ -110,10 +115,35 @@ sym swap 0 header, label 'swap
               y pushd,
                 ret,
 
+sym rot 0 header, label 'rot
+              x popd,
+              y popd,
+              z popd,
+              y pushd,
+              x pushd,
+              z pushd,
+                ret,
+
+sym drop 0 header, label 'drop
+              x popd,
+                ret,
+
 sym '+ 0 header, label 'plus
               x popd,
               y popd,
           x x y add,
+              x pushd,
+                ret,
+
+sym '1+ 0 header, label 'one-plus
+              x popd,
+        x x one add,
+              x pushd,
+                ret,
+
+sym '1- 0 header, label 'one-minus
+              x popd,
+        x x one sub, ( TODO -1 add, )
               x pushd,
                 ret,
 
@@ -147,23 +177,25 @@ sym 2- 0 header, label '2-
               x pushd,
                 ret,
 
+sym 'allot 0 header, label 'allot
+          'here call,
+          'plus call,
+             'h call,
+         'store jmp,
+
 sym , 0 header, label 'comma
 ( here ! here 2+ h ! )
           'here call,
          'store call,
-          'here call, ( TODO: dup? )
-            '2+ call,
-             'h call,
-         'store jmp,
+              2 literal,
+         'allot jmp,
 
 sym c, 0 header, label 'c-comma
 ( here c! here 1+ h ! )
           'here call,
        'c-store call,
-          'here call, ( TODO: dup? )
-            '1+ call,
-             'h call,
-         'store jmp,
+              1 literal,
+         'allot jmp,
 
 : true, -1 swap ldc, ;
 : false, 0 swap ldc, ;
@@ -205,14 +237,146 @@ sym < 0 header, label 'less-than
   pc y x cp?, ( branch to address if condition is zero )
 ;
 
-: if, 0branch, ; ( compile branch if TOS is 0, push address of branch address )
-: then, here swap m! ; ( patch previous branch to here )
-: else, branch, swap then, ; ( patch previous branch to here and start unconditional branch over false condition )
+: if, 0branch, ;                      ( compile branch if TOS is 0, push address of branch address )
+: then, here swap m! ;                ( patch previous branch to here )
+: else, branch, swap then, ;          ( patch previous branch to here and start unconditional branch over false condition )
+
+: begin, here ;
+: until, 0branch, m! ;
 
 sym parse-name 0 header, label 'parse-name
+             0 literal, ( dummy )
+               begin,
+         'drop call,
           'key call,
+          'dup call,
             33 literal,
     'less-than call,
+          'not call,
+               until,
+         'here call, ( address )
+         'swap call,
+      'c-comma call, ( first char )
+             0 literal, ( length )
+               begin,
+     'one-plus call,
+          'key call,
+          'dup call,
+      'c-comma call,
+            33 literal,
+    'less-than call,
+               until,
+         'here call,
+    'one-minus call,
+            'h call,
+        'store call,
+               ret,
+
+sym over 0 header, label 'over
+             x popd,
+             y popd,
+             y pushd,
+             x pushd,
+             y pushd,
+               ret,
+
+sym / 0 header, label 'slash
+             x popd,
+             y popd,
+         z y x div,
+             z pushd,
+               ret,
+
+sym * 0 header, label 'star
+             x popd,
+             y popd,
+         z y x mul,
+             z pushd,
+               ret,
+
+sym - 0 header, label 'minus
+             x popd,
+             y popd,
+         z y x sub,
+             z pushd,
+               ret,
+
+sym + 0 header, label 'plus
+             x popd,
+             y popd,
+         z x y add,
+             z pushd,
+               ret,
+
+sym mod 0 header, label 'mod
+        'over call,
+        'over call,
+       'slash call,
+        'star call,
+       'minus jmp,
+
+sym emit 0 header, label 'emit
+             x popd,
+             x out,
+               ret,
+
+sym cr 0 header, label 'c-r
+            10 literal, ( TODO CRLF? )
+         'emit jmp,
+
+sym . 0 header, label 'dot
+          'dup call,
+             z popd,
+          15 x ldc,
+         z z x shr, ( sign bit to 1s place - 1 if negative, 0 otherwise )
+             z pushd,
+               if,
+            45 literal,
+         'emit call,
+            -1 literal,
+        'slash call, ( TODO negate )
+               then,
+          zero pushd,
+         'swap call,
+               begin,
+          'dup call,
+            10 literal,
+          'mod call,
+            -1 literal, ( TODO true )
+          'rot call,
+            10 literal,
+        'slash call,
+          'dup call,
+             0 literal,
+       'equals call,
+               until,
+         'drop call,
+         label 'repeat ( TODO: structured )
+               if, ( TODO while, or something )
+            48 literal,
+         'plus call,
+         'emit call,
+       'repeat jmp,
+               then,
+               ret,
+
+: header,
+  latest @ here latest ! , ( link to previous word, update latest to this word ) ( TODO: doesn't seem to work )
+  over or c, ( length/flag )
+  0 do c, loop ( name )
+;
+
+sym create-header 0 header, label 'create-header ( non-standard )
+             0 literal, ( TODO: latest link )
+        'comma call,
+         'here call, ( address of length )
+             0 literal, ( dummy length )
+      'c-comma call,
+   'parse-name call,
+         'swap call,
+         'drop call, ( don't need address of name because we know it uses dictionary space )
+         'swap call,
+      'c-store call, ( overwrite length -- assumed < 256 )
                ret,
 
 ( move compile-time h to runtime h )
@@ -236,7 +400,23 @@ y out,
 z out,
 )
 
-1024 literal,
+-123 literal,
+'dot call,
+'c-r call,
+
+123 literal,
+'dot call,
+'c-r call,
+
+0 literal,
+'dot call,
+'c-r call,
+
+42 literal,
+'dot call,
+'c-r call,
+
+2024 literal,
 'h call,
 'store call,
 
@@ -289,12 +469,17 @@ x pushd,
 
 then,
 
-: foo
+begin,
   'key call,
+  'dup call,
   'c-comma call,
-;
+  32 literal,
+  'equals call,
+until,
 
-foo foo foo foo foo foo
+'create-header call,
+'create-header call,
+'create-header call,
 
 7 y lit, y pushd,
 8 x lit, x pushd,
