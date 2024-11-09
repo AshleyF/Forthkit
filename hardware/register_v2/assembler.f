@@ -3,28 +3,27 @@ variable h
 :  , here m! here 2 + h ! ;
 : c, here b! here 1 + h ! ;
 
-: 2nib, 4 << or c, ;
-: 4nib, 2nib, 2nib, ;
+: 2nyb, 4 << or c, ;
+: 4nyb, 2nyb, 2nyb, ;
 
-: halt,    0 2nib, ;
-: ldc,     1 2nib, c, ;
-: ld+,     2 4nib, ;
-: st+,     3 4nib, ;
-: cp?,     4 4nib, ;
-: add,     5 4nib, ;
-: sub,     6 4nib, ;
-: mul,     7 4nib, ;
-: div,     8 4nib, ;
-: nand,    9 4nib, ;
-: shl,    10 4nib, ;
-: shr,    11 4nib, ;
-: in,     12 2nib, ;
-: out,    13 2nib, ;
-: read,   14 4nib, ;
-: write,  15 4nib, ;
+: halt,    0 2nyb, ;
+: ldc,     1 2nyb, c, ;
+: ld+,     2 4nyb, ;
+: st+,     3 4nyb, ;
+: cp?,     4 4nyb, ;
+: add,     5 4nyb, ;
+: sub,     6 4nyb, ;
+: mul,     7 4nyb, ;
+: div,     8 4nyb, ;
+: nand,    9 4nyb, ;
+: shl,    10 4nyb, ;
+: shr,    11 4nyb, ;
+: in,     12 2nyb, ;
+: out,    13 2nyb, ;
+: read,   14 4nyb, ;
+: write,  15 4nyb, ;
 
 : label here constant ;
-
 : assemble 0 here 0 write halt ;
 
  0 constant pc
