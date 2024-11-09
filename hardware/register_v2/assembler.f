@@ -39,7 +39,7 @@ variable h
 : st, zero st+, ;
 
 : lit, pc two ld+, , ;
-: jmp, pc pc ld, , ;
+: jump, pc pc ld, , ;
 : jmz, swap t lit, pc t rot cp?, ; ( uses t )
 
 : not, dup nand, ;

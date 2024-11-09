@@ -4,7 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RM16</title>
+    <style>
+      body {
+        background-color: black;
+        color: white;
+        font-family: sans-serif;
+      }
+      td { border: 1px solid gray }
+      td#terminal { width: 100%; height: 100% }
+    </style>
   </head>
   <body>
+    <h1>RM16</h1>
+    <table>
+      <tr>
+        <td id="controls">Controls</td>
+        <td id="terminal" rowspan="3">Terminal</td>
+      </tr>
+      <tr>
+        <td id="registers">Registers</td>
+      </tr>
+      <tr>
+        <td id="memory">Memory</td>
+      </tr>
+    </table>
   </body>
 </html>

@@ -12,6 +12,6 @@ z x one add,
 'loop z jmz,
   x x y sub,
       x out,
-  'loop jmp,
+  'loop jump,
 
 assemble
