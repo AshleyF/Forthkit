@@ -26,7 +26,7 @@
 * JUMP (dup memory and set instruction pointer)
 * LIT: A = load immediate (25-bit quantity)
 
-## MyRegVM
+## RM16
 
 16-bit, 16 registers (including PC as register 0)
 
@@ -34,7 +34,9 @@
   * Can get/set PC, so no JMP/CALL/EXEC needed
   * Single SHIFT instruction with positive (left)/negative (right)
 * HALT (with exit code)
-* Load/Store: LD, ST (address into register, register to address)
-* Conditional: A=B if C
-* ALU: ADD, SUB, MUL, DIV, AND, OR, XOR, NOT, SHL, SHR
+* Load constant: LDC
+* Load/Store memory: LD+, ST+ (address into register, register to address, and inc/dec)
+* Conditional: CP? (A=B if C)
+* ALU: ADD, SUB, MUL, DIV
+* Bitwise: NAND, SHL, SHR
 * I/O: char IN, OUT, disk READ, WRITE

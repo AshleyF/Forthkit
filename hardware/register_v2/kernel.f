@@ -359,6 +359,7 @@ sym base 0 header, label 'base
 65 constant 'A'
 97 constant 'a'
 
+( TODO figure out -32768 bug! )
 sym . 0 header, label 'dot
           'dup call,
              z popd,
@@ -407,23 +408,22 @@ sym . 0 header, label 'dot
 label 'latest variable, ( internal )
 
 sym header 0 header, label 'header ( non-standard )
+         'here call, ( save here )
        'latest call,
         'fetch call,
-         'here call,
-       'latest call,
-        'store call,
         'comma call,
          'here call, ( address of length )
              0 literal, ( dummy length )
       'c-comma call,
    'parse-name call,
-          'dup call,
-        'allot call, ( reserve space for name )
-         'swap call,
-         'drop call, ( don't need address of name because we know it uses dictionary space )
+          'rot call,
+         'over call,
          'swap call,
       'c-store call, ( overwrite length -- assumed < 256 )
-               ret,
+          'rot call,
+            'h call,
+        'store call, ( restore here )
+               ret,  ( addr len )
 
 sym true 0 header, label 'true ( TODO: check name )
             -1 literal,
@@ -523,8 +523,7 @@ sym >number 0 header, label 'to-number
              0 literal, ( num next len )
                ret,
 
-sym repl 0 header, label 'repl ( TODO: rename )
-   'parse-name call,    ( addr len )
+sym parse-number 0 header, label 'parse-number ( non-standard )
          'over call,    ( addr len addr )
       'c-fetch call,    ( addr len first )
            '-' literal, ( addr len first '-' )
@@ -549,16 +548,154 @@ sym repl 0 header, label 'repl ( TODO: rename )
                if,      ( sign num addr len )
         '2drop call,    ( sign num )
          'star call,    ( num )
-          
+         'true call,    ( num true )
+               else,    ( sign num addr len )
+        '2drop call,    ( sign num )
+        '2drop call,    ( )
+        'false call,    ( false )
+               then,
+               ret,
+
+sym debug 0 header, label 'debug
+           888 literal,
           'dot call,
           'c-r call,
-          
-               else,    ( sign num addr len )
-         'type call,    ( sign num )
-           '?' literal, ( sign num '?' )
-         'emit call,    ( sign num )
-        '2drop call,    ( )
+          'dup call,
+          'dot call,
+          'c-r jump,
+
+sym compstr 0 header, label 'compstr ( non-standard )
+          'dup call,    ( w0 w1 len len )
+             0 literal,
+       'equals call,
+               if,      ( w0 w1 len )
+        '2drop call,    ( w0 )
+         'drop call,    ( )
+         'true call,    ( true )
+               else,    ( w0 w1 len )
+         '-rot call,    ( len w0 w1 )
+         '2dup call,    ( len w0 w1 w0 w1 )
+      'c-fetch call,    ( len w0 w1 w0 c1 )
+         'swap call,    ( len w0 w1 c1 w0 )
+      'c-fetch call,    ( len w0 w1 c1 c0 )
+       'equals call,    ( len w0 w1 bool )
+               if,      ( len w0 w1 )
+     'one-plus call,    ( len w0 w1 )
+          'rot call,    ( w0 w1 len )
+    'one-minus call,    ( w0 w1 len )
+          'rot call,    ( w1 len w0 )
+     'one-plus call,    ( w1 len w0 )
+         '-rot call,    ( w0 w1 len )
+      'compstr call,    ( recurse! TODO no need to compare len again )
+               else,    ( len w0 w1 )
+        '2drop call,    ( len )
+         'drop call,    ( )
+        'false call,    ( false )
                then,
+               then,
+               ret,
+
+sym find 0 header, label 'find
+       'latest call,
+        'fetch call,    ( c-find cur )
+label 'findnext
+         '2dup call,    ( c-find cur c-find cur )
+             2 literal,
+         'plus call,    ( c-find cur c-find c-word )
+         '2dup call,    ( c-find cur c-find c-word c-find c-word )
+      'c-fetch call,    ( c-find cur c-find c-word c-find lenflag )
+           127 literal, ( mask )
+          'and call,    ( c-find cur c-find c-word c-find len )
+         'swap call,    ( c-find cur c-find c-word len c-find )
+      'c-fetch call,    ( c-find cur c-find c-word len len )
+         'over call,    ( c-find cur c-find c-word len len len )
+       'equals call,    ( c-find cur c-find c-word len bool )
+               if,      ( c-find cur c-find c-word len )
+          'rot call,    ( c-find cur c-word len c-find )
+     'one-plus call,    ( c-find cur c-word len c-find -- past len byte )
+          'rot call,    ( c-find cur len c-find c-word )
+     'one-plus call,    ( c-find cur len c-find c-word -- past len byte )
+          'rot call,    ( c-find cur c-find c-word len )
+      'compstr call,    ( c-find cur bool )
+               if,      ( c-find cur )
+         'swap call,    ( cur c-find )
+         'drop call,    ( cur )
+             2 literal, ( cur 2 )
+         'plus call,    ( c-found )
+          'dup call,    ( c-found c-found )
+          'dup call,    ( c-found c-found c-found )
+      'c-fetch call,    ( c-found c-found lenflag )
+           127 literal, ( mask )
+          'and call,    ( c-found c-found len )
+         'plus call,    ( c-found xt )
+     'one-plus call,    ( c-found xt )
+         'swap call,    ( xt c-found )
+      'c-fetch call,    ( xt lenflag )
+           128 literal, ( xt lenflag flag )
+         'swap call,    ( xt flag lenflag )
+         'over call,    ( xt flag lenflag flag )
+          'and call,    ( xt flag mask )
+       'equals call,    ( xt bool )
+               if,      ( xt )
+             1 literal, ( xt 1 -- immediate )
+               else,
+            -1 literal, ( xt -1 -- not immediate )
+               then,
+               ret,
+               then,
+               else,    ( c-find cur c-find c-word len -- lengths don't match )
+        '2drop call,    ( c-find cur c-find )
+         'drop call,    ( c-find cur )
+               then,
+          'dup call,    ( c-find cur cur )
+             0 literal, ( c-find cur cur 0 )
+       'equals call,    ( c-find cur bool )
+               if,      ( c-find cur )
+         'drop call,    ( c-find )
+             0 literal, ( c-find 0 )
+               else,    ( c-find cur )
+        'fetch call,    ( c-find next )
+     'findnext call,    ( recurse! )
+               then,
+               ret,
+
+sym execute 0 header, label 'execute
+             x popd,
+          pc x cp, ( jump from *runtime* stack )
+
+: call, pc pushr, jump, ; ( 6 bytes! )
+
+label 'state variable,
+
+sym repl 0 header, label 'repl ( TODO: rename )
+       'header call,    ( addr len )
+         'over call,    ( addr len addr )
+    'one-minus call,    ( addr len c-addr )
+         'find call,    ( addr len c-addr flag )
+          'dup call,    ( addr len [ c-addr 0 | xt 1 | xt -1 ] [ 0 | 1 | -1 ] )
+             0 literal, ( addr len [ c-addr 0 | xt 1 | xt -1 ] [ 0 | 1 | -1 ] 0 )
+       'equals call,    ( addr len [ c-addr 0 | xt 1 | xt -1 ] [ 0 | 1 | -1 ] 0 )
+               if,      ( addr len c-addr 0 -- not found )
+        '2drop call,    ( addr len )
+         '2dup call,    ( addr len addr len )
+ 'parse-number call,    ( addr len [ num true | false ] )
+               if,      ( addr len -- is number )
+( TODO push/compile )
+         '-rot call,    ( num addr len )
+        '2drop call,    ( num )
+               else,    ( addr len -- not number, error )
+         'type call,    ( )
+           '?' literal, ( '?' )
+         'emit call,    ( )
+               then,
+               else,    ( addr len [ xt 1 | xt -1 ] -- found )
+( TODO call/compile )
+         'drop call,    ( addr len xt )
+         '-rot call,    ( xt addr len )
+        '2drop call,    ( xt )
+      'execute call,
+               then,
+
 32767 t lit,
 one t zero write,
 
