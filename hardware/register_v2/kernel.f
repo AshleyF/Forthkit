@@ -48,8 +48,6 @@ ahead,
   ret,
 ;
 
-( TODO remove labels below )
-
 sym >r 0 header, label 'to-r
               x popd,
               y popr,
@@ -425,11 +423,11 @@ sym header 0 header, label 'header ( non-standard )
         'store call, ( restore here )
                ret,  ( addr len )
 
-sym true 0 header, label 'true ( TODO: check name )
+sym true 0 header, label 'true
             -1 literal,
                ret,
 
-sym false 0 header, label 'false ( TODO: check name )
+sym false 0 header, label 'false
              0 literal,
                ret,
 
@@ -678,7 +676,7 @@ sym make 0 header, label 'make ( non-standard )
 
 label 'state variable,
 
-sym [ 0 header, label 'left-bracket
+sym [ 128 header, label 'left-bracket
         'false call,
         'state call,
         'store jump,
@@ -688,7 +686,7 @@ sym ] 0 header, label 'right-bracket
         'state call,
         'store jump,
 
-sym ; 0 header, label 'simicolon
+sym ; 128 header, label 'simicolon
                ( compile ret, )
         -26282 literal, ( 5699 -> add four r r -- r=r+4 )
         'comma call,
@@ -696,7 +694,7 @@ sym ; 0 header, label 'simicolon
         'comma call,
          13142 literal, ( 5633 -> add four t t -- t=t+4 )
         'comma call,
-         12353 literal, ( 4130 -> cp? zero t pc == pc=t )
+         12353 literal, ( 4130 -> cp? zero t pc -- pc=t )
         'comma call,
  'left-bracket call,
       'current call, ( current -> latest )
@@ -705,48 +703,66 @@ sym ; 0 header, label 'simicolon
         'store call,
                ret,
 
-sym repl 0 header, label 'repl ( TODO: rename )
+sym bye 0 header,
+             0 halt,
+
+sym quit 0 header, label 'quit ( TODO: empty return stack )
        'header call,    ( addr len )
          'over call,    ( addr len addr )
     'one-minus call,    ( addr len c-addr )
-         'find call,    ( addr len c-addr flag )
+         'find call,    ( addr len [ c-addr 0 | xt 1 | xt -1 ] )
           'dup call,    ( addr len [ c-addr 0 | xt 1 | xt -1 ] [ 0 | 1 | -1 ] )
              0 literal, ( addr len [ c-addr 0 | xt 1 | xt -1 ] [ 0 | 1 | -1 ] 0 )
-       'equals call,    ( addr len [ c-addr 0 | xt 1 | xt -1 ] [ 0 | 1 | -1 ] 0 )
-               if,      ( addr len c-addr 0 -- not found )
+       'equals call,    ( addr len [ c-addr 0 | xt 1 | xt -1 ] [ 0 | 1 | -1 ] bool )
+( 0 )          if,      ( addr len c-addr 0 -- not found )
         '2drop call,    ( addr len )
          '2dup call,    ( addr len addr len )
  'parse-number call,    ( addr len [ num true | false ] )
-               if,      ( addr len -- is number )
+( 1 )          if,      ( addr len -- is number )
          '-rot call,    ( num addr len )
         '2drop call,    ( num )
         'state call,
         'fetch call,    ( num state )
-               if,      ( num )
+( 2 )          if,      ( num )
           3106 literal, ( 220C -> ld+ two pc x -- x=[pc] pc += 2 -- load and skip literal )
         'comma call,
         'comma call,    ( literal value )
         -14283 literal, ( 35C8 -> st+ -four x d -- [d]=x d+=-4 -- push literal )
         'comma call,
-               then,
-               else,    ( addr len -- not number, error )
+( 2 )          then,
+( 1 )          else,    ( addr len -- not number, error )
          'type call,    ( )
            '?' literal, ( '?' )
          'emit call,    ( )
-               then,
-               else,    ( addr len [ xt 1 | xt -1 ] -- found )
-( TODO call/compile )
-         'drop call,    ( addr len xt )
+( 1 )          then,
+( 0 )          else,    ( addr len xt [ 1 | -1 ] -- found )
+            -1 literal,
+       'equals call,    ( addr len xt [ 0 | -1 ] )
+        'state call,
+        'fetch call,    ( addr len xt [ 0 | -1 ] [ 0 | non-zero ] )
+             0 literal,
+       'equals call,
+          'not call,    ( addr len xt [ 0 | -1 ] [ 0 | -1 ] )
+          'and call,    ( addr len xt [ 0 | -1 ] )
+               if,      ( addr len xt -- compile? )
+              ( compile call ) 
+          2357 literal, ( 3509 -> st+ -four pc r -- [r]=pc r+=4 -- push pc )
+        'comma call,
+            33 literal, ( 2100 -> ld+ zero pc pc -- pc=[pc] -- jump to following address )
+        'comma call,
+        'comma call,    ( addr len )
+        '2drop call,    ( )
+               else,    ( addr len xt -- immediate/not-compiling )
          '-rot call,    ( xt addr len )
         '2drop call,    ( xt )
-'debug call,
-      'execute call,
+      'execute call,    ( )
                then,
+( 0 )          then,
 
 32767 t lit,
 one t zero write,
 
-         'repl jump, ( TODO: recurse )
+         'quit jump, ( TODO: recurse )
    
 continue, ( patch jump ahead, )
 
@@ -767,7 +783,7 @@ continue, ( patch jump ahead, )
 32767 t lit,
 one t zero write,
 
-'repl jump,
+'quit jump,
 
 assemble
 
