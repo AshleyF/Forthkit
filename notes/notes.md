@@ -9,6 +9,7 @@
 - Make `execute` word and, well, execute words
 - Add `state` word
 - Compile/push numbers depending on `state`
+  - Start with pushing numbers (`: foo 42 ;`)
 - Compile/execute words depending on `state` and immediate flag
 - Make `create` and `immediate`
 - Make colon (`:`) and semicolon (`;`)

@@ -663,9 +663,47 @@ sym execute 0 header, label 'execute
              x popd,
           pc x cp, ( jump from *runtime* stack )
 
-: call, pc pushr, jump, ; ( 6 bytes! )
+label 'current variable, ( internal )
+
+sym make 0 header, label 'make ( non-standard )
+       'header call,    ( addr len )
+         'swap call,    ( len addr )
+             3 literal,
+        'minus call,    ( len linkaddr )
+      'current call,
+        'store call,    ( len )
+             3 literal, ( length of link and lenflag byte )
+         'plus call,    ( length of header )
+        'allot jump,    ( include into dictionary )
 
 label 'state variable,
+
+sym [ 0 header, label 'left-bracket
+        'false call,
+        'state call,
+        'store jump,
+
+sym ] 0 header, label 'right-bracket
+        'true call,
+        'state call,
+        'store jump,
+
+sym ; 0 header, label 'simicolon
+               ( compile ret, )
+        -26282 literal, ( 5699 -> add four r r -- r=r+4 )
+        'comma call,
+        -27871 literal, ( 2193 -> ld+ zero r t -- t=[r] )
+        'comma call,
+         13142 literal, ( 5633 -> add four t t -- t=t+4 )
+        'comma call,
+         12353 literal, ( 4130 -> cp? zero t pc == pc=t )
+        'comma call,
+ 'left-bracket call,
+      'current call, ( current -> latest )
+        'fetch call,
+       'latest call,
+        'store call,
+               ret,
 
 sym repl 0 header, label 'repl ( TODO: rename )
        'header call,    ( addr len )
@@ -680,9 +718,17 @@ sym repl 0 header, label 'repl ( TODO: rename )
          '2dup call,    ( addr len addr len )
  'parse-number call,    ( addr len [ num true | false ] )
                if,      ( addr len -- is number )
-( TODO push/compile )
          '-rot call,    ( num addr len )
         '2drop call,    ( num )
+        'state call,
+        'fetch call,    ( num state )
+               if,      ( num )
+          3106 literal, ( 220C -> ld+ two pc x -- x=[pc] pc += 2 -- load and skip literal )
+        'comma call,
+        'comma call,    ( literal value )
+        -14283 literal, ( 35C8 -> st+ -four x d -- [d]=x d+=-4 -- push literal )
+        'comma call,
+               then,
                else,    ( addr len -- not number, error )
          'type call,    ( )
            '?' literal, ( '?' )
@@ -693,6 +739,7 @@ sym repl 0 header, label 'repl ( TODO: rename )
          'drop call,    ( addr len xt )
          '-rot call,    ( xt addr len )
         '2drop call,    ( xt )
+'debug call,
       'execute call,
                then,
 
