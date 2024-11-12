@@ -40,12 +40,12 @@ variable latest
 ahead,
 
 : variable,
-  x pc cp,
-  pc pc two add, ( skip value )
-  0 , ( append value )
-  x x two add, ( point at value )
-  x pushd,
-  ret,
+     x pc cp,
+     14 y ldc, ( count this and following instruction )
+    x x y add, ( point just beyond this code -- data field )
+        x pushd,
+          ret, ( 8 bytes )
+          here 2 + h ! ( 2 allot )
 ;
 
 sym >r 0 header, label 'to-r
@@ -201,7 +201,7 @@ sym 2- 0 header, label '2-
               x pushd,
                 ret,
 
-sym 'allot 0 header, label 'allot
+sym allot 0 header, label 'allot
           'here call,
           'plus call,
              'h call,
@@ -674,6 +674,21 @@ sym make 0 header, label 'make ( non-standard )
          'plus call,    ( length of header )
         'allot jump,    ( include into dictionary )
 
+sym dovar 0 header, label 'dovar
+      t t four add, ( point just beyond jump from create below )
+             t pushd,
+               ret,
+
+sym create 0 header, label 'create
+         'make call,
+           833 literal, ( 4103 -> cp? zero pc t -- dovar expects in t )
+        'comma call,
+            33 literal, ( 2100 -> ld+ zero pc pc -- pc=[pc] -- jump to following address )
+        'comma call,
+        'dovar literal, ( compile jump to 'dovar )
+        'comma call,
+               ret,
+   
 label 'state variable,
 
 sym [ 128 header, label 'left-bracket
@@ -686,7 +701,13 @@ sym ] 0 header, label 'right-bracket
         'state call,
         'store jump,
 
-sym ; 128 header, label 'simicolon
+sym link 0 header, label 'link ( non-standard )
+      'current call, ( current -> latest )
+        'fetch call,
+       'latest call,
+        'store jump,
+
+sym ; 128 header, label 'semicolon
                ( compile ret, )
         -26282 literal, ( 5699 -> add four r r -- r=r+4 )
         'comma call,
@@ -697,11 +718,7 @@ sym ; 128 header, label 'simicolon
          12353 literal, ( 4130 -> cp? zero t pc -- pc=t )
         'comma call,
  'left-bracket call,
-      'current call, ( current -> latest )
-        'fetch call,
-       'latest call,
-        'store call,
-               ret,
+         'link jump,
 
 sym bye 0 header,
              0 halt,
@@ -778,6 +795,10 @@ continue, ( patch jump ahead, )
        'latest call,
         'store call,
 
+             0 literal,
+        'state call, ( initialize state )
+        'store call,
+
 10 literal, 'base call, 'store call,
 
 32767 t lit,
@@ -786,5 +807,3 @@ one t zero write,
 'quit jump,
 
 assemble
-
-zero halt, ( TODO: remove )

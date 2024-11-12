@@ -49,12 +49,7 @@ int main(void)
     setlocale(LC_ALL, ""); // support unicode
     readBlock(0, SHRT_MAX, 0);
 
-#ifdef VERBOSE
-    short max = 3000;
-    while (--max > 0)
-#else
     while (1)
-#endif
     {
         unsigned char c = NEXT;
         unsigned char j = NEXT;
