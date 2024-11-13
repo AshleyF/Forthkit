@@ -576,9 +576,6 @@ sym parse-number 0 header, label 'parse-number ( non-standard )
                ret,
 
 sym debug 0 header, label 'debug
-           888 literal,
-          'dot call,
-          'c-r call,
           'dup call,
           'dot call,
           'c-r jump,
@@ -614,9 +611,16 @@ sym compstr 0 header, label 'compstr ( non-standard )
                then,
                ret,
 
+label 'state variable,
+
 sym find 0 header, label 'find
        'latest call,
         'fetch call,    ( c-find cur )
+        'state call,    ( c-find cur stateaddr )
+        'fetch call,    ( c-find cur state )
+               if,      ( c-find cur )
+        'fetch call,    ( c-find cur -- skip current word when compiling )
+               then,
 label 'findnext
          '2dup call,    ( c-find cur c-find cur )
              2 literal,
@@ -682,14 +686,12 @@ sym execute 0 header, label 'execute
              x popd,
           pc x cp, ( jump from *runtime* stack )
 
-label 'current variable, ( internal )
-
 sym make 0 header, label 'make ( non-standard )
        'header call,    ( addr len )
          'swap call,    ( len addr )
              3 literal,
         'minus call,    ( len linkaddr )
-      'current call,
+       'latest call,
         'store call,    ( len )
              3 literal, ( length of link and lenflag byte )
          'plus call,    ( length of header )
@@ -710,8 +712,6 @@ sym create 0 header, label 'create
         'comma call,
                ret,
 
-label 'state variable,
-
 sym [ 128 header, label 'left-bracket
         'false call,
         'state call,
@@ -720,12 +720,6 @@ sym [ 128 header, label 'left-bracket
 sym ] 0 header, label 'right-bracket
         'true call,
         'state call,
-        'store jump,
-
-sym link 0 header, label 'link ( non-standard )
-      'current call, ( current -> latest )
-        'fetch call,
-       'latest call,
         'store jump,
 
 sym ; 128 header, label 'semicolon
@@ -738,8 +732,7 @@ sym ; 128 header, label 'semicolon
         'comma call,
          12353 literal, ( 4130 -> cp? zero t pc -- pc=t )
         'comma call,
- 'left-bracket call,
-         'link jump,
+ 'left-bracket jump,
 
 sym bye 0 header,
              0 halt,
