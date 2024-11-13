@@ -1,7 +1,7 @@
 variable h
 : here h @ ;
-:  , here m! here 2 + h ! ;
-: c, here b! here 1 + h ! ;
+:  , here ! here 2 + h ! ;
+: c, here ! here 1 + h ! ;
 
 : 2nyb, 4 << or c, ;
 : 4nyb, 2nyb, 2nyb, ;
@@ -57,4 +57,4 @@ variable h
 : negate, swap over not, dup inc, ; ( uses t via inc, )
 
 : ahead, here 2 + 0 zero jmz, ; ( dummy jump, push address )
-: continue, here swap m! ; ( patch jump )
+: continue, here swap ! ; ( patch jump )

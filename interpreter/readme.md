@@ -44,11 +44,9 @@ The following primitive words are available:
 | `rot`      | zyx-xzy   | Rotate 3rd value to top              |
 | `-rot`     | zyx-yxz   | Rotate top value to 3rd              |
 | `variable` |    -      | Create variable                      |
-| `@`        |   a-n     | Fetch variable value                 |
-| `!`        |  xa-      | Store into variable                  |
+| `@`        |   a-n     | Fetch memory/variable value          |
+| `!`        |  xa-      | Store into memory/variable           |
 | `constant` |   x-      | Create constant                      |
-| `m@`       |   a-n     | Fetch memory address                 |
-| `m!`       |  xa-      | Store into memory address            |
 | `read`     | asb-      | Read block file to core              |
 | `write`    | asb-      | Write core to block file             |
 | `(`        |    -      | Start comment (to `)`)               |
@@ -322,16 +320,14 @@ Remember that this interpreter is temporary. We will play with it a bit, but pri
 
 We will see later that structures such as the stack, dictionary and variables in a native Forth are merely built in raw memory. Here we're making these structures separately concrete and visible in the interpreter so that we can more clearly see what they represent. So `memory` remains separate and available exclusively for building the seed image.
 
-Similar to variables, we have a memory-fetch (`m@`) and memory-store (`m!`). If you're used to regular Forth where there is only `@` and `!` this will seem weird! Because we're keeping variables and raw memory separate we need separate operators, for now.
+Similar to variables, we can use fetch (`@`) and store (`!`) with memory. If you're used to regular Forth where there is only `@` and `!` this will seem weird! Because we're keeping variables and raw memory separate we need separate operators, for now.
 
-To store a `42` into address `123`, we say `42 123 m!`. To retrieve it we say `123 m@`.
+To store a `42` into address `123`, we say `42 123 !`. To retrieve it we say `123 @`.
 
 Finally, we can `write` all of memory to an `block0.bin` file. This will be used to create the seed image for our VM in the future. 
 
 ```python
     self.dictionary = {
-      'm@'       : lambda: self.x_x(lambda x: self.memory[int(x)]),
-      'm!'       : lambda: self.xx_(self.memoryStore),
       'write'    : self.write,
       ... }
 ```

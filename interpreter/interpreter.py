@@ -38,11 +38,12 @@ class Forth:
       'roll'     : lambda: self.x_(lambda x: (self.stack.append(self.stack[int(-x - 1)]), self.stack.pop(int(-x - 2)))),
       'drop'     : lambda: self.x_(lambda _: None),
       'variable' : self.variable,
-      '@'        : lambda: self.x_x(lambda x: self.variables[int(x)]),
-      '!'        : lambda: self.xx_(self.variableStore),
       'constant' : self.constant,
-      'm@'       : lambda: self.x_x(lambda x: (self.memory[int(x)] | self.memory[int(x + 1)] << 8)),
-      'm!'       : lambda: self.xx_(self.memoryStore),
+      '@'        : lambda: self.x_x(self.fetch),
+      '!'        : lambda: self.xx_(self.store),
+      'm!'       : lambda: self.xx_(self.store),
+      'c@'       : lambda: self.x_x(lambda x: self.memory[int(x)]),
+      'c!'       : lambda: self.xx_(self.memoryStoreByte),
       'b@'       : lambda: self.x_x(lambda x: self.memory[int(x)]),
       'b!'       : lambda: self.xx_(self.memoryStoreByte),
       'write'    : lambda: self.xxx_(self.write),
@@ -93,13 +94,21 @@ class Forth:
   def xx_(self, f): self.flip2(f, self.pop(), self.pop())
   def xxx_(self, f): self.flip3(f, self.pop(), self.pop(), self.pop())
 
-  def variableStore(self, val, addr): self.variables[addr] = val
-  def memoryStore(self, val, addr): self.memory[int(addr)] = int(val) & 0xFF; self.memory[int(addr) + 1] = (int(val) >> 8) & 0xFF
+  def fetch(self, addr):
+    if addr >= 0: return self.memory[int(addr)] | self.memory[int(addr + 1)] << 8
+    else: return self.variables[int(-addr) - 1]
+
+  def store(self, val, addr):
+    if addr >= 0:
+      self.memory[int(addr)] = int(val) & 0xFF
+      self.memory[int(addr) + 1] = (int(val) >> 8) & 0xFF
+    else: self.variables[-addr - 1] = val
+
   def memoryStoreByte(self, val, addr): self.memory[int(addr)] = int(val) & 0xFF
 
   def variable(self):
     name = next(self.tokens)
-    index = len(self.variables)
+    index = -len(self.variables) - 1
     self.variables.append(0)
     self.dictionary[name] = lambda: self.push(index)
 

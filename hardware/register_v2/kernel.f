@@ -262,11 +262,11 @@ sym < 0 header, label 'less-than
 ;
 
 : if, 0branch, ;                      ( compile branch if TOS is 0, push address of branch address )
-: then, here swap m! ;                ( patch previous branch to here )
+: then, here swap ! ;                ( patch previous branch to here )
 : else, branch, swap then, ;          ( patch previous branch to here and start unconditional branch over false condition )
 
 : begin, here ;
-: until, 0branch, m! ;
+: until, 0branch, ! ;
 
 sym parse-name 0 header, label 'parse-name
          'here call, ( save h )

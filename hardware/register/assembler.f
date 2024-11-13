@@ -2,8 +2,8 @@
 
 variable dp ( dictionary pointer )
 : here dp @ ;
-:  , here m! here 2 + dp ! ; ( append )
-: c, here b! here 1 + dp ! ; ( append byte )
+:  , here ! here 2 + dp ! ; ( append )
+: c, here c! here 1 + dp ! ; ( append byte )
 
 : halt,   0 c, ;               (       halt,  →  halt machine       )
 : ldc,    1 c,  , c, ;         (   x v ldc,   →  x = v              )
@@ -42,6 +42,6 @@ variable dp ( dictionary pointer )
 
 : label here constant ;
 : ahead, here 1 + 0 jump, ; ( dummy jump, push address )
-: continue, here swap m! ; ( patch jump )
+: continue, here swap m! ; ( patch jump TODO: why m! ? seems to need to avoid override in adapter )
 
 : assemble 0 here 0 write halt ;

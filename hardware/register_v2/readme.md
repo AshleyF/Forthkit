@@ -259,8 +259,8 @@ Building an assembler in Forth is surprisingly easy.
 ```forth
 variable h
 : here h @ ;
-:  , here m! here 2 + h ! ;
-: c, here b! here 1 + h ! ;
+:  , here ! here 2 + h ! ;
+: c, here c! here 1 + h ! ;
 ```
 
 We start with a _dictionary pointer_ (`h`, which we'll soon use to pack a dictionary structure). The `here` word merely fetches the pointer. The comma (`,`) word appends a 16-bit value to the dictionary space and increments the pointer, while c-comma (`c,`) appends a single byte.
@@ -306,10 +306,10 @@ TODO: talk about the predefined constants and pseudo instructions
 
 ```forth
 : ahead, here 2 + 0 zero jmz, ; ( dummy jump, push address )
-: continue, here swap m! ; ( patch jump )
+: continue, here swap ! ; ( patch jump )
 ```
 
-The `label` mechanism works for backward jumps, which may be most common. The `ahead,` and `continue,` words allow us to skip over code. A little tricky, but `ahead,` packs a `jump,` with a dummy (`0`) value and pushes the address of the jump value (`here 1 +`). The `continue,` word is used wherever we want to jump _to_. It patches the jump value to do here (`here swap m!`; storing the current `here` at the previously pushed address).
+The `label` mechanism works for backward jumps, which may be most common. The `ahead,` and `continue,` words allow us to skip over code. A little tricky, but `ahead,` packs a `jump,` with a dummy (`0`) value and pushes the address of the jump value (`here 1 +`). The `continue,` word is used wherever we want to jump _to_. It patches the jump value to do here (`here swap !`; storing the current `here` at the previously pushed address).
 
 ## Interpreter
 

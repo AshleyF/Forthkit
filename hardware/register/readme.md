@@ -261,7 +261,7 @@ Building an assembler in Forth is surprisingly easy.
 ```forth
 variable dp ( dictionary pointer )
 : here dp @ ;
-: , here m! here 1 + dp ! ; ( append )
+: , here ! here 1 + dp ! ; ( append )
 ```
 
 We start with a _dictionary pointer_ (so named because we'll soon use this assembler to pack a dictionary structure). The `here` word merely fetches the pointer. The comma (`,`) word appends a value to the dictionary space and increments the pointer.
@@ -310,14 +310,14 @@ In a few places we do a `swap` to order the arguments in a _natural_ way. For ex
 ```forth
 : label here constant ;
 : ahead, here 1 + 0 jump, ; ( dummy jump, push address )
-: continue, here swap m! ; ( patch jump )
+: continue, here swap ! ; ( patch jump )
 ```
 
 Because the assembler is hosted in Forth, we have all the power of Forth to automate and make helper words for anything we like; make this a _macro assembler_.
 
 For now, we've added `lable` word that creates a constant giving a name to the current address (`here`). This is used, for example, in the test assembly above where we `label &start` at the beginning of a loop and later `&start jump,`.
 
-The `label` mechanism works for backward jumps, which may be most commont. The `ahead,` and `continue,` words allow us to skip over code. A little tricky, but `ahead,` packs a `jump,` with a dummy (`0`) value and pushes the address of the jump value (`here 1 +`). The `continue,` word is used wherever we want to jump _to_. It patches the jump value to do here (`here swap m!`; storing the current `here` at the previously pushed address).
+The `label` mechanism works for backward jumps, which may be most commont. The `ahead,` and `continue,` words allow us to skip over code. A little tricky, but `ahead,` packs a `jump,` with a dummy (`0`) value and pushes the address of the jump value (`here 1 +`). The `continue,` word is used wherever we want to jump _to_. It patches the jump value to do here (`here swap !`; storing the current `here` at the previously pushed address).
 
 ```forth
 : assemble 0 here 0 write halt ;
