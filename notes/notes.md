@@ -14,3 +14,5 @@
 - Make `create` and `immediate`
 - Make colon (`:`) and semicolon (`;`)
 - Away you go!
+
+: constant create , does> @ ;

@@ -3,7 +3,7 @@ variable h
 :  , here ! here 2 + h ! ;
 : c, here ! here 1 + h ! ;
 
-: 2nyb, 4 << or c, ;
+: 2nyb, 4 lshift or c, ;
 : 4nyb, 2nyb, 2nyb, ;
 
 : halt,    0 2nyb, ;

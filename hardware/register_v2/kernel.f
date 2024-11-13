@@ -96,10 +96,31 @@ sym and 0 header, label 'and
               z pushd,
                 ret,
 
+sym or 0 header, label 'or
+              x popd,
+              y popd,
+          z x y or,
+              z pushd,
+                ret,
+
 sym not 0 header, label 'not
               x popd,
             x x not,
               x pushd,
+                ret,
+
+sym lshift 0 header, label 'lshift
+              x popd,
+              y popd,
+          z x y shl,
+              z pushd,
+                ret,
+
+sym rshift 0 header, label 'rshift
+              x popd,
+              y popd,
+          z x y shr,
+              z pushd,
                 ret,
 
 sym c@ 0 header, label 'c-fetch
@@ -500,7 +521,7 @@ sym >number 0 header, label 'to-number
         'minus call,    ( num dig )
           'dup call,    ( num dig dig )
              0 literal, ( num dig dig 0 )
-             9 literal, ( num dig dig 0 9 )
+            10 literal, ( num dig dig 0 10 )
        'within call,    ( num dig bool )
           'not call,    ( num dig bool )
                if,      ( num dig )
@@ -688,7 +709,7 @@ sym create 0 header, label 'create
         'dovar literal, ( compile jump to 'dovar )
         'comma call,
                ret,
-   
+
 label 'state variable,
 
 sym [ 128 header, label 'left-bracket
