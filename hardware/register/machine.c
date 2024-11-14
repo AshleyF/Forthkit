@@ -1,26 +1,16 @@
+// v2
+#define _VERBOSE
+
 #include <stdio.h>
 #include <wchar.h>
 #include <locale.h>
-
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <limits.h>
 
+short reg[16] = {};
 unsigned char mem[0x8000];
-
-void setcell(unsigned short a, short y)
-{
-    extern unsigned char mem[];
-    mem[a] = y;
-    mem[a + 1] = y >> 8;
-}
-
-short getcell(unsigned short a)
-{
-    extern unsigned char mem[];
-    return mem[a] | (mem[a + 1] << 8);
-}
 
 void readBlock(short block, short maxsize, short address)
 {
@@ -49,78 +39,136 @@ void writeBlock(short block, short size, short address)
     fclose(file);
 }
 
+#define NEXT mem[reg[0]++]
+#define LOW(b) b & 0x0F
+#define HIGH(b) LOW(b >> 4);
+
 int main(void)
 {
-    // Set stdin to non-blocking mode
-    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
-    fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
-
-    short reg[64] = {};
-    short rstack[256] = {};
-    short* r = rstack;
-    short pc = 0;
-
+    fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL, 0) | O_NONBLOCK); // Set stdin to non-blocking mode
+    setlocale(LC_ALL, ""); // support unicode
     readBlock(0, SHRT_MAX, 0);
-
-    short x, y, z, v;
-
-    #define NEXT mem[pc++]
-    #define X x = NEXT;
-    #define XY X; y = NEXT
-    #define XYZ XY; z = NEXT;
-    #define V v = mem[pc] | mem[pc + 1] << 8; pc += 2
-    #define Rx reg[x]
-    #define Ry reg[y]
-    #define Rz reg[z]
-    #define OUT wprintf(L"%lc", Rx); fflush(stdout)
-    #define IN Rx = getc(stdin); if (feof(stdin)) { clearerr(stdin); }
-
-    setlocale(LC_ALL, "");
 
     while (1)
     {
-        //printf("%04X -> %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X \n", pc, mem[pc], mem[pc+1], mem[pc+2], mem[pc+3], mem[pc+4], mem[pc+5], mem[pc+6], mem[pc+7], mem[pc+8], mem[pc+9]);
-        switch(NEXT)
+        unsigned char c = NEXT;
+        unsigned char j = NEXT;
+        unsigned char i = HIGH(c);
+        unsigned char x = LOW(c);
+        unsigned char y = HIGH(j);
+        unsigned char z = LOW(j);
+        switch(i)
         {
-            case  0:        return 0;                      // halt
-            case  1: V; X;  Rx = v;                 break; // ldc (x = v) // TODO: swap x <-> v
-            case  2: XY;    Rx = getcell(Ry);       break; // ld (x = m[y])
-            case  3: XY;    setcell(Rx, Ry);        break; // st (m[x] = y)
-            case  4: XY;    Rx = mem[Ry];           break; // ldb (x = m[y])
-            case  5: XY;    mem[Rx] = Ry;           break; // stb (m[x] = y)
-            case  6: XY;    Rx = Ry;                break; // cp (x = y)
-            case  7: X;     IN;                     break; // in (x = getc())
-            case  8: X;     OUT;                    break; // out (putc(x)())
-            case  9: XY;    Rx = Ry + 1;            break; // inc (x = ++y)
-            case 10: XY;    Rx = Ry - 1;            break; // dec (x = --y)
-            case 11: XYZ;   Rx = Ry + Rz;           break; // add (x = y + z)
-            case 12: XYZ;   Rx = Ry - Rz;           break; // sub (x = y - z)
-            case 13: XYZ;   Rx = Ry * Rz;           break; // mul (x = y * z)
-            case 14: XYZ;   Rx = Ry / Rz;           break; // div (x = y / z)
-            case 15: XYZ;   Rx = Ry % Rz;           break; // mod (x = y % z)
-            case 16: XYZ;   Rx = Ry & Rz;           break; // and (x = y & z)
-            case 17: XYZ;   Rx = Ry | Rz;           break; // or (x = y | z)
-            case 18: XYZ;   Rx = Ry ^ Rz;           break; // xor (x = y ^ z)
-            case 19: XY;    Rx = ~Ry;               break; // not (x = ~y)
-            case 20: XYZ;   Rx = Ry << Rz;          break; // shl (x = y << z)
-            case 21: XYZ;   Rx = Ry >> Rz;          break; // shr (x = y >> z)
-            case 22: V; XY; if (Rx == Ry) pc = v;   break; // beq (branch if x == y)
-            case 23: V; XY; if (Rx != Ry) pc = v;   break; // bne (branch if x != y)
-            case 24: V; XY; if (Rx >  Ry) pc = v;   break; // bgt (branch if x > y)
-            case 25: V; XY; if (Rx >= Ry) pc = v;   break; // bge (branch if x >= y)
-            case 26: V; XY; if (Rx <  Ry) pc = v;   break; // blt (branch if x < y)
-            case 27: V; XY; if (Rx <= Ry) pc = v;   break; // ble (branch if x <= y)
-            case 28: V;     pc = v;                 break; // jump (pc = v)
-            case 29: V;     *(r++) = pc; pc = v;    break; // call (jsr(v))
-            case 30: X;     *(r++) = pc; pc = Rx;   break; // exec (jsr(x))
-            case 31:        pc = *(--r);            break; // return (ret)
-            case 32: XYZ;   readBlock(Rx, Ry, Rz);  break; // read
-            case 33: XYZ;   writeBlock(Rx, Ry, Rz); break; // write
+            case 0: // HALT
+#ifdef VERBOSE
+                printf("HALT %2i\n", x);
+#endif
+                return reg[x];
+            case 1: // LDC
+#ifdef VERBOSE
+                printf("LDC %2i=%2i                      ", x, ((y << 4) | z));
+#endif
+                reg[x] = (signed char)((y << 4) | z);
+                break;
+            case 2: // LD+
+#ifdef VERBOSE
+                printf("LD+ %2i=[%2i] +%2i               ", z, y, x);
+#endif
+                reg[z] = (mem[reg[y]] | (mem[reg[y] + 1] << 8));
+                reg[y] += reg[x];
+                break;
+            case 3: // ST+
+#ifdef VERBOSE
+                printf("ST+ [%2i]=%2i +%2i               ", z, y, x);
+#endif
+                mem[reg[z]] = reg[y]; // truncated to byte
+                mem[reg[z] + 1] = (reg[y] >> 8); // truncated to byte
+                reg[z] += reg[x];
+                break;
+            case 4: // CP?
+#ifdef VERBOSE
+                printf("CP? %2i=%2i if %2i=0             ", z, y, x);
+#endif
+                if (reg[x] == 0) reg[z] = reg[y];
+                break;
+            case 5: // ADD
+#ifdef VERBOSE
+                printf("ADD %2i=%2i+%2i                 ", z, y, x);
+#endif
+                reg[z] = reg[y] + reg[x];
+                break;
+            case 6: // SUB
+#ifdef VERBOSE
+                printf("SUB %2i=%2i-%2i                 ", z, y, x);
+#endif
+                reg[z] = reg[y] - reg[x];
+                break;
+            case 7: // MUL
+#ifdef VERBOSE
+                printf("MUL %2i=%2i*%2i                 ", z, y, x);
+#endif
+                reg[z] = reg[y] * reg[x];
+                break;
+            case 8: // DIV
+#ifdef VERBOSE
+                printf("DIV %2i=%2i/%2i                 ", z, y, x);
+#endif
+                reg[z] = reg[y] / reg[x];
+                break;
+            case 9: // NAND
+#ifdef VERBOSE
+                printf("NAND %2i=%2i&%2i                ", z, y, x);
+#endif
+                reg[z] = ~(reg[y] & reg[x]);
+                break;
+            case 10: // SHL
+#ifdef VERBOSE
+                printf("SHL %2i=%2i<<%2i                ", z, y, x);
+#endif
+                reg[z] = reg[y] << reg[x];
+                break;
+            case 11: // SHR
+#ifdef VERBOSE
+                printf("SHR %2i=%2i>>%2i                ", z, y, x);
+#endif
+                reg[z] = reg[y] >> reg[x];
+                break;
+            case 12: // IN
+#ifdef VERBOSE
+                printf("IN ->%2i                        ", x);
+#endif
+                reg[0]--;
+                reg[x] = getc(stdin);
+                if (feof(stdin)) { clearerr(stdin); }
+                break;
+            case 13: // OUT
+#ifdef VERBOSE
+                printf("OUT %2i->                       ", x);
+#endif
+                reg[0]--;
+                wprintf(L"%lc", reg[x]);
+                fflush(stdout);
+                break;
+            case 14: // READ
+#ifdef VERBOSE
+                printf("READ ->%2i (%2i, %2i)          ", z, y, x);
+#endif
+                readBlock(reg[z], reg[y], reg[x]);
+                break;
+            case 15: // WRITE
+#ifdef VERBOSE
+                printf("WRITE %2i-> (%2i, %2i)         ", z, y, x);
+#endif
+                writeBlock(reg[z], reg[y], reg[x]);
+                break;
             default:
-                printf("Invalid instruction! (pc=%04X [%04X])\n", pc - 2, getcell(pc - 2));
+                printf("Invalid instruction! (%i)\n", i);
                 return 1;
         }
+#ifdef VERBOSE
+        printf("pc:%i 1:%i 2:%i 3:%i 4:%i 5:%i 6:%i 7:%i 8:%i 9:%i 10:%i 11:%i 12:%i 13:%i 14:%i 15:%i m100:%2i m101:%2i m102:%2i\n", reg[0], reg[1], reg[2], reg[3], reg[4], reg[5], reg[6], reg[7], reg[8], reg[9], reg[10], reg[11], reg[12], reg[13], reg[14], reg[15], mem[100], mem[101], mem[102]);
+#endif
     }
 
-    return 0;
+    return 0; // TODO: not needed (halt is the only way out)
 }

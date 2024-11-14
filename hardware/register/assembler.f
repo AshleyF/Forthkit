@@ -1,47 +1,60 @@
-( assembler for register VM )
+variable h
+: here h @ ;
+:  , here ! here 2 + h ! ;
+: c, here ! here 1 + h ! ;
 
-variable dp ( dictionary pointer )
-: here dp @ ;
-:  , here ! here 2 + dp ! ; ( append )
-: c, here c! here 1 + dp ! ; ( append byte )
+: 2nyb, 4 lshift or c, ;
+: 4nyb, 2nyb, 2nyb, ;
 
-: halt,   0 c, ;               (       halt,  →  halt machine       )
-: ldc,    1 c,  , c, ;         (   x v ldc,   →  x = v              )
-: ld,     2 c, c, c, ;         (   a x ld,    →  x = mem[a]         )
-: st,     3 c, c, c, ;         (   x a st,    →  mem[a] = x         )
-: ldb,    4 c, c, c, ;         (   a x ldb,   →  x = mem[a]         )
-: stb,    5 c, c, c, ;         (   x a stb,   →  mem[a] = x         )
-: cp,     6 c, c, c, ;         (   y x cp,    →  x = y              )
-: in,     7 c, c, ;            (     x in,    →  x = getc           )
-: out,    8 c, c, ;            (     x out,   →  putc x             )
-: inc,    9 c, c, c, ;         (   y x inc,   →  x = y + 1          )
-: dec,   10 c, c, c, ;         (   y x dec,   →  x = y - 1          )
-: add,   11 c, c, c, c, ;      ( z y x add,   →  x = z + y          )
-: sub,   12 c, c, swap c, c, ; ( z y x sub,   →  x = z - y          )
-: mul,   13 c, c, c, c, ;      ( z y x mul,   →  x = z × y          )
-: div,   14 c, c, swap c, c, ; ( z y x div,   →  x = z ÷ y          )
-: mod,   15 c, c, swap c, c, ; ( z y x mod,   →  x = z mod y        )
-: and,   16 c, c, c, c, ;      ( z y x and,   →  x = z and y        )
-: or,    17 c, c, c, c, ;      ( z y x or,    →  x = z or  y        )
-: xor,   18 c, c, c, c, ;      ( z y x xor,   →  x = z xor y        )
-: not,   19 c, c, c, ;         (   y x not,   →  x = not y          )
-: shl,   20 c, c, swap c, c, ; ( z y x shl,   →  x = z << y         )
-: shr,   21 c, c, swap c, c, ; ( z y x shr,   →  x = z >> y         )
-: beq,   22 c,  , c, c, ;      ( x y a beq,   →  pc = a if x = y    )
-: bne,   23 c,  , c, c, ;      ( x y a bne,   →  pc = a if x ≠ y    )
-: bgt,   24 c,  , swap c, c, ; ( x y a bgt,   →  pc = a if x > y    )
-: bge,   25 c,  , swap c, c, ; ( x y a bge,   →  pc = a if x ≥ y    )
-: blt,   26 c,  , swap c, c, ; ( x y a blt,   →  pc = a if x < y    )
-: ble,   27 c,  , swap c, c, ; ( x y a ble,   →  pc = a if x ≤ y    )
-: jump,  28 c,  , ;            (     a jump,  →  pc = a             )
-: call,  29 c,  , ;            (     a call,  →  push[pc], pc = a   )
-: exec,  30 c, c, ;            (     x exec,  →  pc = [x]           )
-: ret,   31 c, ;               (       ret,   →  pc = pop[]         )
-: read,  32 c, c, c, c, ;      ( a s b read,  →  block file to core )
-: write, 33 c, c, c, c, ;      ( a s b write, →  core to block file )
+: halt,    0 2nyb, ;
+: ldc,     1 2nyb, c, ;
+: ld+,     2 4nyb, ;
+: st+,     3 4nyb, ;
+: cp?,     4 4nyb, ;
+: add,     5 4nyb, ;
+: sub,     6 4nyb, ;
+: mul,     7 4nyb, ;
+: div,     8 4nyb, ;
+: nand,    9 4nyb, ;
+: shl,    10 4nyb, ;
+: shr,    11 4nyb, ;
+: in,     12 2nyb, ;
+: out,    13 2nyb, ;
+: read,   14 4nyb, ;
+: write,  15 4nyb, ;
 
 : label here constant ;
-: ahead, here 1 + 0 jump, ; ( dummy jump, push address )
-: continue, here swap m! ; ( patch jump TODO: why m! ? seems to need to avoid override in adapter )
-
 : assemble 0 here 0 write halt ;
+
+ 0 constant pc
+ 1 constant zero
+ 2 constant two
+ 3 constant t
+
+2 two ldc,
+
+: cp, zero cp?, ;
+: ld, zero ld+, ;
+: st, zero st+, ;
+
+: lit, pc two ld+, , ;
+: jump, pc pc ld, , ;
+: jmz, swap t lit, pc t rot cp?, ; ( uses t )
+
+: not, dup nand, ;
+: and, 2 pick -rot nand, dup not, ;
+: or, dup dup not, over dup not, nand, ;
+( TODO xor nor xnor )
+
+( TODO: needed? )
+: zero, 0 swap ldc, ; ( TODO: with nand? )
+: one, 1 swap ldc, ;
+: -one, -1 swap ldc, ;
+
+: inc, t  one, t swap add, ; ( uses t )
+: dec, t -one, t swap add, ; ( uses t )
+
+: negate, swap over not, dup inc, ; ( uses t via inc, )
+
+: ahead, here 2 + 0 zero jmz, ; ( dummy jump, push address )
+: continue, here swap ! ; ( patch jump )

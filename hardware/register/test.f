@@ -1,16 +1,17 @@
-( simple assembler/VM test - capitalize [-32] console input )
-( requires assembler )
+12 constant one
+13 constant x
+14 constant y
+15 constant z
 
-0 constant u
-1 constant c
-2 constant z
+  1 one ldc,
+   32 y ldc,
 
-      u 32 ldc,
-     label &start
-         c in,
-c z &start blt,
-     c u c sub,
-         c out,
-    &start jump,
+label 'loop
+      x in,
+z x one add,
+'loop z jmz,
+  x x y sub,
+      x out,
+  'loop jump,
 
 assemble
