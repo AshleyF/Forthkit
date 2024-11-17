@@ -686,6 +686,7 @@ sym execute 0 header, label 'execute
              x popd,
           pc x cp, ( jump from *runtime* stack )
 
+( make dict header from next token )
 sym make 0 header, label 'make ( non-standard )
        'header call,    ( addr len )
          'swap call,    ( len addr )
@@ -697,20 +698,51 @@ sym make 0 header, label 'make ( non-standard )
          'plus call,    ( length of header )
         'allot jump,    ( include into dictionary )
 
-sym dovar 0 header, label 'dovar
-      t t four add, ( point just beyond jump from create below )
-             t pushd,
-               ret,
-
+( make dict header, compile push PFA and return )
 sym create 0 header, label 'create
          'make call,
-           833 literal, ( 4103 -> cp? zero pc t -- dovar expects in t )
-        'comma call,
-            33 literal, ( 2100 -> ld+ zero pc pc -- pc=[pc] -- jump to following address )
-        'comma call,
-        'dovar literal, ( compile jump to 'dovar )
-        'comma call,
+          3137 literal, 'comma call, ( 410C -> cp? zero pc x   x=pc )
+          3613 literal, 'comma call, ( 1D0E -> ldc y 14        y=14 )
+        -13219 literal, 'comma call, ( 5DCC -> add y x x       x=y+x )
+        -14283 literal, 'comma call, ( 35C8 -> st+ -four x d   push x )
+        -26282 literal, 'comma call, ( 5699 -> add four r r    ret )
+        -27871 literal, 'comma call, ( 2193 -> ld+ zero r t )
+         13142 literal, 'comma call, ( 5633 -> add four t t )
+         12353 literal, 'comma call, ( 4130 -> cp? zero t pc )
                ret,
+
+( patch return to jump to instance code address given )
+sym (does) 0 header, label '(does)
+       'latest call,
+        'fetch call,
+             2 literal,
+         'plus call,    ( to length/flag )
+          'dup call,
+      'c-fetch call,
+           127 literal, ( mask )
+          'and call,    ( length )
+         'plus call,    ( to end of name )
+     'one-plus call,    ( to code )
+             8 literal,
+         'plus call,    ( to return )
+            33 literal, ( 2100 -> ld+ zero pc pc -- pc=[pc] -- jump to following address )
+         'over call,
+        'store call,
+             2 literal,
+         'plus call,
+        'store jump,   ( to address passed to us )
+
+( compile push instance code address and jump to internal does )
+sym does> 128 header, label 'does
+         'here call,
+            10 literal,
+         'plus call,
+          3106 literal, 'comma call, ( 220C -> ld+ two pc x -- x=[pc] pc += 2 -- load and skip literal )
+        'comma call,    ( literal value )
+        -14283 literal, 'comma call, ( 35C8 -> st+ -four x d -- [d]=x d+=-4 -- push literal )
+            33 literal, 'comma call, ( 2100 -> ld+ zero pc pc -- pc=[pc] -- jump to following address )
+       '(does) literal,
+        'comma jump,
 
 sym [ 128 header, label 'left-bracket
         'false call,
@@ -724,14 +756,10 @@ sym ] 0 header, label 'right-bracket
 
 sym ; 128 header, label 'semicolon
                ( compile ret, )
-        -26282 literal, ( 5699 -> add four r r -- r=r+4 )
-        'comma call,
-        -27871 literal, ( 2193 -> ld+ zero r t -- t=[r] )
-        'comma call,
-         13142 literal, ( 5633 -> add four t t -- t=t+4 )
-        'comma call,
-         12353 literal, ( 4130 -> cp? zero t pc -- pc=t )
-        'comma call,
+        -26282 literal, 'comma call, ( 5699 -> add four r r -- r=r+4 )
+        -27871 literal, 'comma call, ( 2193 -> ld+ zero r t -- t=[r] )
+         13142 literal, 'comma call, ( 5633 -> add four t t -- t=t+4 )
+         12353 literal, 'comma call, ( 4130 -> cp? zero t pc -- pc=t )
  'left-bracket jump,
 
 sym bye 0 header,
@@ -755,11 +783,9 @@ sym quit 0 header, label 'quit ( TODO: empty return stack )
         'state call,
         'fetch call,    ( num state )
 ( 2 )          if,      ( num )
-          3106 literal, ( 220C -> ld+ two pc x -- x=[pc] pc += 2 -- load and skip literal )
-        'comma call,
+          3106 literal, 'comma call, ( 220C -> ld+ two pc x -- x=[pc] pc += 2 -- load and skip literal )
         'comma call,    ( literal value )
-        -14283 literal, ( 35C8 -> st+ -four x d -- [d]=x d+=-4 -- push literal )
-        'comma call,
+        -14283 literal, 'comma call, ( 35C8 -> st+ -four x d -- [d]=x d+=-4 -- push literal )
 ( 2 )          then,
 ( 1 )          else,    ( addr len -- not number, error )
          'type call,    ( )
@@ -777,10 +803,8 @@ sym quit 0 header, label 'quit ( TODO: empty return stack )
           'and call,    ( addr len xt [ 0 | -1 ] )
                if,      ( addr len xt -- compile? )
               ( compile call ) 
-          2357 literal, ( 3509 -> st+ -four pc r -- [r]=pc r+=4 -- push pc )
-        'comma call,
-            33 literal, ( 2100 -> ld+ zero pc pc -- pc=[pc] -- jump to following address )
-        'comma call,
+          2357 literal, 'comma call, ( 3509 -> st+ -four pc r -- [r]=pc r+=4 -- push pc )
+            33 literal, 'comma call, ( 2100 -> ld+ zero pc pc -- pc=[pc] -- jump to following address )
         'comma call,    ( addr len )
         '2drop call,    ( )
                else,    ( addr len xt -- immediate/not-compiling )
