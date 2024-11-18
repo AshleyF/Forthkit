@@ -192,6 +192,16 @@ sym '1- 0 header, label 'one-minus
               x pushd,
                 ret,
 
+ sym write 0 header, label 'write ( block size address -- )
+             x popd,
+             y popd,
+             z popd,
+         z y x write,
+               ret,
+ 
+sym halt 0 header, label 'halt
+          zero halt, ( TODO: with error code? )
+
 label 'h variable, ( internal )
 
 sym here 0 header, label 'here
@@ -289,6 +299,19 @@ sym < 0 header, label 'less-than
 : begin, here ;
 : until, 0branch, ! ;
 
+sym over 0 header, label 'over
+             x popd,
+             y popd,
+             y pushd,
+             x pushd,
+             y pushd,
+               ret,
+
+sym pad 0 header, label 'pad ( -- addr  TODO bounds check, 1000? )
+         'here call,
+          1000 literal,
+         'plus jump,
+
 sym parse-name 0 header, label 'parse-name
          'here call, ( save h )
              0 literal, ( dummy )
@@ -315,14 +338,6 @@ sym parse-name 0 header, label 'parse-name
           'rot call,
             'h call,
         'store call, ( restore h )
-               ret,
-
-sym over 0 header, label 'over
-             x popd,
-             y popd,
-             y pushd,
-             x pushd,
-             y pushd,
                ret,
 
 sym / 0 header, label 'slash
@@ -443,6 +458,23 @@ sym header 0 header, label 'header ( non-standard )
             'h call,
         'store call, ( restore here )
                ret,  ( addr len )
+
+sym immediate 0 header, label 'immediate
+       'latest call,
+        'fetch call,
+             2 literal,
+         'plus call,  ( latest @ cell+ or >name [non-standard] )
+          'dup call,
+        'fetch call,
+           128 literal,
+           'or call,  ( set immediate flag )
+         'swap call,
+        'store jump,
+
+sym literal 128 header,
+          3106 literal, 'comma call, ( 220C -> ld+ two pc x -- x=[pc] pc += 2 -- load and skip literal )
+        'comma call,    ( literal value )
+        -14283 literal, 'comma jump, ( 35C8 -> st+ -four x d -- [d]=x d+=-4 -- push literal )
 
 sym true 0 header, label 'true
             -1 literal,
@@ -580,6 +612,34 @@ sym debug 0 header, label 'debug
           'dot call,
           'c-r jump,
 
+sym parse 0 header, label 'parse ( char -- addr len )
+         'here call,    ( char addr )
+         'swap call,    ( addr char )
+            -1 literal, ( addr char -1 )
+               begin,
+     'one-plus call,    ( addr char len )
+         'over call,    ( addr char len char )
+          'key call,    ( addr char len char key )
+          'dup call,    ( addr char len char key key )
+         '-rot call,    ( addr char len key char key )
+       'equals call,    ( addr char len key bool )
+          'dup call,    ( addr char len key bool bool )
+          'not call,    ( addr char len key bool !bool )
+               if,      ( addr char len key bool )
+         'swap call,    ( addr char len bool key )
+        'comma call,    ( addr char len bool )
+               else,    ( addr char len key bool )
+         'swap call,    ( addr char len bool key )
+         'drop call,    ( addr char len bool )
+               then,
+               until,   ( addr char len )
+         'swap call,    ( addr len char )
+         'drop call,    ( addr len )
+         'over call,    ( addr len addr )
+            'h call,    ( addr len addr h )
+        'store call,    ( addr len -- restore h )
+               ret,
+
 sym compstr 0 header, label 'compstr ( non-standard )
           'dup call,    ( w0 w1 len len )
              0 literal,
@@ -685,6 +745,21 @@ label 'findnext
 sym execute 0 header, label 'execute
              x popd,
           pc x cp, ( jump from *runtime* stack )
+
+sym postpone 128 header,
+       'header call,    ( TODO: use parse-name and append length? )
+         'over call,    ( addr len addr )
+    'one-minus call,    ( addr len c-addr -- to length )
+         'find call,    ( addr len [ c-addr 0 | xt 1 | xt -1 ] )
+             1 literal,
+       'equals call, ( only works for immediate words -- TODO: error for not found or non-immediate )
+               if,
+               ( compile call )
+          2357 literal, 'comma call, ( 3509 -> st+ -four pc r -- [r]=pc r+=4 -- push pc )
+            33 literal, 'comma call, ( 2100 -> ld+ zero pc pc -- pc=[pc] -- jump to following address )
+        'comma call,    ( addr len )
+               then,
+               ret,
 
 ( make dict header from next token )
 sym make 0 header, label 'make ( non-standard )

@@ -8,3 +8,8 @@ make : ] make ] ;
 : constant create , does> @ ;
 
 : point create , , does> dup cell+ @ swap @ ;
+
+: [char] parse-name drop c@ postpone literal ; immediate
+: ( [char] ) parse 2drop ; immediate
+
+( now we can use comments! )
