@@ -12,7 +12,7 @@ diff -s <(xxd block0.bin) <(xxd kernel.bin)
 
 # go around again!
 rm ./block0.bin
-cat ./bootstrap.f ./assembler.f ./kernel.f | ./machine
+cat ./bootstrap.f assembler-adapter.f ./assembler.f ./kernel.f | ./machine
 
 diff -s <(xxd block0.bin) <(xxd kernel.bin)
 

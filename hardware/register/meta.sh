@@ -3,4 +3,4 @@
 . ./kernel.sh
 . ./machine.sh
 echo "Building meta-circular image..."
-cat ./bootstrap.f ./assembler.f ./kernel.f | ./machine
+cat ./bootstrap.f assembler-adapter.f ./assembler.f ./kernel.f | ./machine

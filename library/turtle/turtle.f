@@ -1,7 +1,7 @@
 ( turtle graphics )
 ( requires: pixels.f )
 
-variable x variable y variable theta
+variable x variable y variable theta ( initialized in start )
 variable dx variable dy
 
 : point-x x @ width 2 / + 0.5 + floor ;

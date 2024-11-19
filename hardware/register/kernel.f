@@ -29,7 +29,7 @@
 
 : literal, x lit, x pushd, ; ( TODO: single byte when possible -- couldn't bring myself to make a clit, or cliteral, word! ha! )
 
-variable latest
+variable latest  ( initialized after assembly )
 
 : header,
   latest @ here latest ! , ( link to previous word, update latest to this word )
@@ -266,6 +266,14 @@ sym = 0 header, label 'equals
              y pushd,
                ret,
 
+sym 0= 0 header, label 'zero-equals
+        z zero cp,   ( default false )
+             y true,
+             x popd,
+         z y x cp?,
+             z pushd,
+               ret,
+
 sym negate 0 header, label 'negate
              x popd,
            x x not,
@@ -292,9 +300,9 @@ sym < 0 header, label 'less-than
   pc y x cp?, ( branch to address if condition is zero )
 ;
 
-: if, 0branch, ;                      ( compile branch if TOS is 0, push address of branch address )
-: then, here swap ! ;                ( patch previous branch to here )
-: else, branch, swap then, ;          ( patch previous branch to here and start unconditional branch over false condition )
+: if, 0branch, ;              ( compile branch if TOS is 0, push address of branch address )
+: then, here swap ! ;         ( patch previous branch to here )
+: else, branch, swap then, ;  ( patch previous branch to here and start unconditional branch over false condition )
 
 : begin, here ;
 : until, 0branch, ! ;

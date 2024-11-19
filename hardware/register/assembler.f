@@ -1,4 +1,4 @@
-variable h
+variable h  0 h !
 : here h @ ;
 :  , here ! here 2 + h ! ;
 : c, here ! here 1 + h ! ;
@@ -43,6 +43,7 @@ variable h
 
 : not, dup nand, ;
 : and, 2 pick -rot nand, dup not, ;
+
 : or, dup dup not, over dup not, nand, ;
 ( TODO xor nor xnor )
 

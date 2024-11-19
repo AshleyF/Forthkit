@@ -14,3 +14,28 @@
 - Make `create` and `immediate`
 - Make colon (`:`) and semicolon (`;`)
 - Away you go!
+
+## Koans
+
+- `create buffer 100 allot`
+
+## Pick
+
+```forth
+: pick ( xu...x1 x0 u -- xu...x1 x0 xu )
+  dup 0= if drop dup exit then  swap >r 1- recurse r> swap
+;
+```
+
+Remove u. Copy the xu to the top of the stack. An ambiguous condition exists if there are less than u+2 items on the stack before PICK is executed.
+
+- `: dup 0 pick ;`
+- `: over 1 pick ;`
+
+## If/Else/Then
+
+```forth
+: if, 0branch, ;              ( compile branch if TOS is 0, push address of branch address )
+: then, here swap ! ;         ( patch previous branch to here )
+: else, branch, swap then, ;  ( patch previous branch to here and start unconditional branch over false condition )
+```
