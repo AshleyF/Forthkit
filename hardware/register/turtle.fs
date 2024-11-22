@@ -33,12 +33,13 @@ pi 180e f/ fconstant rads
 
 : start ( -- ) clear 0 0 0 pose ;
 : turn ( a -- ) s>f theta f@ f+ fhead ;
+: plot ( x y -- )
+  fround f>s hwidth +
+  fround f>s hheight + \ x y on *data* stack
+  2dup valid? if set else 2drop then ;
 : move ( d -- )
   dy f@ dx f@ y f@ x f@ 0 do \ note: on *floating point* stack
-    fover fover
-    fround f>s hwidth +
-    fround f>s hheight + \ x y on *data* stack
-    2dup valid? if set else 2drop then
+    fover fover plot
     2 fpick f+ fswap \ x+=dx
     3 fpick f+ fswap \ y+=dy
   loop
