@@ -1,14 +1,19 @@
 create memory $8000 allot
-variable m memory m !
+variable h  memory h !
 
-: m, ( c -- ) m @ c! 1 m +! ;
-: mm, ( cc -- ) dup m, 8 rshift m, ; \ 16-bit little endian
+false warnings ! \ intentionally redefining (here c, ,)
 
-: 2nybbles, ( x i -- ) 4 lshift or m, ;
+: here h @ ;
+: c, ( c -- ) here c! 1 h +! ;
+: , ( cc -- ) dup c, 8 rshift c, ; \ 16-bit little endian
+
+true warnings !
+
+: 2nybbles, ( x i -- ) 4 lshift or c, ;
 : 4nybbles, ( z y x i -- ) 2nybbles, 2nybbles, ;
 
 : halt,  (     x -- )  0 2nybbles, ;    \ halt(x)      (halt with exit code x)
-: ldc,   (   v x -- )  1 2nybbles, m, ; \ x=v          (load constant signed v into x)
+: ldc,   (   v x -- )  1 2nybbles, c, ; \ x=v          (load constant signed v into x)
 : ld+,   ( z y x -- )  2 4nybbles, ;    \ z=[y] y+=x   (load from memory and inc/dec pointer)
 : st+,   ( z y x -- )  3 4nybbles, ;    \ [z]=y z+=x   (store to memory and inc/dec poniter)
 : cp?,   ( z y x -- )  4 4nybbles, ;    \ z=y if x     (conditional copy)
@@ -24,7 +29,7 @@ variable m memory m !
 : read,  ( z y x -- ) 14 4nybbles, ;    \ read(z,y,x)  (file z of size y -> address x)
 : write, ( z y x -- ) 15 4nybbles, ;    \ write(z,y,x) (file z of size y <- address x)
 
-: label m @ memory - constant ; \ current address within memory buffer
+: label here memory - constant ; \ current address within memory buffer
 
 0 constant pc
 1 constant zero
@@ -33,7 +38,7 @@ variable m memory m !
 : ld, ( y x -- ) zero ld+, ; \ y=[x] (load from memory)
 : st, ( y x -- ) zero st+, ; \ [y]=x (store to memory)
 
-: jump, ( addr -- ) pc pc ld, mm, ; \ unconditional jump to address (following cell)
+: jump, ( addr -- ) pc pc ld, , ; \ unconditional jump to address (following cell)
 
 : not, (   y x -- ) dup nand, ;                        \ y=~x  (bitwise/logical not)
 : and, 2 pick -rot nand, dup not, ;
@@ -60,11 +65,10 @@ variable m memory m !
 \ : continue, here swap ! ; ( patch jump )
 \ : assemble 0 here 0 write halt ;
 
-\ : literal, pc two ld+, mm, ;
 \ : jumpz, swap x literal, pc x rot cp?, ;
 
-: assemble
+: assemble ( -- )
   s" block0.bin" r/w create-file throw
-  memory over m @ memory - swap \ file address length file
+  memory here memory - 2 pick \ ( file address length file -- )
   write-file throw
   close-file throw ;
