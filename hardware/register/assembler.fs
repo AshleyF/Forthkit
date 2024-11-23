@@ -1,10 +1,11 @@
 create memory $8000 allot
 variable m memory m !
 
-: m, m @ c! 1 m +! ;
+: m, ( c -- ) m @ c! 1 m +! ;
+: mm, ( cc -- ) dup m, 8 rshift m, ; \ 16-bit little endian
 
-: 2nybbles, 4 lshift or m, ;
-: 4nybbles, 2nybbles, 2nybbles, ;
+: 2nybbles, ( x i -- ) 4 lshift or m, ;
+: 4nybbles, ( z y x i -- ) 2nybbles, 2nybbles, ;
 
 : halt,  (     x -- )  0 2nybbles, ;    \ halt(x)      (halt with exit code x)
 : ldc,   (   v x -- )  1 2nybbles, m, ; \ x=v          (load constant signed v into x)
@@ -23,33 +24,32 @@ variable m memory m !
 : read,  ( z y x -- ) 14 4nybbles, ;    \ read(z,y,x)  (file z of size y -> address x)
 : write, ( z y x -- ) 15 4nybbles, ;    \ write(z,y,x) (file z of size y <- address x)
 
-: label m @ constant ;
+: label m @ memory - constant ; \ current address within memory buffer
 
 0 constant pc
 1 constant zero
-\ 2 constant two
-\ 3 constant t
 
-\ 2 two ldc,
+: cp, ( y x -- ) zero cp?, ; \ y=x   (unconditional copy)
+: ld, ( y x -- ) zero ld+, ; \ y=[x] (load from memory)
+: st, ( y x -- ) zero st+, ; \ [y]=x (store to memory)
 
-: cp, zero cp?, ;
-: ld, zero ld+, ;
-: st, zero st+, ;
+: jump, ( addr -- ) pc pc ld, mm, ; \ unconditional jump to address (following cell)
 
-\ : lit, pc two ld+, , ;
-: jump, pc pc ld, , ;
-\ : jmz, swap t lit, pc t rot cp?, ; ( uses t )
-
-: not, dup nand, ;
+: not, (   y x -- ) dup nand, ;                        \ y=~x  (bitwise/logical not)
 : and, 2 pick -rot nand, dup not, ;
+\ : and, ( z y x -- ) t -rot nand, t not, ;       \ z=y&x (bitwise/logical and)
+\ : and2, ( z y x -- ) >r >r dup dup r> r> nand, not, ;       \ z=y&x (bitwise/logical and)
+: or,  ( z y x -- ) dup dup not, over dup not, nand, ; \ z=y|x (bitwise/logical and)
+\ : xor, ( z y x -- ) 2dup t -rot and, >r >r dup dup r> r> or, t and, ;
 
-: or, dup dup not, over dup not, nand, ;
-( TODO xor nor xnor )
-
-( TODO: needed? )
-: zero, 0 swap ldc, ; ( TODO: with nand? )
-: one, 1 swap ldc, ;
-: -one, -1 swap ldc, ;
+\ sample
+\ : bnand and invert ; \ primitive
+\ : bnot dup bnand ;
+\ : band bnand bnot ;
+\ : bor bnot swap bnot band bnot ;
+\ : bxor 2dup bor -rot band bnot band ;
+\ : bnor bor bnot ;
+\ : bxnor bxor bnot ;
 
 \ : inc, t  one, t swap add, ; ( uses t )
 \ : dec, t -one, t swap add, ; ( uses t )
@@ -59,3 +59,12 @@ variable m memory m !
 \ : ahead, here 2 + 0 zero jmz, ; ( dummy jump, push address )
 \ : continue, here swap ! ; ( patch jump )
 \ : assemble 0 here 0 write halt ;
+
+\ : literal, pc two ld+, mm, ;
+\ : jumpz, swap x literal, pc x rot cp?, ;
+
+: assemble
+  s" block0.bin" r/w create-file throw
+  memory over m @ memory - swap \ file address length file
+  write-file throw
+  close-file throw ;

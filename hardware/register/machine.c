@@ -36,7 +36,7 @@ void writeBlock(short block, short size, short address)
 
 int main(void)
 {
-    readBlock(0, 0x8000, 0);
+    readBlock(0, 0x7FFF, 0);
     while (1)
     {
         unsigned char c = NEXT;
