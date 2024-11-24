@@ -11,4 +11,4 @@ x x upper sub,  \ 6233       SUB upper x x
         x out,  \ D3         OUT x
     'loop jump, \ 2100 0200  LD+ zero pc pc 0002
  
-assemble bye
+save-boot-block bye

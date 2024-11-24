@@ -20,7 +20,7 @@ true warnings !
 : add,   ( z y x -- )  5 4nybbles, ;    \ z=y+x        (addition)
 : sub,   ( z y x -- )  6 4nybbles, ;    \ z=y-x        (subtraction)
 : mul,   ( z y x -- )  7 4nybbles, ;    \ z=y*x        (multiplication)
-: div,   ( z y x -- )  8 4nybbles, ;    \ z=y/x        (divition)
+: div,   ( z y x -- )  8 4nybbles, ;    \ z=y/x        (division)
 : nand,  ( z y x -- )  9 4nybbles, ;    \ z=y nand x   (not-and)
 : shl,   ( z y x -- ) 10 4nybbles, ;    \ z=y<<x       (bitwise shift-left)
 : shr,   ( z y x -- ) 11 4nybbles, ;    \ z=y>>x       (bitwise shift-right)
@@ -67,7 +67,7 @@ true warnings !
 
 \ : jumpz, swap x literal, pc x rot cp?, ;
 
-: assemble ( -- )
+: save-boot-block ( -- ) \ save 
   s" block0.bin" r/w create-file throw
   memory here memory - 2 pick \ ( file address length file -- )
   write-file throw
