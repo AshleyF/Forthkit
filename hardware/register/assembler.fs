@@ -67,8 +67,19 @@ true warnings !
 
 \ : jumpz, swap x literal, pc x rot cp?, ;
 
-: save-boot-block ( -- ) \ save 
-  s" block0.bin" r/w create-file throw
-  memory here memory - 2 pick \ ( file address length file -- )
-  write-file throw
+: read-block ( block memaddr len )
+  rot drop \ TODO: support numbered blocks
+  s" block0.bin" 2dup file-status 0<> if ." Block file not found " else drop then
+  r/o open-file throw
+  rot memory + -rot dup >r
+  read-file throw drop r>
   close-file throw ;
+
+: write-block ( block memaddr len )
+  rot drop \ TODO: support numbered blocks
+  s" block0.bin" w/o create-file throw
+  rot memory + -rot dup >r
+  write-file throw r>
+  close-file throw ;
+
+: write-boot-block ( -- ) 0 0 here memory - write-block ;

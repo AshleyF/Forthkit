@@ -1,4 +1,5 @@
 require assembler.fs
+require machine.fs
 
 2 constant upper
 3 constant x
@@ -11,4 +12,4 @@ x x upper sub,  \ 6233       SUB upper x x
         x out,  \ D3         OUT x
     'loop jump, \ 2100 0200  LD+ zero pc pc 0002
  
-save-boot-block bye
+ \ write-boot-block bye
