@@ -29,7 +29,7 @@ true warnings !
 : read,  ( z y x -- ) 14 4nybbles, ;    \ read(z,y,x)  (file z of size y -> address x)
 : write, ( z y x -- ) 15 4nybbles, ;    \ write(z,y,x) (file z of size y <- address x)
 
-: label here memory - constant ; \ current address within memory buffer
+( --- secondary instructions ------------------------------------------------- )
 
 0 constant pc
 1 constant zero
@@ -61,11 +61,17 @@ true warnings !
 
 \ : negate, swap over not, dup inc, ; ( uses t via inc, )
 \ 
-\ : ahead, here 2 + 0 zero jmz, ; ( dummy jump, push address )
-\ : continue, here swap ! ; ( patch jump )
 \ : assemble 0 here 0 write halt ;
 
 \ : jumpz, swap x literal, pc x rot cp?, ;
+
+( --- assembler tools -------------------------------------------------------- )
+
+: label ( -- ) here memory - constant ; \ current address within memory buffer
+: skip, ( -- ) here 2 + .s 0 jump, ; \ dummy jump, push address
+: then, ( -- ) here memory - swap .s ! ; \ patch jump to continue here
+
+( --- read/write blocks ------------------------------------------------------ )
 
 : read-block ( block memaddr len )
   rot drop \ TODO: support numbered blocks
@@ -82,4 +88,5 @@ true warnings !
   write-file throw r>
   close-file throw ;
 
+: read-boot-block  ( -- ) 0 0 $8000 read-block ;
 : write-boot-block ( -- ) 0 0 here memory - write-block ;

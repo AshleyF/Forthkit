@@ -49,6 +49,8 @@ true warnings ! \ intentionally redefining (latest, header,)
 
 ( --- primitives ------------------------------------------------------------- )
 
+                skip, \ skip to interpreter
+
 \ bye ( -- ) halt machine
 0 header, bye
               0 halt,
@@ -90,3 +92,6 @@ true warnings ! \ intentionally redefining (latest, header,)
                 ret,
 
 ( --- interpreter ------------------------------------------------------------ )
+
+               then,
+          zero halt,

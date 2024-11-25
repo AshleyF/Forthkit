@@ -1,3 +1,5 @@
+require assembler.fs \ memory
+
 create registers 16 cells allot  registers 16 cells 0 fill
 
 : bit ( n -- mask ) 1 swap lshift ; \ make nth-bit mask (e.g. 15 -> $8000)
@@ -37,9 +39,8 @@ create registers 16 cells allot  registers 16 cells 0 fill
     throw
   endcase ;
 : steps ( n -- ) 0 do step loop ;
-: run step recurse ;
+: run begin step again ;
 
-: reset ( -- ) \ reset registers, memory, h
-  registers 16 cells 0 fill
-  memory $8000 0 fill
-  memory h ! ;
+: soft-reset ( -- ) registers 16 cells 0 fill ; \ reset registers, memory, h
+: hard-reset ( -- ) soft-reset memory $8000 0 fill memory h ! ; \ reset registers, memory, h
+: reboot ( -- ) hard-reset read-boot-block run ; \ reboot from block0 image
