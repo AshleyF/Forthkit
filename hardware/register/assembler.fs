@@ -1,4 +1,5 @@
-create memory $8000 allot
+$8000 constant memory-size
+create memory memory-size allot
 variable h  memory h !
 
 false warnings ! \ intentionally redefining (here c, ,)
@@ -88,5 +89,5 @@ true warnings !
   write-file throw r>
   close-file throw ;
 
-: read-boot-block  ( -- ) 0 0 $8000 read-block ;
+: read-boot-block  ( -- ) 0 0 memory-size read-block ;
 : write-boot-block ( -- ) 0 0 here memory - write-block ;

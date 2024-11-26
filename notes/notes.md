@@ -39,3 +39,12 @@ Remove u. Copy the xu to the top of the stack. An ambiguous condition exists if 
 : then, here swap ! ;         ( patch previous branch to here )
 : else, branch, swap then, ;  ( patch previous branch to here and start unconditional branch over false condition )
 ```
+
+## Books
+
+- Dr. Ting's [Systems Guide to figForth](https://www.forth.org/OffeteStore/1010_SystemsGuideToFigForth.pdf)
+
+## Links
+
+- [The Evolution of Forth](https://www.forth.com/resources/forth-programming-language/)
+- A little [treasure trove](https://www.complang.tuwien.ac.at/projects/forth.html)

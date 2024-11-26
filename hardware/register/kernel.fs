@@ -17,12 +17,12 @@ require assembler.fs
 : push, ( reg ptr -- ) swap -four st+, ;
 : pop,  ( reg ptr -- ) dup dup four add, ld, ;
 
-10 constant d  $8000 2 - d literal, \ data stack pointer
+10 constant d  memory-size 2 - d literal, \ data stack pointer
 
 : pushd, ( reg -- ) d push, ;
 : popd,  ( reg -- ) d pop, ;
 
-11 constant r  $8000 4 - r literal, \ return stack pointer
+11 constant r  memory-size 4 - r literal, \ return stack pointer
 
 : pushr, ( reg -- ) r push, ;
 : popr,  ( reg -- ) r pop, ;
@@ -52,8 +52,9 @@ true warnings ! \ intentionally redefining (latest, header,)
                 skip, \ skip to interpreter
 
 \ bye ( -- ) halt machine
-0 header, bye
-              0 halt,
+0 header, bye  label 'bye
+              x popd,
+              x halt,
 
 \ @ ( addr -- ) fetch 16-bit value
 0 header, @  label 'fetch
