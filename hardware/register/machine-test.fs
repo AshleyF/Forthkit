@@ -19,11 +19,11 @@ hard-reset ." Test ld+ "
 
 hard-reset ." Test st+ "
       5 x ldc,
-     42 y ldc,
-    100 z ldc,
+    100 y ldc,
+     42 z ldc,
     z y x st+,
     4 steps
-    100 memory + s@ 42 = z reg @ 105 = and . cr
+    100 memory + s@ 42 = y reg @ 105 = and . cr
 
 hard-reset ." Test cp? zero "
       0 x ldc,

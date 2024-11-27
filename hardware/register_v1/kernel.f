@@ -13,7 +13,7 @@
     4 four ldc,
   -4 -four ldc,
 
-: push, ( rp- ) swap -four st+, ;
+: push, ( rp- ) -four st+, ;
 : pop, ( rp- ) dup dup four add, ld, ;
 
 32764 d lit,
@@ -86,7 +86,7 @@ sym @ 0 header, label 'fetch
 sym ! 0 header, label 'store
               x popd,
               y popd,
-            x y st,
+            y x st,
                 ret,
 
 sym and 0 header, label 'and
@@ -140,7 +140,7 @@ sym c! 0 header, label 'c-store
             w x ld, ( w = existing value )
           w w z and, ( mask to upper )
           y y w or, ( combine )
-            x y st,
+            y x st,
                 ret,
 
 sym dup 0 header, label 'dup

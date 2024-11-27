@@ -14,7 +14,7 @@ require assembler.fs
 
 ( --- stacks ----------------------------------------------------------------- )
 
-: push, ( reg ptr -- ) dup dup four sub, swap st, ;
+: push, ( reg ptr -- ) dup dup four sub, st, ;
 : pop,  ( reg ptr -- ) four ld+, ;
 
 10 constant d  memory-size 2 + d literal, \ data stack pointer
@@ -72,7 +72,7 @@ true warnings ! \ intentionally redefining (latest, header,)
 0 header, !  label 'store
               x popd,
               y popd,
-            x y st,
+            y x st,
                 ret,
 
 \ c@ ( addr -- ) fetch 8-bit value
@@ -94,7 +94,7 @@ true warnings ! \ intentionally redefining (latest, header,)
             w x ld,   \ existing value
           w w z and,  \ mask to upper
           y y w or,   \ combine
-            x y st,
+            y x st,
                 ret,
 
 \ + ( y x -- sum ) addition
@@ -254,7 +254,7 @@ true warnings ! \ intentionally redefining (latest, header,)
 \ nip ( y x -- x ) drop second stack value
 0 header, nip  label 'nip
              x popd,
-           d x st,
+           x d st,
                ret,
 
 \ over ( y x -- y x y ) copy second stack value to top
@@ -288,7 +288,7 @@ true warnings ! \ intentionally redefining (latest, header,)
 0 header, >r  label 'to-r
               x popd,
             y r ld,  \ this return address
-            r x st,  \ replace
+            x r st,  \ replace
        y y four add, \ ret,
            pc y cp,
                 

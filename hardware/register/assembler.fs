@@ -15,8 +15,8 @@ true warnings !
 
 : halt,  (     x -- )  0 2nybbles, ;    \ halt(x)      (halt with exit code x)
 : ldc,   (   v x -- )  1 2nybbles, c, ; \ x=v          (load constant signed v into x)
-: ld+,   ( z y x -- )  2 4nybbles, ;    \ z=[y] y+=x   (load from memory and inc/dec pointer)
-: st+,   ( z y x -- )  3 4nybbles, ;    \ [z]=y z+=x   (store to memory and inc/dec poniter)
+: ld+,   ( z y x -- )  2 4nybbles, ;    \ z<-[y] y+=x  (load from memory and inc/dec pointer)
+: st+,   ( z y x -- )  3 4nybbles, ;    \ z->[y] y+=x  (store to memory and inc/dec poniter)
 : cp?,   ( z y x -- )  4 4nybbles, ;    \ z=y if x     (conditional copy)
 : add,   ( z y x -- )  5 4nybbles, ;    \ z=y+x        (addition)
 : sub,   ( z y x -- )  6 4nybbles, ;    \ z=y-x        (subtraction)
@@ -35,9 +35,9 @@ true warnings !
 0 constant pc
 1 constant zero
 
-: cp, ( y x -- ) zero cp?, ; \ y=x   (unconditional copy)
-: ld, ( y x -- ) zero ld+, ; \ y=[x] (load from memory)
-: st, ( y x -- ) zero st+, ; \ [y]=x (store to memory)
+: cp, ( y x -- ) zero cp?, ; \ y=x    (unconditional copy)
+: ld, ( y x -- ) zero ld+, ; \ y<-[x] (load from memory)
+: st, ( y x -- ) zero st+, ; \ y->[x] (store to memory)
 
 : jump, ( addr -- ) pc pc ld, , ; \ unconditional jump to address (following cell)
 
