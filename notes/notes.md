@@ -2,7 +2,7 @@
 
 ## Bootstrapping
 
-- Make dot word (`.`)
+- Make dot word (`.`) -- even simple single-digit
 - Make `header` word (at least input)
 - Do number parsing and echo
 - Make `find` word and search dictionary
@@ -14,6 +14,11 @@
 - Make `create` and `immediate`
 - Make colon (`:`) and semicolon (`;`)
 - Away you go!
+
+## Learnings
+
+- Building a VM in Forth makes debugging *much* easier
+- Stacks that maintain a pointer to the top are useful (move/push rather than push/move)
 
 ## Koans
 

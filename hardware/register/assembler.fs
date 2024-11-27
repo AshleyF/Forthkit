@@ -43,34 +43,13 @@ true warnings !
 
 : not, (   y x -- ) dup nand, ;                        \ y=~x  (bitwise/logical not)
 : and, 2 pick -rot nand, dup not, ;
-\ : and, ( z y x -- ) t -rot nand, t not, ;       \ z=y&x (bitwise/logical and)
-\ : and2, ( z y x -- ) >r >r dup dup r> r> nand, not, ;       \ z=y&x (bitwise/logical and)
 : or,  ( z y x -- ) dup dup not, over dup not, nand, ; \ z=y|x (bitwise/logical and)
-\ : xor, ( z y x -- ) 2dup t -rot and, >r >r dup dup r> r> or, t and, ;
-
-\ sample
-\ : bnand and invert ; \ primitive
-\ : bnot dup bnand ;
-\ : band bnand bnot ;
-\ : bor bnot swap bnot band bnot ;
-\ : bxor 2dup bor -rot band bnot band ;
-\ : bnor bor bnot ;
-\ : bxnor bxor bnot ;
-
-\ : inc, t  one, t swap add, ; ( uses t )
-\ : dec, t -one, t swap add, ; ( uses t )
-
-\ : negate, swap over not, dup inc, ; ( uses t via inc, )
-\ 
-\ : assemble 0 here 0 write halt ;
-
-\ : jumpz, swap x literal, pc x rot cp?, ;
 
 ( --- assembler tools -------------------------------------------------------- )
 
 : label ( -- ) here memory - constant ; \ current address within memory buffer
-: skip, ( -- ) here 2 + .s 0 jump, ; \ dummy jump, push address
-: then, ( -- ) here memory - swap .s ! ; \ patch jump to continue here
+: skip, ( -- ) here 2 + 0 jump, ; \ dummy jump, push address
+: then, ( -- ) here memory - swap ! ; \ patch jump to continue here
 
 ( --- read/write blocks ------------------------------------------------------ )
 

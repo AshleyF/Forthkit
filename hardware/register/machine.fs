@@ -20,7 +20,7 @@ create registers 16 cells allot  registers 16 cells 0 fill
 
 : step ( -- ) fetch-pc nybbles \ fetch instruction
   case
-     0 of ." Halt " reg @ . quit endof                        \ halt(x) (halt with exit code x)
+     0 of cr ." Halt " reg @ . quit endof                     \ halt(x) (halt with exit code x)
      1 of fetch-pc 8 >signed swap reg ! endof                 \ ldc x=v (load constant signed byte into x)
      2 of xyz over mem s@ swap ! reg+! endof                  \ ld+ z=[y] y+=x (load from memory and inc/dec pointer)
      3 of xyz swap @ over mem s! reg+! endof                  \ st+ [z]=y z+=x (store to memory and inc/dec poniter)
