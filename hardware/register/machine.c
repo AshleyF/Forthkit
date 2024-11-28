@@ -83,7 +83,7 @@ int main(void)
                 reg[z] = reg[y] << reg[x];
                 break;
             case 11: // SHR
-                reg[z] = reg[y] >> reg[x];
+                reg[z] = (unsigned short)reg[y] >> reg[x]; // without sign extension
                 break;
             case 12: // IN
                 reg[0]--;

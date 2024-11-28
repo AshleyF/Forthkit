@@ -192,7 +192,7 @@ sym '1- 0 header, label 'one-minus
               x pushd,
                 ret,
 
- sym write 0 header, label 'write ( block size address -- )
+sym write 0 header, label 'write ( block size address -- )
              x popd,
              y popd,
              z popd,
@@ -288,7 +288,6 @@ sym < 0 header, label 'less-than
           15 x ldc,
          z z x shr, ( sign bit to 1s place - 1 if negative, 0 otherwise )
              z pushd,
-               ret,
        'negate jump, ( -1 if negative, 0 otherwise )
 
 : branch, 0 jump, here 2 - ( pointer to address ) ;

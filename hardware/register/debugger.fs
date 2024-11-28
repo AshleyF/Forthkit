@@ -19,9 +19,16 @@ label 'dot
 
 : pushc, x ldc, x pushd, ;
 
+label 'foo
+             -7 pushc,
+        'negate call,
+           'dot call,
+           'bye call,
+
 label 'test
-              0 pushc,
-'zero-not-equals call,
+              7 pushc,
+              3 pushc,
+     'less-than call,
       'one-plus call,
            'dot call,
            'bye call,

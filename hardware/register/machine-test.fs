@@ -85,10 +85,10 @@ hard-reset ." Test shl "
 
 hard-reset ." Test shr "
       4 x ldc,
-      1 y ldc,
+     -7 y ldc,
     z y x shr,
     3 steps
-    z reg @ 1 4 rshift = . cr
+    z reg @ -7 64 16 4 - - rshift = . cr
 
 hard-reset ." Test in "
         x in,

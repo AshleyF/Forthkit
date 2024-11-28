@@ -2,7 +2,6 @@
 
 ## Next
 
-- [`<`](https://forth-standard.org/standard/core/less)
 - [`>`](https://forth-standard.org/standard/core/more)
 - [`0<`](https://forth-standard.org/standard/core/Zeroless)
 - [`0>`](https://forth-standard.org/standard/core/Zeromore) (extension)
@@ -78,7 +77,6 @@
 ## Strings
 
 ## Comparison
-- [`<`](https://forth-standard.org/standard/core/less)
 - [`U<`](https://forth-standard.org/standard/core/Uless)
 - [`>`](https://forth-standard.org/standard/core/more)
 - [`U>`](https://forth-standard.org/standard/core/Umore) (extension)

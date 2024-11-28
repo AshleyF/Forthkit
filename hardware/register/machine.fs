@@ -31,7 +31,7 @@ create registers 16 cells allot  registers 16 cells 0 fill
      8 of ['] / binop endof                                   \ div z=y/x (division)
      9 of [: and invert ;] binop endof                        \ nand z=y nand x (not-and)
     10 of ['] lshift binop endof                              \ shl z=y<<x (bitwise shift-left)
-    11 of ['] rshift binop endof                              \ shr z=y>>x (bitwise shift-right)
+    11 of [: swap $ffff and swap rshift ;] binop endof        \ shr z=y>>x (bitwise shift-right)
     12 of key swap reg s! endof                               \ in x=getc() (read from console)
     13 of reg @ emit endof                                    \ out putc(x) (write to console)
     14 of xyz @ rot @ rot @ read-block endof                  \ read(z,y,x)  (file z of size y -> address x)

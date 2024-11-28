@@ -104,7 +104,7 @@ true warnings ! \ intentionally redefining (latest, header,)
 0 header, +  label 'plus
              x popd,
              y popd,
-         x x y add,
+         x y x add,
              x pushd,
                ret,
 
@@ -177,17 +177,17 @@ true warnings ! \ intentionally redefining (latest, header,)
 
 \ invert ( x -- result ) invert bits
 0 header, invert  label 'invert
-              x popd,
+            x d ld,
             x x not,
-              x pushd,
+            x d st,
                 ret,
 
 \ negate ( x -- result ) arithetic inverse (invert 1+) (0 swap -)
 0 header, negate  label 'negate
-             x popd,
+           x d ld,
            x x not,
        x x one add,
-             x pushd,
+           x d st,
                ret,
 
 \ and ( y x -- result ) logical/bitwise and
@@ -210,7 +210,7 @@ true warnings ! \ intentionally redefining (latest, header,)
 0 header, lshift  label 'lshift
              x popd,
              y popd,
-         x x y shl,
+         x y x shl,
              x pushd,
                ret,
 
@@ -225,7 +225,7 @@ true warnings ! \ intentionally redefining (latest, header,)
 0 header, rshift  label 'rshift
              x popd,
              y popd,
-         x x y shr,
+         x y x shr,
              x pushd,
                ret,
 
@@ -364,7 +364,7 @@ true warnings ! \ intentionally redefining (latest, header,)
 0 header, =  label 'equals
              x popd,
            y d ld,
-         z x y sub, \ zero if equal
+         z y x sub, \ zero if equal
           y #f cp,
         y #t z cp?,
            y d st,
@@ -374,7 +374,7 @@ true warnings ! \ intentionally redefining (latest, header,)
 0 header, <>  label 'not-equals
              x popd,
            y d ld,
-         z x y sub, \ zero if equal
+         z y x sub, \ zero if equal
           y #t cp,
         y #f z cp?,
            y d st,
@@ -393,6 +393,18 @@ true warnings ! \ intentionally redefining (latest, header,)
            x d ld,
           y #t cp,
         y #f x cp?,
+           y d st,
+               ret,
+
+\ < ( y x -- b ) true if y less than x (- 15 rshift negate 1+)
+0 header, <  label 'less-than
+             x popd,
+           y d ld,
+         y y x sub, \ negative if less
+          15 x ldc,
+         y y x shr, \ sign bit to 1s place
+           y y not, \ negate
+       y y one add,
            y d st,
                ret,
 
