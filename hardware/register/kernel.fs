@@ -143,6 +143,27 @@ true warnings ! \ intentionally redefining (latest, header,)
              x pushd,
                ret,
 
+\ mod ( y x -- remainder ) remainder of division
+0 header, mod  label 'mod
+             x popd,
+             y popd,
+         z y x div,
+         z z x mul,
+         z y z sub,
+             z pushd,
+               ret,
+
+\ /mod ( y x -- remainder quotient ) remainder and quotient result of division
+0 header, /mod  label 'slash-mod
+             x popd,
+             y popd,
+         z y x div,
+         w z x mul,
+         w y w sub,
+             w pushd,
+             z pushd,
+               ret,
+
 \ nand ( y x -- not-and ) not and (non-standard)
 0 header, nand  label 'nand
              x popd,
@@ -158,7 +179,7 @@ true warnings ! \ intentionally redefining (latest, header,)
               x pushd,
                 ret,
 
-\ negate ( x -- result ) arithetic inverse (not 1+)
+\ negate ( x -- result ) arithetic inverse (invert 1+) (0 swap -)
 0 header, negate  label 'negate
              x popd,
            x x not,
@@ -264,6 +285,25 @@ true warnings ! \ intentionally redefining (latest, header,)
              x pushd,
                ret,
 
+\ swap ( y x -- x y ) swap top two stack values
+0 header, swap  label 'swap
+           x d ld,
+      z d four add,
+           y z ld,
+           y d st, \ swap in-place
+           x z st,
+               ret,
+
+\ tuck ( y x -- x y x ) copy top stack value under second value
+0 header, tuck  label 'tuck
+           x d ld,
+      z d four add,
+           y z ld,
+           y d st, \ swap in-place
+           x z st,
+          x pushd,
+               ret,
+
 \ rot ( z y x -- y x z ) rotate top three stack values
 0 header, rot  label 'rot
              x popd,
@@ -282,6 +322,15 @@ true warnings ! \ intentionally redefining (latest, header,)
              x pushd,
              z pushd,
              y pushd,
+               ret,
+
+\ depth ( -- depth ) data stack depth
+0 header, depth  label 'depth
+ memory-size x literal,
+         x x d sub,
+      x x four div,
+       x x one add,
+             x pushd,
                ret,
 
 \ >r ( x -- ) ( R: -- x ) move x to return stack

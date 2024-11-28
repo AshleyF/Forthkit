@@ -53,3 +53,4 @@ Remove u. Copy the xu to the top of the stack. An ambiguous condition exists if 
 
 - [The Evolution of Forth](https://www.forth.com/resources/forth-programming-language/)
 - A little [treasure trove](https://www.complang.tuwien.ac.at/projects/forth.html)
+- [The FORTH Approach to Operating Systems](https://dl.acm.org/doi/pdf/10.1145/800191.805586)

@@ -1,5 +1,5 @@
 $8000 constant memory-size
-create memory memory-size allot
+create memory memory-size allot  memory memory-size 0 fill
 variable h  memory h !
 
 false warnings ! \ intentionally redefining (here c, ,)
