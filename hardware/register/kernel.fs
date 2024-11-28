@@ -1,14 +1,17 @@
 require assembler.fs
 
-2 constant one    1   one ldc, \ literal 1
-3 constant two    2   two ldc, \ literal 2
-4 constant four   4  four ldc, \ literal 4
-5 constant eight  8 eight ldc, \ literal 8
-
-6 constant x
-7 constant y
-8 constant z
-9 constant w \ TODO: c@ c! as secondaries and remove this
+    2 constant one       1   one ldc, \ literal 1
+    3 constant two       2   two ldc, \ literal 2
+    4 constant four      4  four ldc, \ literal 4
+    5 constant eight     8 eight ldc, \ literal 8
+    
+    6 constant #t       -1    #t ldc, \ literal true (-1)
+ zero constant #f                     \ literal false (0)
+ 
+    7 constant x
+    8 constant y
+    9 constant z
+   10 constant w \ TODO: c@ c! as secondaries and remove this
 
 : literal, ( val reg -- ) pc two ld+, , ;
 
@@ -17,12 +20,12 @@ require assembler.fs
 : push, ( reg ptr -- ) dup dup four sub, st, ;
 : pop,  ( reg ptr -- ) four ld+, ;
 
-10 constant d  memory-size 2 + d literal, \ data stack pointer
+11 constant d  memory-size 2 + d literal, \ data stack pointer
 
 : pushd, ( reg -- ) d push, ;
 : popd,  ( reg -- ) d pop, ;
 
-11 constant r  memory-size r literal, \ return stack pointer
+12 constant r  memory-size r literal, \ return stack pointer
 
 : pushr, ( reg -- ) r push, ;
 : popr,  ( reg -- ) r pop, ;
@@ -53,49 +56,49 @@ true warnings ! \ intentionally redefining (latest, header,)
 
 \ (bye) ( code -- ) halt machine with return code (non-standard)
 0 header, bye  label '(bye)
-              x popd,
-              x halt,
+             x popd,
+             x halt,
 
 \ bye ( -- ) halt machine
 0 header, bye  label 'bye
-           zero pushd,
-         '(bye) jump,
+          zero pushd,
+        '(bye) jump,
 
 \ @ ( addr -- ) fetch 16-bit value
 0 header, @  label 'fetch
-              x popd,
-            x x ld,
-              x pushd,
-                ret,
+             x popd,
+           x x ld,
+             x pushd,
+               ret,
 
 \ ! ( val addr -- ) store 16-bit value
 0 header, !  label 'store
-              x popd,
-              y popd,
-            y x st,
-                ret,
+             x popd,
+             y popd,
+           y x st,
+               ret,
 
 \ c@ ( addr -- ) fetch 8-bit value
 0 header, c@  label 'c-fetch
-              x popd,
-            x x ld,
-          $ff y literal, 
-          x x y and,
-              x pushd,
-                ret,
+             x popd,
+           x x ld,
+         $ff y literal, 
+         x x y and,
+             x pushd,
+               ret,
 
 \ c! ( val addr -- ) store 8-bit value
 0 header, c!  label 'c-store
-              x popd,
-              y popd,
-          $ff z literal, 
-          y y z and,  \ mask to lower
-            z z not,  \ upper mask
-            w x ld,   \ existing value
-          w w z and,  \ mask to upper
-          y y w or,   \ combine
-            y x st,
-                ret,
+             x popd,
+             y popd,
+         $ff z literal, 
+         y y z and,  \ mask to lower
+           z z not,  \ upper mask
+           w x ld,   \ existing value
+         w w z and,  \ mask to upper
+         y y w or,   \ combine
+           y x st,
+               ret,
 
 \ + ( y x -- sum ) addition
 0 header, +  label 'plus
@@ -189,55 +192,55 @@ true warnings ! \ intentionally redefining (latest, header,)
 
 \ and ( y x -- result ) logical/bitwise and
 0 header, and  label 'and
-              x popd,
-              y popd,
-          z x y and,
-              z pushd,
-                ret,
+             x popd,
+             y popd,
+         z x y and,
+             z pushd,
+               ret,
 
 \ or ( y x -- result ) logical/bitwise or
 0 header, or  label 'or
-              x popd,
-              y popd,
-          z x y or,
-              z pushd,
-                ret,
+             x popd,
+             y popd,
+         z x y or,
+             z pushd,
+               ret,
 
 \ lshift ( y x -- result ) left shift
 0 header, lshift  label 'lshift
-              x popd,
-              y popd,
-          x x y shl,
-              x pushd,
-                ret,
+             x popd,
+             y popd,
+         x x y shl,
+             x pushd,
+               ret,
 
 \ 2* ( x -- result ) multiply by 2 (1 lshift)
 0 header, 2*  label 'two-star
-              x popd,
-        x x one shl,
-              x pushd,
-                ret,
+             x popd,
+       x x one shl,
+             x pushd,
+               ret,
 
 \ rshift ( y x -- result ) right shift
 0 header, rshift  label 'rshift
-              x popd,
-              y popd,
-          x x y shr,
-              x pushd,
-                ret,
+             x popd,
+             y popd,
+         x x y shr,
+             x pushd,
+               ret,
 
 \ 2/ ( x -- result ) divide by 2 (1 rshift)
 0 header, 2/  label 'two-slash
-              x popd,
-        x x one shr,
-              x pushd,
-                ret,
+             x popd,
+       x x one shr,
+             x pushd,
+               ret,
 
 \ key ( -- char ) read from console
 0 header, key  label 'key
-              x in,
-              x pushd,
-                ret,
+             x in,
+             x pushd,
+               ret,
 
 \ emit ( char -- ) write to console
 0 header, emit  label 'emit
@@ -301,7 +304,7 @@ true warnings ! \ intentionally redefining (latest, header,)
            y z ld,
            y d st, \ swap in-place
            x z st,
-          x pushd,
+             x pushd,
                ret,
 
 \ rot ( z y x -- y x z ) rotate top three stack values
@@ -335,27 +338,63 @@ true warnings ! \ intentionally redefining (latest, header,)
 
 \ >r ( x -- ) ( R: -- x ) move x to return stack
 0 header, >r  label 'to-r
-              x popd,
-            y r ld,  \ this return address
-            x r st,  \ replace
-       y y four add, \ ret,
-           pc y cp,
+             x popd,
+           y r ld,  \ this return address
+           x r st,  \ replace
+      y y four add, \ ret,
+          pc y cp,
                 
 \ >r ( -- x ) ( R: x -- ) move x from return stack
 0 header, r>  label 'r-from
-              x popr, \ this return address
-              y popr, \ top value before call
-              y pushd,
-       x x four add,  \ ret,
-           pc x cp,
+             x popr, \ this return address
+             y popr, \ top value before call
+             y pushd,
+      x x four add,  \ ret,
+          pc x cp,
 
 \ r@ ( -- x ) ( R: x -- x ) copy x from return stack
 0 header, r@  label 'r-fetch
-              x popr, \ this return address
-            y r ld,   \ top value before call
-              y pushd,
-       x x four add,  \ ret,
-           pc x cp,
+             x popr, \ this return address
+           y r ld,   \ top value before call
+             y pushd,
+      x x four add,  \ ret,
+          pc x cp,
+
+\ = ( y x -- b ) true if equal
+0 header, =  label 'equals
+             x popd,
+           y d ld,
+         z x y sub, \ zero if equal
+          y #f cp,
+        y #t z cp?,
+           y d st,
+               ret,
+
+\ <> ( y x -- b ) true if not equal
+0 header, <>  label 'not-equals
+             x popd,
+           y d ld,
+         z x y sub, \ zero if equal
+          y #t cp,
+        y #f z cp?,
+           y d st,
+               ret,
+
+\ 0= ( y x -- b ) true if equal to zero
+0 header, 0=  label 'zero-equals
+           x d ld,
+          y #f cp,
+        y #t x cp?,
+           y d st,
+               ret,
+
+\ 0<> ( y x -- b ) true if not equal to zero
+0 header, 0=  label 'zero-not-equals
+           x d ld,
+          y #t cp,
+        y #f x cp?,
+           y d st,
+               ret,
 
 ( --- secondaries ------------------------------------------------------------ )
 

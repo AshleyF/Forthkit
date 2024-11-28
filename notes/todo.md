@@ -2,13 +2,9 @@
 
 ## Next
 
-- [`=`](https://forth-standard.org/standard/core/Equal)
 - [`<`](https://forth-standard.org/standard/core/less)
 - [`>`](https://forth-standard.org/standard/core/more)
 - [`0<`](https://forth-standard.org/standard/core/Zeroless)
-- [`0=`](https://forth-standard.org/standard/core/ZeroEqual)
-- [`<>`](https://forth-standard.org/standard/core/ne) (extension)
-- [`0<>`](https://forth-standard.org/standard/core/Zerone) (extension)
 - [`0>`](https://forth-standard.org/standard/core/Zeromore) (extension)
 
 ## ALU/Math
@@ -82,15 +78,11 @@
 ## Strings
 
 ## Comparison
-- [`=`](https://forth-standard.org/standard/core/Equal)
 - [`<`](https://forth-standard.org/standard/core/less)
 - [`U<`](https://forth-standard.org/standard/core/Uless)
 - [`>`](https://forth-standard.org/standard/core/more)
 - [`U>`](https://forth-standard.org/standard/core/Umore) (extension)
 - [`0<`](https://forth-standard.org/standard/core/Zeroless)
-- [`0=`](https://forth-standard.org/standard/core/ZeroEqual)
-- [`<>`](https://forth-standard.org/standard/core/ne) (extension)
-- [`0<>`](https://forth-standard.org/standard/core/Zerone) (extension)
 - [`0>`](https://forth-standard.org/standard/core/Zeromore) (extension)
 
 ## Flow

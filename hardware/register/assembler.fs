@@ -17,7 +17,7 @@ true warnings !
 : ldc,   (   v x -- )  1 2nybbles, c, ; \ x=v          (load constant signed v into x)
 : ld+,   ( z y x -- )  2 4nybbles, ;    \ z<-[y] y+=x  (load from memory and inc/dec pointer)
 : st+,   ( z y x -- )  3 4nybbles, ;    \ z->[y] y+=x  (store to memory and inc/dec poniter)
-: cp?,   ( z y x -- )  4 4nybbles, ;    \ z=y if x     (conditional copy)
+: cp?,   ( z y x -- )  4 4nybbles, ;    \ z=y if x=0   (conditional copy)
 : add,   ( z y x -- )  5 4nybbles, ;    \ z=y+x        (addition)
 : sub,   ( z y x -- )  6 4nybbles, ;    \ z=y-x        (subtraction)
 : mul,   ( z y x -- )  7 4nybbles, ;    \ z=y*x        (multiplication)

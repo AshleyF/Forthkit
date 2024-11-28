@@ -20,10 +20,9 @@ label 'dot
 : pushc, x ldc, x pushd, ;
 
 label 'test
-             25 pushc,
-              7 pushc,
-           'slash-mod call,
-           'dot call,
+              0 pushc,
+'zero-not-equals call,
+      'one-plus call,
            'dot call,
            'bye call,
 
