@@ -26,10 +26,14 @@ label 'foo
            'bye call,
 
 label 'test
-              7 pushc,
               3 pushc,
-     'less-than call,
-      'one-plus call,
+              4 pushc,
+              5 pushc,
+              6 pushc,
+      'two-swap call,
+           'dot call,
+           'dot call,
+           'dot call,
            'dot call,
            'bye call,
 

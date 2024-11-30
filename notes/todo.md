@@ -1,11 +1,5 @@
 # TODO
 
-## Next
-
-- [`>`](https://forth-standard.org/standard/core/more)
-- [`0<`](https://forth-standard.org/standard/core/Zeroless)
-- [`0>`](https://forth-standard.org/standard/core/Zeromore) (extension)
-
 ## ALU/Math
 - [`XOR`](https://forth-standard.org/standard/core/XOR)
 - [`ABS`](https://forth-standard.org/standard/core/ABS) (dup 0< if negate then)
@@ -21,11 +15,6 @@
 - [`SM/REM`](https://forth-standard.org/standard/core/SMDivREM)
 
 ## Stack
-- [`2DROP`](https://forth-standard.org/standard/core/TwoDROP)
-- [`?DUP`](https://forth-standard.org/standard/core/qDUP)
-- [`2DUP`](https://forth-standard.org/standard/core/TwoDUP)
-- [`2OVER`](https://forth-standard.org/standard/core/TwoOVER)
-- [`2SWAP`](https://forth-standard.org/standard/core/TwoSWAP)
 - [`PICK`](https://forth-standard.org/standard/core/PICK) (extension) (1+ 4 * dsp@ + @)
 - [`ROLL`](https://forth-standard.org/standard/core/ROLL) (extension)
 - [`2>R`](https://forth-standard.org/standard/core/TwotoR) (extension)
@@ -78,10 +67,7 @@
 
 ## Comparison
 - [`U<`](https://forth-standard.org/standard/core/Uless)
-- [`>`](https://forth-standard.org/standard/core/more)
 - [`U>`](https://forth-standard.org/standard/core/Umore) (extension)
-- [`0<`](https://forth-standard.org/standard/core/Zeroless)
-- [`0>`](https://forth-standard.org/standard/core/Zeromore) (extension)
 
 ## Flow
 - [`RECURSE`](https://forth-standard.org/standard/core/RECURSE) (immediate latest @ >cfa ,)

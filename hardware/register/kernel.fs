@@ -1,17 +1,18 @@
 require assembler.fs
 
-    2 constant one       1   one ldc, \ literal 1
-    3 constant two       2   two ldc, \ literal 2
-    4 constant four      4  four ldc, \ literal 4
-    5 constant eight     8 eight ldc, \ literal 8
+    2 constant one       1    one ldc, \ literal 1
+    3 constant two       2    two ldc, \ literal 2
+    4 constant four      4   four ldc, \ literal 4
+    5 constant eight     8  eight ldc, \ literal 8
+    6 constant twelve   12 twelve ldc, \ literal 12
     
-    6 constant #t       -1    #t ldc, \ literal true (-1)
- zero constant #f                     \ literal false (0)
+    7 constant #t       -1     #t ldc, \ literal true (-1)
+ zero constant #f                      \ literal false (0)
  
-    7 constant x
-    8 constant y
-    9 constant z
-   10 constant w \ TODO: c@ c! as secondaries and remove this
+    8 constant x
+    9 constant y
+   10 constant z
+   11 constant w \ TODO: c@ c! as secondaries and remove this
 
 : literal, ( val reg -- ) pc two ld+, , ;
 
@@ -20,12 +21,12 @@ require assembler.fs
 : push, ( reg ptr -- ) dup dup four sub, st, ;
 : pop,  ( reg ptr -- ) four ld+, ;
 
-11 constant d  memory-size 2 + d literal, \ data stack pointer
+12 constant d  memory-size 2 + d literal, \ data stack pointer
 
 : pushd, ( reg -- ) d push, ;
 : popd,  ( reg -- ) d pop, ;
 
-12 constant r  memory-size r literal, \ return stack pointer
+13 constant r  memory-size r literal, \ return stack pointer
 
 : pushr, ( reg -- ) r push, ;
 : popr,  ( reg -- ) r pop, ;
@@ -269,11 +270,34 @@ true warnings ! \ intentionally redefining (latest, header,)
       d d four add,
                ret,
 
+\ 2drop ( y x -- ) remove top two stack values
+0 header, 2drop  label 'two-drop
+     d d eight add,
+               ret,
+
 \ dup ( x -- x x ) duplicate top stack value
-0 header, dup  label 'dup
+0 header, dup  label 'dupe
            x d ld,
              x pushd,
                ret,
+
+\ 2dup ( y x -- y x y x ) duplicate top two stack values
+0 header, 2dup  label 'two-dupe
+           x d ld,
+      y d four add,
+           y y ld,
+             y pushd,
+             x pushd,
+               ret,
+
+\ ?dup ( x -- 0 | x x ) duplicate top stack value if non-zero
+0 header, ?dup  label 'question-dupe
+           x d ld,
+             y popr,  \ return address
+      y y four add,
+        pc y x cp?,   \ return if x=0
+             x pushd, \ else dup
+          pc y cp,    \ return
 
 \ nip ( y x -- x ) drop second stack value
 0 header, nip  label 'nip
@@ -288,6 +312,16 @@ true warnings ! \ intentionally redefining (latest, header,)
              x pushd,
                ret,
 
+\ 2over ( w z y x -- w z y x w z ) copy second pair of stack values to top
+0 header, 2over  label 'two-over
+    x d twelve add,
+           x x ld,
+             x pushd,
+    x d twelve add,
+           x x ld,
+             x pushd,
+               ret,
+
 \ swap ( y x -- x y ) swap top two stack values
 0 header, swap  label 'swap
            x d ld,
@@ -295,6 +329,21 @@ true warnings ! \ intentionally redefining (latest, header,)
            y z ld,
            y d st, \ swap in-place
            x z st,
+               ret,
+
+\ 2swap ( w z y x -- y x w z ) swap top two pairs of stack values
+0 header, 2swap  label 'two-swap
+           x d ld,
+     y d eight add,
+           z y ld,
+           z d st, \ swap z<->x in-place
+           x y st,
+      x d four add,
+           y x ld,
+    z d twelve add,
+           w z ld,
+           w x st, \ swap w<->y in-place
+           y z st,
                ret,
 
 \ tuck ( y x -- x y x ) copy top stack value under second value
@@ -396,16 +445,52 @@ true warnings ! \ intentionally redefining (latest, header,)
            y d st,
                ret,
 
-\ < ( y x -- b ) true if y less than x (- 15 rshift negate 1+)
+\ 0< ( x -- b ) true if x less than zero (15 rshift negate 1+)
+0 header, 0<  label 'zero-less
+           x d ld,
+          15 y ldc,
+         x x y shr, \ sign bit to 1s place
+           x x not, \ negate
+       x x one add,
+           x d st,
+               ret,
+
+\ < ( y x -- b ) true if y less than x (- 0<)
 0 header, <  label 'less-than
              x popd,
            y d ld,
-         y y x sub, \ negative if less
-          15 x ldc,
-         y y x shr, \ sign bit to 1s place
-           y y not, \ negate
-       y y one add,
-           y d st,
+         x y x sub, \ negative if y less than x
+          15 y ldc,
+         x x y shr, \ sign bit to 1s place
+           x x not, \ negate
+       x x one add,
+           x d st,
+               ret,
+
+\ 0> ( x -- b ) true if x greater than zero (1- 15 rshift 1-)
+0 header, 0>  label 'zero-greater
+           x d ld,
+       x x one sub, \ negative if not greater than zero
+          15 y ldc,
+         x x y shr, \ sign bit to 1s place
+           x x not, \ negate
+       x x one add,
+           x x not, \ invert
+           x d st,
+               ret,
+
+\ > ( y x -- b ) true if y greater than x (- 0>)
+0 header, >  label 'greater-than
+             x popd,
+           y d ld,
+         x y x sub, \ negative if y less than x
+       x x one sub, \ negative if y is equal to x
+          15 y ldc,
+         x x y shr, \ sign bit to 1s place
+           x x not, \ negate
+       x x one add,
+           x x not, \ invert
+           x d st,
                ret,
 
 ( --- secondaries ------------------------------------------------------------ )
