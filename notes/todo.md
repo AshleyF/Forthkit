@@ -47,8 +47,6 @@
 - [`+LOOP`](https://forth-standard.org/standard/core/PlusLOOP)
 - [`UNLOOP`](https://forth-standard.org/standard/core/UNLOOP)
 - [`LEAVE`](https://forth-standard.org/standard/core/LEAVE)
-- [`I`](https://forth-standard.org/standard/core/I)
-- [`J`](https://forth-standard.org/standard/core/J)
 - [`(`](https://forth-standard.org/standard/core/p) (immediate 1 begin key dup '(' = if drop 1+ else ')' = if 1- then then dup 0= until drop)
 - [`\`](https://forth-standard.org/standard/core/bs) (extension)
 - [`CONSTANT`](https://forth-standard.org/standard/core/CONSTANT) (word create docol , ' lit , , ' exit ,)

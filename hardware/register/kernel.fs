@@ -592,11 +592,11 @@ true warnings ! \ intentionally redefining (latest, header,)
 
 ( --- secondary control-flow ------------------------------------------------- )
 
-: do, ( C: -- addr ) \ begin do-loop (2>r)
+: do, ( C: -- addr ) \ begin do-loop (immediate 2>r)
      'two-to-r call,
                begin, ;
 
-: loop, ( C: addr -- ) \ end do-loop (r> 1+ r@ over >r < if again then 2r> 2drop)
+: loop, ( C: addr -- ) \ end do-loop (immediate r> 1+ r@ over >r < if again then 2r> 2drop)
        'r-from call, ( start )
      'one-plus call,
       'r-fetch call,
@@ -608,6 +608,21 @@ true warnings ! \ intentionally redefining (latest, header,)
                then,
    'two-r-from call,
      'two-drop call, ;
+
+\ i ( -- x ) ( R: x -- x ) copy innermost loop index (r@)
+0 header, i  label 'i-index
+      'r-fetch jump,
+
+\ j ( -- x ) ( R: x -- x ) copy next outer loop index (2r> r> r@ swap >r -riot 2>r) (x r twelve add, x x ld, x pushd, ret,)
+0 header, j  label 'j-index
+   'two-r-from call,
+       'r-from call,
+      'r-fetch call,
+         'swap call,
+         'to-r call,
+         '-rot call,
+     'two-to-r call, \ tricky, don't jump here!
+               ret,
 
 ( --- memory abstractions ---------------------------------------------------- )
 

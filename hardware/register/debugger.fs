@@ -18,15 +18,19 @@ label 'dot
                 ret,
 
 label 'test
-             3 literal,
+            10 literal,
              0 literal,
                do,
              7 literal,
-               loop,
-           'dot call,
-           'dot call,
-           'dot call,
-           'dot call,
-           'bye call,
+             3 literal,
+               do,
+      'i-index call,
+          'dot call,
+      'j-index call,
+          'dot call,
+          'c-r call,
+              loop,
+              loop,
+          'bye call,
 
 run
