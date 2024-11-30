@@ -15,11 +15,7 @@
 - [`SM/REM`](https://forth-standard.org/standard/core/SMDivREM)
 
 ## Stack
-- [`PICK`](https://forth-standard.org/standard/core/PICK) (extension) (1+ 4 * dsp@ + @)
 - [`ROLL`](https://forth-standard.org/standard/core/ROLL) (extension)
-- [`2>R`](https://forth-standard.org/standard/core/TwotoR) (extension)
-- [`2R>`](https://forth-standard.org/standard/core/TwoRfrom) (extension)
-- [`2R@`](https://forth-standard.org/standard/core/TwoRFetch) (extension)
 
 ## Memory
 - [`+!`](https://forth-standard.org/standard/core/PlusStore)

@@ -12,7 +12,7 @@ require assembler.fs
     8 constant x
     9 constant y
    10 constant z
-   11 constant w \ TODO: c@ c! as secondaries and remove this
+   11 constant w
 
 : literal, ( val reg -- ) pc two ld+, , ;
 
@@ -376,6 +376,16 @@ true warnings ! \ intentionally redefining (latest, header,)
              y pushd,
                ret,
 
+\ pick ( n...x -- n...x n ) copy 0-based nth stack value to top
+0 header, pick  label 'pick
+           x d ld,
+      x x four mul,
+      x x four add,
+         x x d add,
+           x x ld,
+           x d st,
+               ret,
+
 \ depth ( -- depth ) data stack depth
 0 header, depth  label 'depth
  memory-size x literal,
@@ -385,29 +395,60 @@ true warnings ! \ intentionally redefining (latest, header,)
              x pushd,
                ret,
 
-\ >r ( x -- ) ( R: -- x ) move x to return stack
+\ >r ( x -- ) ( R: x -- ) move x to return stack
 0 header, >r  label 'to-r
              x popd,
            y r ld,  \ this return address
            x r st,  \ replace
       y y four add, \ ret,
           pc y cp,
-                
-\ >r ( -- x ) ( R: x -- ) move x from return stack
+
+\ 2>r ( y x -- ) ( R: -- y x ) move y x pair to return stack
+0 header, 2>r  label 'two-to-r
+             x popd,
+             y popd,
+           z r ld,  \ this return address
+           y r st,  \ push y in-place
+             x pushr,
+      z z four add, \ ret,
+          pc z cp,
+
+\ r> ( -- x ) ( R: x -- ) move x from return stack
 0 header, r>  label 'r-from
-             x popr, \ this return address
-             y popr, \ top value before call
+             z popr, \ this return address
+             x popr, \ top value before call
+             x pushd,
+      z z four add,  \ ret,
+          pc z cp,
+
+\ 2r> ( -- y x ) ( R: y x -- ) move x from return stack
+0 header, 2r>  label 'two-r-from
+             z popr, \ this return address
+             x popr, \ top value before call
+             y popr, \ second value before call
              y pushd,
-      x x four add,  \ ret,
-          pc x cp,
+             x pushd,
+      z z four add,  \ ret,
+          pc z cp,
 
 \ r@ ( -- x ) ( R: x -- x ) copy x from return stack
 0 header, r@  label 'r-fetch
-             x popr, \ this return address
-           y r ld,   \ top value before call
+             z popr, \ this return address
+           x r ld,   \ top value before call
+             x pushd,
+      z z four add,  \ ret,
+          pc z cp,
+
+\ 2r@ ( -- y x ) ( R: y x -- y x ) copy y x pair from return stack
+0 header, 2r@  label 'two-r-fetch
+             z popr, \ this return address
+           x r ld,   \ top value before call
+      y r four add,
+           y y ld,
              y pushd,
-      x x four add,  \ ret,
-          pc x cp,
+             x pushd,
+      z z four add,  \ ret,
+          pc z cp,
 
 \ = ( y x -- b ) true if equal
 0 header, =  label 'equals
@@ -507,4 +548,5 @@ true warnings ! \ intentionally redefining (latest, header,)
 ( --- interpreter ------------------------------------------------------------ )
 
                then,
+               here 
           zero halt,
