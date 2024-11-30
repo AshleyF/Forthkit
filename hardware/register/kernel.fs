@@ -33,16 +33,17 @@ require assembler.fs
 : pushr, ( reg -- ) r push, ;
 : popr,  ( reg -- ) r pop, ;
 
-: call, ( addr -- ) pc pushr, jump, ;     \ 6 bytes
+: call, ( addr -- ) pc pushr,  jump, ;    \ 6 bytes
 : ret, x popr,  x x four add,  pc x cp, ; \ 8 bytes (pc popr, would complicate calls)
 
-( --- control flow ----------------------------------------------------------- )
+( --- control-flow ----------------------------------------------------------- )
 
-: if, ( -- addr ) x popd,  0 y ldv,  here 2 -  pc y x cp?, ; \ dummy branch on 0, push pointer to address
-: else, ( addr -- addr ) branch, swap then, ;  \ patch previous branch to here, dummy unconditionally branch over false block
+: if, ( C: -- addr ) x popd,  0 y ldv,  here 2 -  pc y x cp?, ; \ dummy branch on 0, push pointer to address
+: else, ( C: addr -- addr ) branch, swap then, ;  \ patch previous branch to here, dummy unconditionally branch over false block
 
-: begin, ( -- addr ) here memory - ;
-: until, ( addr -- ) if, s! ; \ branch on 0 to address
+: begin, ( C: -- addr ) here memory - ;
+: again, ( C: addr -- ) jump, ;
+: until, ( C: addr -- ) if, s! ; \ branch on 0 to address
 
 ( --- dictionary ------------------------------------------------------------- )
 
@@ -544,19 +545,116 @@ true warnings ! \ intentionally redefining (latest, header,)
            x d st,
                ret,
 
+\ exit ( -- ) ( R: addr -- ) return from call
+0 header, exit  label 'exit
+             x popr, \ discard this call
+               ret,
+
 ( --- secondaries ------------------------------------------------------------ )
 
-\ \ xor ( y x -- result ) logical/bitwise exclusive or
-\ 0 header, xor  label 'xor
-\           '2dup call,
-\             'or call,
-\           '-rot call,
-\            'and call,
-\         'invert call,
-\            'and jump,
+\ xor ( y x -- result ) logical/bitwise exclusive or (2dup or -rot and invert and)
+0 header, xor  label 'xor
+     'two-dupe call,
+           'or call,
+         '-rot call,
+          'and call,
+       'invert call,
+          'and jump,
+
+\ abs ( x -- |x| ) absolute value (dup 0< if negate then)
+0 header, abs  label 'abs
+         'dupe call,
+    'zero-less call,
+               if,
+       'negate call,
+               then,
+               ret,
+
+\ min ( y x -- min ) lessor value (2dup < if drop exit then nip)
+0 header, min  label 'min
+     'two-dupe call,
+    'less-than call,
+               if,
+         'drop call,
+         'exit call,
+               then,
+          'nip jump,
+
+\ max ( y x -- max ) greater value (2dup < if nip exit then drop)
+0 header, max  label 'max
+     'two-dupe call,
+    'less-than call,
+               if,
+          'nip call,
+         'exit call,
+               then,
+         'drop jump,
+
+( --- secondary control-flow ------------------------------------------------- )
+
+: do, ( C: -- addr ) \ begin do-loop (2>r)
+     'two-to-r call,
+               begin, ;
+
+: loop, ( C: addr -- ) \ end do-loop (r> 1+ r@ over >r < if again then 2r> 2drop)
+       'r-from call, ( start )
+     'one-plus call,
+      'r-fetch call,
+         'over call,
+         'to-r call,
+    'less-than call,
+               if,
+               swap again, \ swap if address
+               then,
+   'two-r-from call,
+     'two-drop call, ;
+
+( --- memory abstractions ---------------------------------------------------- )
+
+\ align ( -- ) reserve space to align data space pointer (no-op on RM16)
+0 header, align  label 'align
+               ret, \ no-op
+
+\ aligned ( addr -- addr ) align address (no-op on RM16)
+0 header, aligned  label 'aligned
+               ret, \ no-op
+
+\ cells ( x -- n-cells ) size in address units of n-cells (2*)
+0 header, cells  label 'cells
+     'two-star jump,
+
+\ cell+ ( addr -- addr ) add size of cell to address (2 +)
+0 header, cell+  label 'cell+
+             2 literal,
+         'plus jump,
+
+\ chars ( x -- n-chars ) size in address units of n-chars (no-op)
+0 header, chars  label 'chars
+               ret, \ no-op
+
+\ char+ ( addr -- addr ) add size of char to address (1+)
+0 header, char+  label 'char-plus
+     'one-plus jump,
 
 ( --- interpreter ------------------------------------------------------------ )
 
+\ bl ( -- c ) space character value (32 constant bl)
+0 header, bl  label 'bl
+          32 x ldc,
+             x pushd,
+               ret,
+
+\ space ( -- ) emit space character (bl emit)
+0 header, space  label 'space
+           'bl call,
+         'emit jump,
+
+\ cr ( -- ) cause newline (10 emit)
+0 header, cr  label 'c-r
+            10 literal,
+         'emit jump,
+
+( --- end of dictionary ------------------------------------------------------ )
+
                then,
-               here 
           zero halt,
