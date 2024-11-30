@@ -14,25 +14,35 @@ require assembler.fs
    10 constant z
    11 constant w
 
-: literal, ( val reg -- ) pc two ld+, , ;
+: ldv, ( val reg -- ) pc two ld+, , ;
 
 ( --- stacks ----------------------------------------------------------------- )
 
-: push, ( reg ptr -- ) dup dup four sub, st, ;
+: push, ( reg ptr -- ) dup dup four sub,  st, ;
 : pop,  ( reg ptr -- ) four ld+, ;
 
-12 constant d  memory-size 2 + d literal, \ data stack pointer
+12 constant d  memory-size 2 + d ldv, \ data stack pointer
 
 : pushd, ( reg -- ) d push, ;
 : popd,  ( reg -- ) d pop, ;
 
-13 constant r  memory-size r literal, \ return stack pointer
+: literal, x ldv,  x pushd, ;
+
+13 constant r  memory-size r ldv, \ return stack pointer
 
 : pushr, ( reg -- ) r push, ;
 : popr,  ( reg -- ) r pop, ;
 
-: call, ( addr -- ) pc pushr, jump, ;   \ 6 bytes
-: ret, x popr, x x four add, pc x cp, ; \ 8 bytes (pc popr, would complicate calls)
+: call, ( addr -- ) pc pushr, jump, ;     \ 6 bytes
+: ret, x popr,  x x four add,  pc x cp, ; \ 8 bytes (pc popr, would complicate calls)
+
+( --- control flow ----------------------------------------------------------- )
+
+: if, ( -- addr ) x popd,  0 y ldv,  here 2 -  pc y x cp?, ; \ dummy branch on 0, push pointer to address
+: else, ( addr -- addr ) branch, swap then, ;  \ patch previous branch to here, dummy unconditionally branch over false block
+
+: begin, ( -- addr ) here memory - ;
+: until, ( addr -- ) if, s! ; \ branch on 0 to address
 
 ( --- dictionary ------------------------------------------------------------- )
 
@@ -53,7 +63,7 @@ true warnings ! \ intentionally redefining (latest, header,)
 
 ( --- primitives ------------------------------------------------------------- )
 
-                skip, \ skip to interpreter
+               branch, \ skip dictionary
 
 \ (bye) ( code -- ) halt machine with return code (non-standard)
 0 header, bye  label '(bye)
@@ -83,7 +93,7 @@ true warnings ! \ intentionally redefining (latest, header,)
 0 header, c@  label 'c-fetch
              x popd,
            x x ld,
-         $ff y literal, 
+         $ff y ldv, 
          x x y and,
              x pushd,
                ret,
@@ -92,7 +102,7 @@ true warnings ! \ intentionally redefining (latest, header,)
 0 header, c!  label 'c-store
              x popd,
              y popd,
-         $ff z literal, 
+         $ff z ldv, 
          y y z and,  \ mask to lower
            z z not,  \ upper mask
            w x ld,   \ existing value
@@ -388,7 +398,7 @@ true warnings ! \ intentionally redefining (latest, header,)
 
 \ depth ( -- depth ) data stack depth
 0 header, depth  label 'depth
- memory-size x literal,
+ memory-size x ldv,
          x x d sub,
       x x four div,
        x x one add,

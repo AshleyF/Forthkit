@@ -14,8 +14,6 @@ create registers 16 cells allot  registers 16 cells 0 fill
 : xyz ( x -- reg-x reg-y reg-z ) reg fetch-pc nybbles reg swap reg ;
 
 : mem ( reg -- addr ) @ memory + ; \ memory address pointed to by register
-: s! ( val addr -- ) over 8 rshift over 1+ c! c! ; \ store 16-bit value at address
-: s@ ( addr -- val ) dup c@ swap 1+ c@ 8 lshift or ; \ fetch 16-bit value from address
 : binop ( x op -- ) swap xyz >r @ swap @ rot execute >s r> ! ; \ execute binary operation ( y x -- )
 
 : step ( -- ) fetch-pc nybbles \ fetch instruction

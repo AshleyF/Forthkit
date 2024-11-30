@@ -7,6 +7,8 @@ false warnings ! \ intentionally redefining (here c, ,)
 : here h @ ;
 : c, ( c -- ) here c! 1 h +! ;
 : , ( cc -- ) dup c, 8 rshift c, ; \ 16-bit little endian
+: s! ( val addr -- ) over 8 rshift over 1+ c! c! ; \ store 16-bit value at address
+: s@ ( addr -- val ) dup c@ swap 1+ c@ 8 lshift or ; \ fetch 16-bit value from address
 
 true warnings !
 
@@ -47,9 +49,9 @@ true warnings !
 
 ( --- assembler tools -------------------------------------------------------- )
 
-: label ( -- ) here memory - constant ; \ current address within memory buffer
-: skip, ( -- ) here 2 + 0 jump, ; \ dummy jump, push address
-: then, ( -- ) here memory - swap ! ; \ patch jump to continue here
+: label ( -- addr ) here memory - constant ; \ current address within memory buffer
+: branch, ( -- addr ) 0 jump,  here 2 - ; \ dummy jump, push pointer to address
+: then, ( addr -- ) here memory - swap s! ; \ patch jump to continue here (relative to memory buffer)
 
 ( --- read/write blocks ------------------------------------------------------ )
 

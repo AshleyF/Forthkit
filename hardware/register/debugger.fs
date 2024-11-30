@@ -17,21 +17,26 @@ label 'dot
               x out,
                 ret,
 
-: pushc, x ldc, x pushd, ;
-
 label 'foo
-             -7 pushc,
+             -7 literal,
         'negate call,
            'dot call,
            'bye call,
 
 label 'test
-              3 pushc,
-              4 pushc,
-              5 pushc,
-              6 pushc,
-              3 pushc,
-        'pick call,
+              2 literal,
+              3 literal,
+              1 literal,
+                if,
+              4 literal,
+              5 literal,
+                else,
+              6 literal,
+              7 literal,
+                then,
+              8 literal,
+              9 literal,
+           'dot call,
            'dot call,
            'dot call,
            'dot call,
