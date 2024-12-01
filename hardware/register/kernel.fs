@@ -90,6 +90,15 @@ true warnings ! \ intentionally redefining (latest, header,)
            y x st,
                ret,
 
+\ +! ( val addr -- ) store 16-bit value
+0 header, +!  label 'plus-store
+             x popd,
+             y popd,
+           z x ld,
+         z z y add,
+           z x st,
+               ret,
+
 \ c@ ( addr -- ) fetch 8-bit value
 0 header, c@  label 'c-fetch
              x popd,
@@ -550,7 +559,88 @@ true warnings ! \ intentionally redefining (latest, header,)
              x popr, \ discard this call
                ret,
 
+( --- memory ----------------------------------------------------------------- )
+
+\ align ( -- ) reserve space to align data space pointer (no-op on RM16)
+0 header, align  label 'align
+               ret, \ no-op
+
+\ aligned ( addr -- addr ) align address (no-op on RM16)
+0 header, aligned  label 'aligned
+               ret, \ no-op
+
+\ cells ( x -- n-cells ) size in address units of n-cells (2*)
+0 header, cells  label 'cells
+     'two-star jump,
+
+\ cell+ ( addr -- addr ) add size of cell to address (2 +)
+0 header, cell+  label 'cell-plus
+             2 literal,
+         'plus jump,
+
+\ chars ( x -- n-chars ) size in address units of n-chars (no-op)
+0 header, chars  label 'chars
+               ret, \ no-op
+
+\ char+ ( addr -- addr ) add size of char to address (1+)
+0 header, char+  label 'char-plus
+     'one-plus jump,
+
+: var,
+          label
+     x pc cp,
+     14 y ldc, \ count this and following instructions
+    x x y add, \ point just beyond this code -- data field
+        x pushd,
+          ret, \ 8 bytes
+          here 2 + h ! ; \ 2 allot
+
+\ dp ( -- addr ) return address of dictionary pointer (variable h) (non-standard, common internal)
+var, 'dp \ initialized after dictionary (below)
+
+\ here ( -- addr ) current dictionary pointer address (dp @)
+0 header, here  label 'here
+           'dp call,
+        'fetch jump,
+
+\ allot ( n -- ) advance dictionary pointer (dp +!)
+0 header, allot  label 'allot
+           'dp call,
+   'plus-store jump,
+
+\ , ( x -- ) append x in newly reserved cell (here ! 1 cells allot)
+0 header, ,  label 'comma
+         'here call,
+        'store call,
+             1 literal,
+        'cells call,
+        'allot jump,
+
+\ c, ( x -- ) append x chars in newly reserved space (here c! 1 chars allot)
+0 header, ,  label 'c-comma
+         'here call,
+      'c-store call,
+             1 literal,
+        'chars call,
+        'allot jump,
+
 ( --- secondaries ------------------------------------------------------------ )
+
+\ 2! ( y x addr -- ) store x y at consecutive addresses (swap over ! cell+ !)
+0 header, 2!  label 'two-store
+         'swap call,
+         'over call,
+        'store call,
+    'cell-plus call,
+        'store jump,
+
+\ 2@ ( addr -- y x ) fetch pair of consecutive addresses (dup cell+ @ swap @)
+0 header, 2@  label 'two-fetch
+         'dupe call,
+    'cell-plus call,
+        'fetch call,
+         'swap call,
+        'fetch jump,
 
 \ xor ( y x -- result ) logical/bitwise exclusive or (2dup or -rot and invert and)
 0 header, xor  label 'xor
@@ -596,9 +686,9 @@ true warnings ! \ intentionally redefining (latest, header,)
      'two-to-r call,
                begin, ;
 
-: loop, ( C: addr -- ) \ end do-loop (immediate r> 1+ r@ over >r < if again then 2r> 2drop)
+: +loop, ( n -- ) ( C: addr -- ) \ end do-loop, add n to loop counter (immediate r> + r@ over >r < if again then 2r> 2drop)
        'r-from call, ( start )
-     'one-plus call,
+         'plus call,
       'r-fetch call,
          'over call,
          'to-r call,
@@ -608,6 +698,8 @@ true warnings ! \ intentionally redefining (latest, header,)
                then,
    'two-r-from call,
      'two-drop call, ;
+
+: loop, ( C: addr -- ) 1 literal,  +loop, ; \ end do-loop (immediate 1 +loop)
 
 \ i ( -- x ) ( R: x -- x ) copy innermost loop index (r@)
 0 header, i  label 'i-index
@@ -624,39 +716,26 @@ true warnings ! \ intentionally redefining (latest, header,)
      'two-to-r call, \ tricky, don't jump here!
                ret,
 
-( --- memory abstractions ---------------------------------------------------- )
-
-\ align ( -- ) reserve space to align data space pointer (no-op on RM16)
-0 header, align  label 'align
-               ret, \ no-op
-
-\ aligned ( addr -- addr ) align address (no-op on RM16)
-0 header, aligned  label 'aligned
-               ret, \ no-op
-
-\ cells ( x -- n-cells ) size in address units of n-cells (2*)
-0 header, cells  label 'cells
-     'two-star jump,
-
-\ cell+ ( addr -- addr ) add size of cell to address (2 +)
-0 header, cell+  label 'cell+
-             2 literal,
-         'plus jump,
-
-\ chars ( x -- n-chars ) size in address units of n-chars (no-op)
-0 header, chars  label 'chars
-               ret, \ no-op
-
-\ char+ ( addr -- addr ) add size of char to address (1+)
-0 header, char+  label 'char-plus
-     'one-plus jump,
+\ unloop ( -- ) ( R: y x -- ) remove loop parameters (2r> 2drop)
+0 header, unloop  label 'unloop
+   'two-r-from call,
+     'two-drop jump,
 
 ( --- interpreter ------------------------------------------------------------ )
 
+\ true ( -- true ) return true flag (-1 constant true)
+0 header, true  label 'true
+            -1 literal,
+               ret,
+
+\ false ( -- false ) return false flag (0 constant false)
+0 header, false  label 'false
+             0 literal,
+               ret,
+
 \ bl ( -- c ) space character value (32 constant bl)
 0 header, bl  label 'bl
-          32 x ldc,
-             x pushd,
+            32 literal,
                ret,
 
 \ space ( -- ) emit space character (bl emit)
@@ -672,4 +751,7 @@ true warnings ! \ intentionally redefining (latest, header,)
 ( --- end of dictionary ------------------------------------------------------ )
 
                then,
+ here memory - literal,
+           'dp call,
+        'store call, \ update dictionary pointer to compile-time position
           zero halt,

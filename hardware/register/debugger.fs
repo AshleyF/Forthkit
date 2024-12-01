@@ -17,11 +17,11 @@ label 'dot
               x out,
                 ret,
 
-label 'test
+label 'foo
             10 literal,
              0 literal,
                do,
-             7 literal,
+             9 literal,
              3 literal,
                do,
       'i-index call,
@@ -29,8 +29,18 @@ label 'test
       'j-index call,
           'dot call,
           'c-r call,
+            1 literal,
+              +loop,
               loop,
-              loop,
+          'bye call,
+
+label 'test
+         'here call,
+          'dot call,
+             7 literal,
+        'allot call,
+         'here call,
+          'dot call,
           'bye call,
 
 run
