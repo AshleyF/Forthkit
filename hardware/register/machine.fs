@@ -13,15 +13,14 @@ create registers 16 cells allot  registers 16 cells 0 fill
 : nybbles ( byte -- n2 n1 ) dup $f and swap 4 rshift ( $f and ) ; \ split byte into nybbles 
 : xyz ( x -- reg-x reg-y reg-z ) reg fetch-pc nybbles reg swap reg ;
 
-: mem ( reg -- addr ) @ memory + ; \ memory address pointed to by register
 : binop ( x op -- ) swap xyz >r @ swap @ rot execute >s r> ! ; \ execute binary operation ( y x -- )
 
 : step ( -- ) fetch-pc nybbles \ fetch instruction
   case
      0 of cr ." Halt " reg @ . quit endof                     \ halt(x) (halt with exit code x)
      1 of fetch-pc 8 >signed swap reg ! endof                 \ ldc x=v (load constant signed byte into x)
-     2 of xyz over mem s@ swap ! reg+! endof                  \ ld+ z<-[y] y+=x (load from memory and inc/dec pointer)
-     3 of xyz @ over mem s! reg+! endof                       \ st+ z->[y] y+=x (store to memory and inc/dec poniter)
+     2 of xyz over @ s@ swap ! reg+! endof                    \ ld+ z<-[y] y+=x (load from memory and inc/dec pointer)
+     3 of xyz @ over @ s! reg+! endof                         \ st+ z->[y] y+=x (store to memory and inc/dec poniter)
      4 of xyz rot @ 0= if swap @ swap ! else 2drop then endof \ cp? z=y if x=0 (conditional copy)
      5 of ['] + binop endof                                   \ add z=y+x (addition)
      6 of ['] - binop endof                                   \ sub z=y-x (subtraction)

@@ -4,11 +4,11 @@ variable h  memory h !
 
 false warnings ! \ intentionally redefining (here c, ,)
 
-: here h @ ;
-: c, ( c -- ) here c! 1 h +! ;
+: here h @ memory - ;
+: c, ( c -- ) h @ c! 1 h +! ;
 : , ( cc -- ) dup c, 8 rshift c, ; \ 16-bit little endian
-: s! ( val addr -- ) over 8 rshift over 1+ c! c! ; \ store 16-bit value at address
-: s@ ( addr -- val ) dup c@ swap 1+ c@ 8 lshift or ; \ fetch 16-bit value from address
+: s! ( val addr -- ) memory + over 8 rshift over 1+ c! c! ; \ store 16-bit value at address (relative to memory)
+: s@ ( addr -- val ) memory + dup c@ swap 1+ c@ 8 lshift or ; \ fetch 16-bit value from address (relative to memory)
 
 true warnings !
 
@@ -49,9 +49,9 @@ true warnings !
 
 ( --- assembler tools -------------------------------------------------------- )
 
-: label ( -- addr ) here memory - constant ; \ current address within memory buffer
+: label ( -- addr ) here constant ; \ current address within memory
 : branch, ( -- addr ) 0 jump,  here 2 - ; \ dummy jump, push pointer to address
-: then, ( addr -- ) here memory - swap s! ; \ patch jump to continue here (relative to memory buffer)
+: then, ( orig -- ) here swap s! ; \ patch jump to continue here (relative to memory)
 
 ( --- read/write blocks ------------------------------------------------------ )
 
@@ -71,4 +71,4 @@ true warnings !
   close-file throw ;
 
 : read-boot-block  ( -- ) 0 0 memory-size read-block ;
-: write-boot-block ( -- ) 0 0 here memory - write-block ;
+: write-boot-block ( -- ) 0 0 here write-block ;

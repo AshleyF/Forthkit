@@ -38,12 +38,17 @@ require assembler.fs
 
 ( --- control-flow ----------------------------------------------------------- )
 
-: if, ( C: -- addr ) x popd,  0 y ldv,  here 2 -  pc y x cp?, ; \ dummy branch on 0, push pointer to address
-: else, ( C: addr -- addr ) branch, swap then, ;  \ patch previous branch to here, dummy unconditionally branch over false block
+: if, ( C: -- orig ) x popd,  0 y ldv,  here 2 -  pc y x cp?, ; \ dummy branch on 0, push pointer to address
+: else, ( C: orig1 -- orig2 ) branch, swap then, ;  \ patch previous branch to here, dummy unconditionally branch over false block
+\ then, defined in assembler (patch jump to continue here)
 
-: begin, ( C: -- addr ) here memory - ;
-: again, ( C: addr -- ) jump, ;
-: until, ( C: addr -- ) if, s! ; \ branch on 0 to address
+: begin, ( C: -- dest ) here ; \ begin loop
+: again, ( C: dest -- ) jump, ; \ jump back to beginning
+: until, ( C: dest -- ) if, s! ; \ branch on 0 to address
+: while, ( C: dest -- orig dest ) if,  ;
+: repeat, ( C: orig dest -- ) ;
+
+\ begin ... while ... repeat
 
 ( --- dictionary ------------------------------------------------------------- )
 
@@ -54,7 +59,7 @@ variable latest  0 latest !
 : header, ( flag "<spaces>name" -- )
   latest @ \ link to current (soon to be previous) word
   here latest ! \ update latest to this word
-  memory - , \ append link, relative to memory buffer
+  memory - , \ append link, relative to memory
   parse-name \ ( flag addr len -- )
   rot over or c, \ append flag/len
   over + swap \ ( end start -- )
@@ -593,7 +598,7 @@ true warnings ! \ intentionally redefining (latest, header,)
     x x y add, \ point just beyond this code -- data field
         x pushd,
           ret, \ 8 bytes
-          here 2 + h ! ; \ 2 allot
+          2 h +! ; \ 2 allot
 
 \ dp ( -- addr ) return address of dictionary pointer (variable h) (non-standard, common internal)
 var, 'dp \ initialized after dictionary (below)
@@ -751,7 +756,7 @@ var, 'dp \ initialized after dictionary (below)
 ( --- end of dictionary ------------------------------------------------------ )
 
                then,
- here memory - literal,
+          here literal, \ update dictionary pointer to compile-time position
            'dp call,
-        'store call, \ update dictionary pointer to compile-time position
+        'store call,
           zero halt,

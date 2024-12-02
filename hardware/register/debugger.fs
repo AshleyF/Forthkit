@@ -8,7 +8,7 @@ require kernel.fs
 : run-word ( addr -- ) pc reg ! run ;
 : rw run-word ;
 
-here memory - . ." byte kernel"
+here . ." byte kernel"
 
 label 'dot
               x popd,
@@ -35,11 +35,14 @@ label 'foo
           'bye call,
 
 label 'test
-         'here call,
-          'dot call,
+             3 literal,
+               begin,
              7 literal,
-        'allot call,
-         'here call,
+          'dot call,
+         'dupe call,
+    'one-minus call,
+               until,
+             9 literal,
           'dot call,
           'bye call,
 
