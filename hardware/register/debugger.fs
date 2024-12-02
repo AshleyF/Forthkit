@@ -34,21 +34,29 @@ label 'foo
               loop,
           'bye call,
 
-label 'test
-             1 literal,
-               begin,
+label 'test \ 78598698719
              7 literal,
           'dot call,
-     'one-plus call,
-         'dupe call,
+             5 literal,
+             5 literal,
+               do,            \ false addr
+             8 literal,
           'dot call,
-         'dupe call,
-            8 literal,
-    'less-than call,
-               while,
+      'i-index call,
+          'dot call,
+      'i-index call,
              6 literal,
+       'equals call,
+               if,          \ false addr ifaddr
+             1 literal,
           'dot call,
-               repeat,
+               leave,       \ false baddr true addr ifaddr
+               then,
+             9 literal,
+          'dot call,
+               loop,
+             9 literal,
+          'dot call,
           'bye call,
 
 run

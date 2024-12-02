@@ -695,38 +695,56 @@ var, 'dp \ initialized after dictionary (below)
 \ <limit> <start> do ... loop
 \ <limit> <start> do ... <n> +loop
 \ <limit> <start> do ... unloop exit ... loop
-\ <limit> <start> do ... leave ... loop
-: do, ( limit start -- ) ( C: -- addr ) \ begin do-loop (immediate 2>r)
+\ <limit> <start> do ... if ... leave then ... loop
+: do, ( limit start -- ) ( C: -- false addr ) \ begin do-loop (immediate 2>r begin false)
+     'two-to-r call,
+               false \ no addresses to patch (initially)
+               begin, ;
+
+: ?do, ( limit start -- ) ( C: -- false addr true addr )
+     'two-dupe call,
+   'not-equals call,
+               false \ terminator for patching
+               if,
+               true  \ patch if to loop
      'two-to-r call,
                begin, ;
 
-: +loop, ( n -- ) ( C: addr -- ) \ end do-loop, add n to loop counter (immediate r> + r@ over >r < if again then 2r> 2drop)
-       'r-from call, ( start )
+: leave, ( C: -- addr true )
+               branch,
+               -rot true -rot ; \ patch to loop (swap under if address)
+
+: +loop, ( n -- ) ( C: ... flag addr -- ) \ end do-loop, add n to loop counter (immediate r> + r@ over >r < if again then 2r> 2drop)
+       'r-from call,
          'plus call,
       'r-fetch call,
          'over call,
          'to-r call,
     'less-than call,
                if,
-               swap again, \ swap if address
+               swap again,
                then,
+               begin while
+               patch,
+               repeat
    'two-r-from call,
      'two-drop call, ;
 
-: loop, ( C: addr -- ) 1 literal,  +loop, ; \ end do-loop (immediate 1 +loop)
+: loop, ( C: addr -- )
+             1 literal,
+               +loop, ; \ end do-loop (immediate 1 +loop)
 
-\ i ( -- x ) ( R: x -- x ) copy innermost loop index (r@)
+\ i ( -- x ) ( R: x -- x ) copy innermost loop index (2r@ drop)
 0 header, i  label 'i-index
-      'r-fetch jump,
+  'two-r-fetch call, \ including return from here
+         'drop jump,
 
-\ j ( -- x ) ( R: x -- x ) copy next outer loop index (2r> r> r@ swap >r -riot 2>r) (x r twelve add, x x ld, x pushd, ret,)
+\ j ( -- x ) ( R: x -- x ) copy next outer loop index (2r> 2r@ drop -rot 2>r) (x r twelve add, x x ld, x pushd, ret,)
 0 header, j  label 'j-index
-   'two-r-from call,
-       'r-from call,
-      'r-fetch call,
-         'swap call,
-         'to-r call,
-         '-rot call,
+   'two-r-from call, \ i this
+  'two-r-fetch call, \ i this j limit
+         'drop call, \ i this j
+         '-rot call, \ j i this
      'two-to-r call, \ tricky, don't jump here!
                ret,
 
