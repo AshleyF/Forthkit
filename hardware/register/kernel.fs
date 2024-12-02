@@ -36,19 +36,24 @@ require assembler.fs
 : call, ( addr -- ) pc pushr,  jump, ;    \ 6 bytes
 : ret, x popr,  x x four add,  pc x cp, ; \ 8 bytes (pc popr, would complicate calls)
 
-( --- control-flow ----------------------------------------------------------- )
+( --- primitive control-flow ------------------------------------------------- )
 
-: if, ( C: -- orig ) x popd,  0 y ldv,  here 2 -  pc y x cp?, ; \ dummy branch on 0, push pointer to address
+: 0branch, ( -- dest ) x popd,  0 y ldv,  here 2 -  pc y x cp?, ; \ dummy jump if 0 to address, push pointer to patch
+
+\ ... if ... then
+\ ... if ... else ... then
+: if, ( C: -- orig ) 0branch, ; \ dummy branch on 0, push pointer to address
+: then, ( orig -- ) patch, ; \ patch if/else to continue here
 : else, ( C: orig1 -- orig2 ) branch, swap then, ;  \ patch previous branch to here, dummy unconditionally branch over false block
-\ then, defined in assembler (patch jump to continue here)
 
+\ begin ... again
+\ begin ... until
+\ begin ... while ... repeat
 : begin, ( C: -- dest ) here ; \ begin loop
 : again, ( C: dest -- ) jump, ; \ jump back to beginning
-: until, ( C: dest -- ) if, s! ; \ branch on 0 to address
-: while, ( C: dest -- orig dest ) if,  ;
-: repeat, ( C: orig dest -- ) ;
-
-\ begin ... while ... repeat
+: until, ( C: dest -- ) 0branch, s! ; \ branch on 0 to address
+: while, ( C: dest -- orig dest ) 0branch, swap ; \ continue while condition met (0= if), 
+: repeat, ( C: orig dest -- ) again, here swap s! ; \ jump back to beginning, patch while to here
 
 ( --- dictionary ------------------------------------------------------------- )
 
@@ -687,7 +692,11 @@ var, 'dp \ initialized after dictionary (below)
 
 ( --- secondary control-flow ------------------------------------------------- )
 
-: do, ( C: -- addr ) \ begin do-loop (immediate 2>r)
+\ <limit> <start> do ... loop
+\ <limit> <start> do ... <n> +loop
+\ <limit> <start> do ... unloop exit ... loop
+\ <limit> <start> do ... leave ... loop
+: do, ( limit start -- ) ( C: -- addr ) \ begin do-loop (immediate 2>r)
      'two-to-r call,
                begin, ;
 
@@ -755,7 +764,7 @@ var, 'dp \ initialized after dictionary (below)
 
 ( --- end of dictionary ------------------------------------------------------ )
 
-               then,
+               patch,
           here literal, \ update dictionary pointer to compile-time position
            'dp call,
         'store call,

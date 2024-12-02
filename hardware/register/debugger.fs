@@ -35,15 +35,20 @@ label 'foo
           'bye call,
 
 label 'test
-             3 literal,
+             1 literal,
                begin,
              7 literal,
           'dot call,
+     'one-plus call,
          'dupe call,
-    'one-minus call,
-               until,
-             9 literal,
           'dot call,
+         'dupe call,
+            8 literal,
+    'less-than call,
+               while,
+             6 literal,
+          'dot call,
+               repeat,
           'bye call,
 
 run

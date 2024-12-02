@@ -4,16 +4,12 @@ create registers 16 cells allot  registers 16 cells 0 fill
 
 : bit ( n -- mask ) 1 swap lshift ; \ make nth-bit mask (e.g. 15 -> $8000)
 : >signed ( val bits -- signed ) 2dup 1- bit and 0<> if bit 1- invert or else drop then ; \ signed n-bits
-: >s ( val -- signed ) 16 >signed ;
-
 : reg ( i -- addr ) cells registers + ; \ register address
-: reg+! ( v reg -- ) swap @ over +! dup @ >s swap ! ; \ +! while ensuring signed 16-bit
-
+: reg+! ( v reg -- ) swap @ over +! dup @ 16 >signed swap ! ; \ +! while ensuring signed 16-bit
 : fetch-pc registers @ memory + c@ 1 registers +! ; \ fetch [pc++]
 : nybbles ( byte -- n2 n1 ) dup $f and swap 4 rshift ( $f and ) ; \ split byte into nybbles 
 : xyz ( x -- reg-x reg-y reg-z ) reg fetch-pc nybbles reg swap reg ;
-
-: binop ( x op -- ) swap xyz >r @ swap @ rot execute >s r> ! ; \ execute binary operation ( y x -- )
+: binop ( x op -- ) swap xyz >r @ swap @ rot execute 16 >signed r> ! ; \ execute binary operation ( y x -- )
 
 : step ( -- ) fetch-pc nybbles \ fetch instruction
   case

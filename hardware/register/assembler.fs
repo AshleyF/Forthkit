@@ -50,8 +50,8 @@ true warnings !
 ( --- assembler tools -------------------------------------------------------- )
 
 : label ( -- addr ) here constant ; \ current address within memory
-: branch, ( -- addr ) 0 jump,  here 2 - ; \ dummy jump, push pointer to address
-: then, ( orig -- ) here swap s! ; \ patch jump to continue here (relative to memory)
+: branch, ( -- dest ) 0 jump,  here 2 - ; \ dummy jump, push pointer to patch
+: patch, ( orig -- ) here swap s! ; \ patch jump to continue here
 
 ( --- read/write blocks ------------------------------------------------------ )
 
