@@ -28,7 +28,6 @@
 - [`.(](https://forth-standard.org/standard/`core/Dotp) (extension)
 - [`U.`](https://forth-standard.org/standard/core/Ud) (base @ /mod ?dup if recurse then dup 10 < if '0' else 10 - 'a' then + emit space)
 - [`ACCEPT`](https://forth-standard.org/standard/core/ACCEPT)
-- [`TYPE`](https://forth-standard.org/standard/core/TYPE)
 - [`U<`](https://forth-standard.org/standard/core/Uless)
 - [`U>`](https://forth-standard.org/standard/core/Umore) (extension)
 - [`RECURSE`](https://forth-standard.org/standard/core/RECURSE) (immediate latest @ >cfa ,)

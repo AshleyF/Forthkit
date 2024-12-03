@@ -17,46 +17,20 @@ label 'dot
               x out,
                 ret,
 
-label 'foo
-            10 literal,
-             0 literal,
-               do,
-             9 literal,
-             3 literal,
-               do,
-      'i-index call,
-          'dot call,
-      'j-index call,
-          'dot call,
-          'c-r call,
-            1 literal,
-              +loop,
-              loop,
-          'bye call,
-
-label 'test \ 78598698719
-             7 literal,
-          'dot call,
-             5 literal,
-             5 literal,
-               do,            \ false addr
-             8 literal,
-          'dot call,
-      'i-index call,
-          'dot call,
-      'i-index call,
-             6 literal,
-       'equals call,
-               if,          \ false addr ifaddr
-             1 literal,
-          'dot call,
-               leave,       \ false baddr true addr ifaddr
-               then,
-             9 literal,
-          'dot call,
-               loop,
-             9 literal,
-          'dot call,
+label 'hello
+         'here call,
+           104 literal, \ h
+      'c-comma call,
+           101 literal, \ e
+      'c-comma call,
+           108 literal, \ l
+      'c-comma call,
+           108 literal, \ l
+      'c-comma call,
+           111 literal, \ o
+      'c-comma call,
+             5 literal, \ length
+         'type call,
           'bye call,
 
 run

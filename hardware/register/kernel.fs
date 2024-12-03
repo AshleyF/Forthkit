@@ -627,7 +627,7 @@ var, 'dp \ initialized after dictionary (below)
         'allot jump,
 
 \ c, ( x -- ) append x chars in newly reserved space (here c! 1 chars allot)
-0 header, ,  label 'c-comma
+0 header, c,  label 'c-comma
          'here call,
       'c-store call,
              1 literal,
@@ -779,6 +779,19 @@ var, 'dp \ initialized after dictionary (below)
 0 header, cr  label 'c-r
             10 literal,
          'emit jump,
+
+\ type ( addr len -- ) display the character string (0 max 0 ?do dup c@ emit char+ loop drop)
+0 header, type  label 'type
+             0 literal,
+          'max call,
+             0 literal,
+               ?do,
+         'dupe call,
+      'c-fetch call,
+         'emit call,
+    'char-plus call,
+               loop,
+         'drop jump,
 
 ( --- end of dictionary ------------------------------------------------------ )
 
