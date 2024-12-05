@@ -34,7 +34,7 @@ require assembler.fs
 : popr,  ( reg -- ) r pop, ;
 
 : call, ( addr -- ) pc pushr,  jump, ;    \ 6 bytes
-: ret, x popr,  x x four add,  pc x cp, ; \ 8 bytes (pc popr, would complicate calls)
+: ret, x popr,  x x four add,  pc x cp, ; \ 6 bytes (pc popr, would complicate calls)
 
 ( --- primitive control-flow ------------------------------------------------- )
 
@@ -599,10 +599,10 @@ true warnings ! \ intentionally redefining (latest, header,)
 : var,
           label
      x pc cp,
-     14 y ldc, \ count this and following instructions
-    x x y add, \ point just beyond this code -- data field
-        x pushd,
-          ret, \ 8 bytes
+     14 y ldc,     \ count this and following instructions
+    x x y add,     \ point just beyond this code -- data field
+        x pushd,   \ 4 bytes
+          ret,     \ 6 bytes
           2 h +! ; \ 2 allot
 
 \ dp ( -- addr ) return address of dictionary pointer (variable h) (non-standard, common internal)
@@ -792,6 +792,56 @@ var, 'dp \ initialized after dictionary (below)
     'char-plus call,
                loop,
          'drop jump,
+
+\ pad ( -- addr ) address of transient region for intermediate processing
+0 header, pad  label 'pad
+         'here call,
+          1024 literal, \ arbitrary distance away
+         'plus jump,
+
+\ np ( -- addr ) return address of pictured numeric output pointer (non-standard)
+var, 'np \ initialized after dictionary (below)
+
+\ <# ( -- ) initialize pictured numeric output (pad 64 + np !)
+0 header, hold  label 'less-number-sign
+          'pad call,
+            64 literal, \ arbitrary distance away
+         'plus call,
+           'np call,
+        'store jump,
+
+\ hold ( char -- ) add char to beginning of pictured numeric output (np -1 over +! c!)
+0 header, hold  label 'hold
+           'np call,
+            -1 literal,
+         'over call,
+   'plus-store call,
+        'fetch call,
+      'c-store jump,
+
+\ holds ( addr len -- ) add string to beginning of pictured numeric output (begin dup while 1- 2dup + c@ hold repeat 2drop)
+0 header, holds  label 'holds
+               begin,
+         'dupe call,
+               while,
+    'one-minus call,
+     'two-dupe call,
+         'plus call,
+      'c-fetch call,
+         'hold call,
+               repeat,
+     'two-drop jump,
+
+\ #> ( xd -- addr len ) make pictured numeric output string available (np @ pad 64 + over -)
+0 header, #>  label 'number-sign-greater
+     'two-drop call,
+           'np call,
+        'fetch call,
+          'pad call,
+            64 literal, \ arbitrary distance away
+         'plus call,
+         'over call,
+        'minus jump,
 
 ( --- end of dictionary ------------------------------------------------------ )
 
