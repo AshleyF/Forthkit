@@ -33,56 +33,17 @@ label 'hello
              'type call,
               'bye call,
 
-label 'foo
--123 literal,
-'dot call,
-              'bye call,
-
-label 'baz
-              'pad call,
-                64 literal, \ arbitrary distance away
-             'plus call,
-               'np call,
-            'store call,
-               104 literal, \ h
-'dupe call,
- 'dot call,
-               'np call,
-            'fetch call,
-'dupe call,
- 'dot call,
-          'c-store call,
-              'bye call,
-
 label 'test
-               123 literal,
-                 0 literal,
-'less-number-sign call,
-               111 literal, \ o
-             'hold call,
-               108 literal, \ l
-             'hold call,
-                -7 literal,
-             'sign call,
-               108 literal, \ l
-             'hold call,
-               101 literal, \ e
-             'hold call,
-               104 literal, \ h
-             'hold call,
-                33 literal, \ !
-             'hold call,
-'number-sign-s call,
-'number-sign-gtr call,
-
-'two-dupe call,
-'less-number-sign call,
-            'holds call,
-                32 literal,
-             'hold call,
-            'holds call,
-'number-sign-gtr call,
-             'type call,
+              -123 literal,
+              'dot call,
+              -123 literal,
+            'u-dot call,
+               682 literal,
+           'binary call,
+              'dot call,
+           'unused call,
+          'decimal call,
+              'dot call,
               'bye call,
 
 run

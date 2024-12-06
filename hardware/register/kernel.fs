@@ -418,10 +418,9 @@ true warnings ! \ intentionally redefining (latest, header,)
 
 \ depth ( -- depth ) data stack depth
 0 header, depth  label 'depth
-     memory-size x ldv,
+ memory-size 2 + x ldv,
              x x d sub,
           x x four div,
-           x x one add,
                  x pushd,
                    ret,
 
@@ -612,6 +611,12 @@ var, 'dp \ initialized after dictionary (below)
 0 header, here  label 'here
                'dp call,
             'fetch jump,
+
+\ unused ( -- remaining ) dictionary space remaining
+0 header, unused  label 'unused
+       memory-size literal,
+             'here call,
+            'minus jump, \ TODO: consider stack space?
 
 \ allot ( n -- ) advance dictionary pointer (dp +!)
 0 header, allot  label 'allot
@@ -905,7 +910,7 @@ var, 'np \ initialized after dictionary (below)
              'over call,
             'minus jump,
 
-\ . ( n -- ) display in free field format (dup abs 0 <# #s rot sign #> type space)
+\ . ( n -- ) display value in free field format (dup abs 0 <# #s rot sign #> type space)
 0 header, .  label 'dot
              'dupe call,
               'abs call,
@@ -917,6 +922,35 @@ var, 'np \ initialized after dictionary (below)
   'number-sign-gtr call,
              'type call,
             'space jump,
+
+\ u. ( u -- ) display unsigned value in free field format (0 <# #s #> type space)
+0 header, u.  label 'u-dot
+                 0 literal,
+ 'less-number-sign call,
+    'number-sign-s call,
+  'number-sign-gtr call,
+             'type call,
+            'space jump,
+
+\ .s ( -- ) display values on the stack non-destructively (depth dup 0 ?do dup i - pick . loop drop)
+0 header, .s  label 'dot-s
+            'depth call,
+             'dupe call,
+                 0 literal,
+                   ?do,
+             'dupe call,
+          'i-index call,
+            'minus call,
+             'pick call,
+              'dot call,
+                   loop,
+             'drop call,
+                   ret,
+
+\ ? ( addr -- ) display value stored at address (@ .)
+0 header, ?  label 'question
+            'fetch call,
+              'dot jump,
 
 ( --- end of dictionary ------------------------------------------------------ )
 
