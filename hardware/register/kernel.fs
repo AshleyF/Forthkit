@@ -808,7 +808,7 @@ var, 'dp \ initialized after dictionary (below)
 var, 'np \ initialized after dictionary (below)
 
 \ <# ( -- ) initialize pictured numeric output (pad 64 + np !)
-0 header, hold  label 'less-number-sign
+0 header, hold  label 'num-start
               'pad call,
                 64 literal, \ arbitrary distance away
              'plus call,
@@ -865,7 +865,7 @@ var, 'np \ initialized after dictionary (below)
             'store jump,
 
 \ # ( ud -- ud ) prepend least significant digit to pictured numeric output, return ud/base
-0 header, #  label 'number-sign
+0 header, #  label 'num
              'swap call, \ TODO: support double numbers
              'base call,
             'fetch call,
@@ -878,11 +878,11 @@ var, 'np \ initialized after dictionary (below)
              'swap jump, \ TODO: support double numbers
 
 \ #s ( ud -- ud ) convert all digits using # (appends at least 0)
-0 header, #s  label 'number-sign-s
+0 header, #s  label 'num-s
              'swap call, \ TODO: support double numbers
                    begin,
              'swap call, \ TODO: support double numbers
-      'number-sign call, \ note: at least once even if zero
+              'num call, \ note: at least once even if zero
              'swap call, \ TODO: support double numbers
              'dupe call,
   'zero-not-equals call,
@@ -900,7 +900,7 @@ var, 'np \ initialized after dictionary (below)
                    ret,
 
 \ #> ( xd -- addr len ) make pictured numeric output string available (np @ pad 64 + over -)
-0 header, #>  label 'number-sign-gtr \ greater
+0 header, #>  label 'num-end \ greater
          'two-drop call,
                'np call,
             'fetch call,
@@ -915,20 +915,20 @@ var, 'np \ initialized after dictionary (below)
              'dupe call,
               'abs call,
                  0 literal,
- 'less-number-sign call,
-    'number-sign-s call,
+        'num-start call,
+            'num-s call,
               'rot call,
              'sign call,
-  'number-sign-gtr call,
+          'num-end call,
              'type call,
             'space jump,
 
 \ u. ( u -- ) display unsigned value in free field format (0 <# #s #> type space)
 0 header, u.  label 'u-dot
                  0 literal,
- 'less-number-sign call,
-    'number-sign-s call,
-  'number-sign-gtr call,
+        'num-start call,
+            'num-s call,
+          'num-end call,
              'type call,
             'space jump,
 

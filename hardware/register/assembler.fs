@@ -1,4 +1,4 @@
-$8000 constant memory-size
+$10000 constant memory-size
 create memory memory-size allot  memory memory-size 0 fill
 variable h  memory h !
 

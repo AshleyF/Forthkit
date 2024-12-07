@@ -1,13 +1,18 @@
 #include <stdio.h>
 
-short reg[16] = {};
-unsigned char mem[0x8000];
+unsigned short reg[0xf] = {};
+unsigned char mem[0x10000];
 
-void readBlock(short block, short maxsize, short address)
+FILE* openBlock(unsigned short block, const char * mode)
 {
-    char filename[16];
+    char filename[0xf];
     snprintf(filename, sizeof(filename), "block%d.bin", block);
-    FILE *file = fopen(filename, "r");
+    return fopen(filename, mode);
+}
+
+void readBlock(unsigned short block, long maxsize, unsigned short address)
+{
+    FILE *file = openBlock(block, "r");
     fseek(file, 0, SEEK_END);
     long size = ftell(file);
     fseek(file, 0, SEEK_SET);
@@ -18,11 +23,9 @@ void readBlock(short block, short maxsize, short address)
     fclose(file);
 }
 
-void writeBlock(short block, short size, short address)
+void writeBlock(unsigned short block, long size, unsigned short address)
 {
-    char filename[16];
-    snprintf(filename, sizeof(filename), "block%d.bin", block);
-    FILE *file = fopen(filename, "w");
+    FILE *file = openBlock(block, "w");
     if (!file || !fwrite(mem + address, 1, size, file))
     {
         printf("Could not write block file.\n");
@@ -36,7 +39,7 @@ void writeBlock(short block, short size, short address)
 
 int main(void)
 {
-    readBlock(0, 0x7FFF, 0);
+    readBlock(0, sizeof(mem), 0);
     while (1)
     {
         unsigned char c = NEXT;
@@ -47,61 +50,23 @@ int main(void)
         unsigned char z = LOW(j);
         switch(i)
         {
-            case 0: // HALT
-                return reg[x];
-            case 1: // LDC
-                reg[x] = (signed char)((y << 4) | z);
-                break;
-            case 2: // LD+
-                reg[z] = (mem[reg[y]] | (mem[reg[y] + 1] << 8));
-                reg[y] += reg[x];
-                break;
-            case 3: // ST+
-                mem[reg[z]] = reg[y]; // truncated to byte
-                mem[reg[z] + 1] = (reg[y] >> 8); // truncated to byte
-                reg[z] += reg[x];
-                break;
-            case 4: // CP?
-                if (reg[x] == 0) reg[z] = reg[y];
-                break;
-            case 5: // ADD
-                reg[z] = reg[y] + reg[x];
-                break;
-            case 6: // SUB
-                reg[z] = reg[y] - reg[x];
-                break;
-            case 7: // MUL
-                reg[z] = reg[y] * reg[x];
-                break;
-            case 8: // DIV
-                reg[z] = reg[y] / reg[x];
-                break;
-            case 9: // NAND
-                reg[z] = ~(reg[y] & reg[x]);
-                break;
-            case 10: // SHL
-                reg[z] = reg[y] << reg[x];
-                break;
-            case 11: // SHR
-                reg[z] = (unsigned short)reg[y] >> reg[x]; // without sign extension
-                break;
-            case 12: // IN
-                reg[0]--;
-                reg[x] = getc(stdin);
-                break;
-            case 13: // OUT
-                reg[0]--;
-                putc(reg[x], stdout);
-                break;
-            case 14: // READ
-                readBlock(reg[z], reg[y], reg[x]);
-                break;
-            case 15: // WRITE
-                writeBlock(reg[z], reg[y], reg[x]);
-                break;
-            default:
-                printf("Invalid instruction! (%i)\n", i);
-                return 1;
+            case 0: return reg[x]; // HALT
+            case 1: reg[x] = (signed char)((y << 4) | z); break; // LDC
+            case 2: reg[z] = (mem[reg[y]] | (mem[reg[y] + 1] << 8)); reg[y] += reg[x]; break; // LD+
+            case 3: mem[reg[y]] = reg[z]; mem[reg[y] + 1] = (reg[z] >> 8); reg[y] += reg[x]; break; // ST+
+            case 4: if (reg[x] == 0) reg[z] = reg[y]; break; // CP?
+            case 5: reg[z] = reg[y] + reg[x]; break; // ADD
+            case 6: reg[z] = reg[y] - reg[x]; break; // SUB
+            case 7: reg[z] = reg[y] * reg[x]; break; // MUL
+            case 8: reg[z] = reg[y] / reg[x]; break; // DIV
+            case 9: reg[z] = ~(reg[y] & reg[x]); break; // NAND
+            case 10: reg[z] = reg[y] << reg[x]; break; // SHL
+            case 11: reg[z] = (unsigned short)reg[y] >> reg[x]; break; // SHR
+            case 12: reg[0]--; reg[x] = getc(stdin); break; // IN
+            case 13: reg[0]--; putc(reg[x], stdout); break; // OUT
+            case 14: readBlock(reg[z], reg[y], reg[x]); break; // READ
+            case 15: writeBlock(reg[z], reg[y], reg[x]); break; // WRITE
+            default: printf("Invalid instruction! (%i)\n", i); return 1;
         }
     }
 }
