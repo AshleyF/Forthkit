@@ -18,32 +18,32 @@ here . ." byte kernel"
 \                    ret,
 
 label 'hello
-             'here call,
+            ' here call,
                104 literal, \ h
-          'c-comma call,
+              ' c, call,
                101 literal, \ e
-          'c-comma call,
+              ' c, call,
                108 literal, \ l
-          'c-comma call,
+              ' c, call,
                108 literal, \ l
-          'c-comma call,
+              ' c, call,
                111 literal, \ o
-          'c-comma call,
+              ' c, call,
                  5 literal, \ length
-             'type call,
-              'bye call,
+            ' type call,
+             ' bye call,
 
 label 'test
               -123 literal,
-              'dot call,
+               ' . call,
               -123 literal,
-            'u-dot call,
+              ' u. call,
                682 literal,
-           'binary call,
-              'dot call,
-           'unused call,
-          'decimal call,
-              'dot call,
-              'bye call,
+          ' binary call,
+               ' . call,
+          ' unused call,
+         ' decimal call,
+               ' . call,
+             ' bye call,
 
 run

@@ -1,6 +1,6 @@
 require assembler.fs \ memory
 
-create registers 16 cells allot  registers 16 cells 0 fill
+create registers 16 cells allot  registers 16 cells erase
 
 : 16bit ( n -- n16 ) $ffff and ;
 : reg ( i -- addr ) cells registers + ; \ register address
@@ -33,6 +33,6 @@ create registers 16 cells allot  registers 16 cells 0 fill
 : steps ( n -- ) 0 do step loop ;
 : run begin step again ;
 
-: soft-reset ( -- ) registers 16 cells 0 fill ; \ reset registers, memory, h
-: hard-reset ( -- ) soft-reset memory memory-size 0 fill memory h ! ; \ reset registers, memory, h
+: soft-reset ( -- ) registers 16 cells erase ; \ reset registers, memory, h
+: hard-reset ( -- ) soft-reset memory memory-size erase memory h ! ; \ reset registers, memory, h
 : reboot ( -- ) hard-reset read-boot-block run ; \ reboot from block0 image
