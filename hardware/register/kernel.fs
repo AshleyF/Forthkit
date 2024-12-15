@@ -71,31 +71,14 @@ variable latest  0 latest !
   do i c@ c, loop ; \ append name
 
 : '
-  latest @ parse-name \ link find len
+  bl word latest @ \ ( find link -- )
   begin
-    2 pick \ link find len link
-    memory + 3 + dup 1- c@ $7f and \ link find len word len
-    2over 2over \ link find len word len find len word len
-    compare 0= \ link find len word len eq
-    if \ link find len word len
-      + memory - \ link find len addr
-      swap drop \ link find addr
-      -rot 2drop \ addr
-      exit
-    then
-    2drop \ link find len
-    rot \ find len link
-    s@ \ find len next
-    dup 0=
-    if
-      -rot \ next find len
-      ." Word not found: "
-      type \ next
-      cr
-      exit
-    then
-    -rot \ next find len
+    2dup memory + 3 + dup 1- c@ $7f and \ get name/len
+    rot count 2over compare 0= if + memory - -rot 2drop exit then \ return xt if names match
+    2drop s@ dup 0= if ." Word not found: " drop count type cr exit then \ follow link, until end
   again ;
+
+: ['] ' postpone literal ; immediate
 
 true warnings ! \ intentionally redefining (latest, header, ')
 
@@ -104,14 +87,14 @@ true warnings ! \ intentionally redefining (latest, header, ')
                branch, \ skip dictionary
 
 \ (bye) ( code -- ) halt machine with return code (non-standard)
-0 header, bye
+0 header, (bye)
                  x popd,
                  x halt,
 
 \ bye ( -- ) halt machine
 0 header, bye
               zero pushd,
-             ' bye jump,
+           ' (bye) jump,
 
 \ @ ( addr -- ) fetch 16-bit value
 0 header, @
@@ -729,17 +712,17 @@ var, dp \ initialized after dictionary (below)
 \ <limit> <start> do ... unloop exit ... loop
 \ <limit> <start> do ... if ... leave then ... loop
 : do, ( limit start -- ) ( C: -- false addr ) \ begin do-loop (immediate 2>r begin false)
- [ ' 2>r ] literal call,
+           ['] 2>r call,
                    false \ no addresses to patch (initially)
                    begin, ;
 
 : ?do, ( limit start -- ) ( C: -- false addr true addr )
-[ ' 2dup ] literal call,
-  [ ' <> ] literal call,
+          ['] 2dup call,
+            ['] <> call,
                    false \ terminator for patching
                    if,
                    true  \ patch if to loop
- [ ' 2>r ] literal call,
+           ['] 2>r call,
                    begin, ;
 
 : leave, ( C: -- addr true )
@@ -747,20 +730,20 @@ var, dp \ initialized after dictionary (below)
                    -rot true -rot ; \ patch to loop (swap under if address)
 
 : +loop, ( n -- ) ( C: ... flag addr -- ) \ end do-loop, add n to loop counter (immediate r> + r@ over >r < if again then 2r> 2drop)
-   [ ' r> ] literal call,
-    [ ' + ] literal call,
-   [ ' r@ ] literal call,
- [ ' over ] literal call,
-   [ ' >r ] literal call,
-    [ ' < ] literal call,
+             ['] r> call,
+              ['] + call,
+             ['] r@ call,
+           ['] over call,
+             ['] >r call,
+              ['] < call,
                     if,
                     swap again,
                     then,
                     begin while
                     patch,
                     repeat
-  [ ' 2r> ] literal call,
-[ ' 2drop ] literal call, ;
+            ['] 2r> call,
+          ['] 2drop call, ;
 
 : loop, ( C: addr -- )
                  1 literal,
@@ -937,11 +920,16 @@ var, base
             ' over call,
                ' - jump,
 
-\ . ( n -- ) display value in free field format (dup abs 0 <# #s rot sign #> type space)
+\ s>d ( n -- d ) convert number to double-cell
+0 header, s>d
+                 0 literal,
+                   ret,
+
+\ . ( n -- ) display value in free field format (dup abs s>d <# #s rot sign #> type space)
 0 header, .
              ' dup call,
              ' abs call,
-                 0 literal,
+             ' s>d call,
               ' <# call,
               ' #s call,
              ' rot call,
