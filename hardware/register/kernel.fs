@@ -651,10 +651,9 @@ var, dp \ initialized after dictionary (below)
 
 ( --- secondaries ------------------------------------------------------------ )
 
-\ 2! ( y x addr -- ) store x y at consecutive addresses (swap over ! cell+ !)
+\ 2! ( y x addr -- ) store x y at consecutive addresses (tuck ! cell+ !)
 0 header, 2!
-            ' swap call,
-            ' over call,
+            ' tuck call,
                ' ! call,
            ' cell+ call,
                ' ! jump,
@@ -763,9 +762,12 @@ var, dp \ initialized after dictionary (below)
              ' 2>r call, \ tricky, don't jump here!
                    ret,
 
-\ unloop ( -- ) ( R: y x -- ) remove loop parameters (2r> 2drop)
+\ unloop ( -- ) ( R: y x -- ) remove loop parameters (r> 2r> rot >r 2drop)
 0 header, unloop
-             ' 2r> call,
+              ' r> call, \ this return address
+             ' 2r> call, \ loop parameters
+             ' rot call,
+              ' >r call, \ replace this return address
            ' 2drop jump,
 
 ( --- interpreter ------------------------------------------------------------ )
@@ -966,6 +968,106 @@ var, base
 0 header, ?
                ' @ call,
                ' . jump,
+
+( --- interpreter ------------------------------------------------------------ )
+
+\ source ( -- c-addr u )
+0 header, source
+memory-size $500 - literal, \ $ff bytes above stacks
+               $ff literal, \ size ($400 bytes for stacks/$ff elements each)
+                   ret,
+\ >in offset to parse area within input buffer
+var, >in
+
+\ refill ( -- flag ) fill input buffer from input (TODO: support evaluate strings)
+0 header, refill
+          ' source call,
+            ' drop call, \ TODO: bounds check
+                   begin,
+             ' key call,
+             ' dup call,
+                13 literal,
+              ' <> call,
+                   while,
+            ' over call,
+               ' ! call,
+              ' 1+ call,
+                   repeat,
+            ' drop call,
+                 0 literal,
+             ' >in call,
+               ' ! call,
+            ' true jump,
+
+\ parse ( char "ccc<char>" -- c-addr u ) parse ccc delimited by char
+0 header, parse
+          ' source call, \ char c-addr u
+             ' >in call, \ char c-addr u in
+               ' @ call, \ char c-addr u in
+             ' rot call, \ char u in c-addr
+               ' + call, \ char u start
+            ' tuck call, \ char start u start
+               ' + call, \ char start end
+            ' over call, \ char start end start
+                   ?do,  \ char start
+            ' over call, \ char start char
+               ' i call, \ char start char i
+              ' c@ call, \ char start char c
+            ' over call, \ char start char c char
+               $20 literal,
+               ' = call, \ char start char c sp?
+                   if,   \ char start char c
+              ' 1- call,
+               ' > call, \ char start c<=$20
+                   else,
+               ' = call, \ char start =?
+                   then,
+                   if,
+             ' nip call, \ start
+               ' i call, \ start i
+            ' over call, \ start i start
+               ' - call, \ start len
+             ' dup call, \ start len len
+              ' 1+ call, \ start len len+
+             ' >in call, \ start len in
+              ' +! call, \ start len
+          ' unloop call,
+            ' exit call,
+                   then,
+                   loop,
+             ' nip call, \ start
+          ' source call, \ start c-addr u
+             ' nip call, \ start u
+            ' over call, \ start u start
+               ' + call, \ start end
+            ' over call, \ start end start
+               ' - call, \ start len
+                   ret,
+
+\ parse-name ( "<spaces>name<space>" -- c-addr u ) skip leading space and parse name delimited by space
+0 header, parse-name
+          ' source call,
+             ' >in call,
+               ' @ call,
+             ' rot call,
+               ' + call,
+            ' tuck call,
+               ' + call,
+            ' swap call,
+                   ?do,
+               ' i call,
+              ' c@ call,
+               $20 literal,
+               ' > call,
+                   if,
+                   leave,
+                   then,
+                 1 literal,
+             ' >in call,
+              ' +! call,
+                   loop,
+               $20 literal,
+           ' parse jump,
 
 ( --- end of dictionary ------------------------------------------------------ )
 

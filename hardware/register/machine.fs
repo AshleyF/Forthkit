@@ -24,7 +24,7 @@ create registers 16 cells allot  registers 16 cells erase
      9 of [: and invert ;] binop endof                           \ nand z=y nand x (not-and)
     10 of ['] lshift binop endof                                 \ shl z=y<<x (bitwise shift-left)
     11 of [: swap 16bit swap rshift ;] binop endof               \ shr z=y>>x (bitwise shift-right)
-    12 of key swap reg s! endof                                  \ in x=getc() (read from console)
+    12 of key dup emit swap reg ! endof                          \ in x=getc() (read from console)
     13 of reg @ emit endof                                       \ out putc(x) (write to console)
     14 of xyz @ rot @ rot @ read-block endof                     \ read(z,y,x)  (file z of size y -> address x)
     15 of xyz @ rot @ rot @ write-block endof                    \ write(z,y,x) (file z of size y <- address x)
