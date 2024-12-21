@@ -33,7 +33,7 @@ label 'hello
             ' type call,
              ' bye call,
 
-label 'test
+label 'parse
               -123 literal,
                ' . call,
               -123 literal,
@@ -45,9 +45,10 @@ label 'test
          ' decimal call,
                ' . call,
           ' refill call,
+            ' drop call,
              \  $20 literal,
             \ char x literal,
-           ' parse-name call,
+      ' parse-name call,
 ' cr call,
 ' cr call,
 ' 2dup call,
@@ -59,7 +60,7 @@ label 'test
 ' type call,
                \ $20 literal,
             \ char x literal,
-           ' parse-name call,
+      ' parse-name call,
 ' cr call,
 ' cr call,
 ' 2dup call,
@@ -69,6 +70,24 @@ label 'test
 ' @ call,
 ' u. call,
 ' type call,
+             ' bye call,
+
+
+label 'test
+7 literal,
+42 literal,
+          ' refill call,
+            ' drop call,
+               ' ' call,
+         ' execute call,
+               ' ' call,
+         ' execute call,
+               ' ' call,
+         ' execute call,
+               ' ' call,
+         ' execute call,
+               ' ' call,
+         ' execute call,
              ' bye call,
 
 run

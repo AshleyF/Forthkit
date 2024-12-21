@@ -86,6 +86,11 @@ true warnings ! \ intentionally redefining (latest, header, ')
 
                branch, \ skip dictionary
 
+\ execute ( i * x xt -- j * x ) perform the semantics identified by xt
+0 header, execute
+                 x popd,
+              pc x cp,
+
 \ (bye) ( code -- ) halt machine with return code (non-standard)
 0 header, (bye)
                  x popd,
@@ -976,6 +981,7 @@ var, base
 memory-size $500 - literal, \ $ff bytes above stacks
                $ff literal, \ size ($400 bytes for stacks/$ff elements each)
                    ret,
+
 \ >in offset to parse area within input buffer
 var, >in
 
@@ -993,7 +999,7 @@ var, >in
                ' ! call,
               ' 1+ call,
                    repeat,
-            ' drop call,
+           ' 2drop call,
                  0 literal,
              ' >in call,
                ' ! call,
@@ -1014,7 +1020,7 @@ var, >in
                ' i call, \ char start char i
               ' c@ call, \ char start char c
             ' over call, \ char start char c char
-               $20 literal,
+              ' bl call,
                ' = call, \ char start char c sp?
                    if,   \ char start char c
               ' 1- call,
@@ -1041,39 +1047,184 @@ var, >in
             ' over call, \ start u start
                ' + call, \ start end
             ' over call, \ start end start
-               ' - call, \ start len
-                   ret,
+               ' - jump, \ start len
+
+\ (skip) ( char "<chars>..." -- "..." ) skip leading delimeter chars
+0 header, (skip)
+          ' source call, \ char c-addr u
+             ' >in call, \ char c-addr u in
+               ' @ call, \ char c-addr u in
+             ' rot call, \ char c-addr u in c-addr
+               ' + call, \ char c-addr u inaddr
+            ' tuck call, \ char inaddr c-addr u
+               ' + call, \ char inaddr end
+            ' swap call, \ char end inaddr
+                   ?do,  \ char
+             ' dup call, \ char char
+               ' i call, \ char char addr
+              ' c@ call, \ char char c
+            ' over call, \ char char c char
+              ' bl call, \ char char c char $20
+               ' = call, \ char char c sp?
+                   if,   \ char char c
+              ' 1+ call, \ char char c+
+               ' < call, \ char c>$20 (not delimiter)
+                   else, \ char char c
+              ' <> call, \ char <>? (not delimiter)
+                   then,
+                   if,   \ char
+                   leave,
+                   then,
+                 1 literal, \ char 1
+             ' >in call,    \ char 1 in
+              ' +! call,    \ char 
+                   loop,
+            ' drop jump,    \ 
 
 \ parse-name ( "<spaces>name<space>" -- c-addr u ) skip leading space and parse name delimited by space
 0 header, parse-name
-          ' source call,
-             ' >in call,
-               ' @ call,
-             ' rot call,
-               ' + call,
-            ' tuck call,
-               ' + call,
-            ' swap call,
-                   ?do,
-               ' i call,
-              ' c@ call,
-               $20 literal,
-               ' > call,
-                   if,
-                   leave,
-                   then,
-                 1 literal,
-             ' >in call,
-              ' +! call,
-                   loop,
-               $20 literal,
+              ' bl call,
+             ' dup call,
+          ' (skip) call,
            ' parse jump,
+
+\ cmove ( c-addr1 c-addr2 u -- ) copy characters (from lower to higher addresses)
+0 header, cmove
+                 0 literal,
+                   ?do,
+            ' over call,
+              ' c@ call,
+            ' over call,
+              ' c! call,
+              ' 1+ call,
+            ' swap call,
+              ' 1+ call,
+            ' swap call,
+                   loop,
+           ' 2drop jump,
+
+\ word ( char "<chars>ccc<char>" -- c-addr ) skip leading delimeters, parse ccc delimited by char, return transient counted string
+0 header, word
+             ' dup call, \ char char
+          ' (skip) call, \ char
+           ' parse call, \ c-addr u
+             ' dup call, \ c-addr u u
+             ' pad call, \ c-addr u u pad
+              ' c! call, \ c-addr u -- length
+             ' pad call, \ c-addr u pad
+              ' 1+ call, \ c-addr u pad+
+            ' swap call, \ c-addr pad+ u
+           ' cmove call, \ 
+             ' pad jump, \ pad
+                   ret,
+
+\ count ( c-addr1 -- c-addr2 u ) counted string to c-addr and length
+0 header, count
+             ' dup call,
+              ' c@ call,
+            ' swap call,
+              ' 1+ call,
+            ' swap jump,
+
+var, latest \ common, but non-standard
+
+\ (equal) ( c-addr1 u1 c-addr2 u2 -- flag ) compare strings for equality
+0 header, (equal)
+             ' rot call,
+            ' over call,
+              ' <> call, \ lengths unequal?
+                   if,
+            ' drop call,
+           ' 2drop call,
+           ' false call,
+            ' exit call,
+                   then,
+                 0 literal,
+                   do,
+            ' 2dup call,
+               ' i call,
+               ' + call,
+              ' c@ call,
+            ' swap call,
+               ' i call,
+               ' + call,
+              ' c@ call,
+              ' <> call,
+                   if,
+           ' 2drop call,
+           ' false call,
+          ' unloop call,
+            ' exit call,
+                   then,
+                   loop,
+           ' 2drop call,
+            ' true jump,
+
+\ find ( c-addr -- c-addr 0 | xt 1 | xt -1 ) find named definition (0=not found, 1=immediate, -1=non-immediate)
+0 header, find
+          ' latest call,
+               ' @ call,    \ find link
+                   begin,
+            ' 2dup call,    \ find link find link
+                 3 literal,
+               ' + call,    \ find link find link+3
+             ' dup call,
+              ' 1- call,    \ find link find link+3 link+2
+              ' c@ call,    \ find link find link+3 len/flag
+               $7f literal,
+             ' and call,    \ find link find link+3 len
+             ' rot call,    \ find link link+3 len find
+           ' count call,    \ find link link+3 len find len
+           ' 2over call,    \ find link link+3 len find len link+3 len
+         ' (equal) call,    \ find link link+3 len eq?
+                   if,      \ find link link+3 len
+               ' + call,    \ find link xt
+            ' -rot call,    \ xt find link
+             ' nip call,    \ xt link
+                 2 literal,
+               ' + call,    \ xt link+2
+               $80 literal,
+             ' and call,    \ xt flag
+              ' 0= call,
+                   if,
+                -1 literal, \ xt -1 (non-immediate)
+                   else,
+                 1 literal, \ xt 1 (immediate)
+                   then,
+            ' exit call,    \ xt (names match!)
+                   then,    \ find link link+3 len
+           ' 2drop call,    \ find link
+               ' @ call,    \ find link (follow link)
+             ' dup call,
+              ' 0= call,
+                   if,
+            ' drop call,    \ find
+                 0 literal, \ find 0  (not found)
+            ' exit call,
+                   then,
+                   again,
+                   ret,
+
+\ ' ( "<spaces>name" -- xt ) skip leading space, parse and find name
+0 header, '
+              ' bl call, \ $20
+            ' word call, \ c-addr
+            ' find call, \ c-addr 0 | xt 1 | xt -1
+              ' 0= call, \ c-addr -1 | xt 0
+                   if,   \ c-addr
+            ' drop call, \
+                 0 literal, \ 0 \ TODO: abort with message?
+                   then,
+                   ret, \ 0 | xt
 
 ( --- end of dictionary ------------------------------------------------------ )
 
                    patch,
               here literal, \ update dictionary pointer to compile-time position
               ' dp call,
+               ' ! call,
+          latest @ literal, \ update latest to compile-time
+          ' latest call,
                ' ! call,
          ' decimal call, \ default base
               zero halt,
