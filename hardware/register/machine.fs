@@ -10,6 +10,16 @@ create registers 16 cells allot  registers 16 cells erase
 : xyz ( x -- reg-x reg-y reg-z ) reg fetch-pc nybbles reg swap reg ;
 : binop ( x op -- ) swap xyz >r @ swap @ rot execute 16bit r> ! ; \ execute binary operation ( y x -- )
 
+\ [undefined] [: [if]
+\ : [: ( -- ) postpone ahead :noname ; immediate compile-only
+\ : ;] ( -- xt ) postpone ; ] postpone then latestxt postpone literal ; immediate compile-only
+\ [then]
+
+[undefined] [: [if]
+: nand and invert ;
+: shr swap 16bit swap rshift ;
+[then]
+
 : step ( -- ) fetch-pc nybbles \ fetch instruction
   case
      0 of cr ." Halt " reg @ . quit endof                        \ halt(x) (halt with exit code x)
@@ -21,9 +31,17 @@ create registers 16 cells allot  registers 16 cells erase
      6 of ['] - binop endof                                      \ sub z=y-x (subtraction)
      7 of ['] * binop endof                                      \ mul z=y*x (multiplication)
      8 of ['] / binop endof                                      \ div z=y/x (division)
+[undefined] [: [if]
+     9 of ['] nand binop endof                                   \ nand z=y nand x (not-and)
+[else]
      9 of [: and invert ;] binop endof                           \ nand z=y nand x (not-and)
+[then]
     10 of ['] lshift binop endof                                 \ shl z=y<<x (bitwise shift-left)
+[undefined] [: [if]
+    11 of ['] shr binop endof                                    \ shr z=y>>x (bitwise shift-right)
+[else]
     11 of [: swap 16bit swap rshift ;] binop endof               \ shr z=y>>x (bitwise shift-right)
+[then]
     12 of key dup emit swap reg ! endof                          \ in x=getc() (read from console)
     13 of reg @ emit endof                                       \ out putc(x) (write to console)
     14 of xyz @ rot @ rot @ read-block endof                     \ read(z,y,x)  (file z of size y -> address x)
