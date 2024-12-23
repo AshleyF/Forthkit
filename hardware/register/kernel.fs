@@ -1067,8 +1067,8 @@ var, >in
               ' bl call, \ char char c char $20
                ' = call, \ char char c sp?
                    if,   \ char char c
-              ' 1+ call, \ char char c+
-               ' < call, \ char c>$20 (not delimiter)
+            ' swap call, \ char c char
+               ' > call, \ char c>$20 (not delimiter)
                    else, \ char char c
               ' <> call, \ char <>? (not delimiter)
                    then,
@@ -1216,6 +1216,35 @@ var, latest \ common, but non-standard
                  0 literal, \ 0 \ TODO: abort with message?
                    then,
                    ret, \ 0 | xt
+
+\ >number ( ud1 c-addr1 u1 -- ud2 c-addr2 u2 ) ud2 is the unsigned result of converting the characters
+\         within the string specified by c-addr1 u1 into digits, using the number in BASE, and adding
+\         each into ud1 after multiplying ud1 by the number in BASE. Conversion continues left-to-right
+\         until a character that is not convertible, including any "+" or "-", is encountered or the string
+\         is entirely converted. c-addr2 is the location of the first unconverted character or the first
+\         character past the end of the string if the string was entirely converted. u2 is the number of
+\         unconverted characters in the string. An ambiguous condition exists if ud2 overflows.
+0 header, >number
+                   begin,  \ n a c
+             ' dup call,   \ n a c c
+              ' 0> call,   \ n a c c0>
+                   while,  \ n a c
+            ' -rot call,   \ c n a
+             ' dup call,   \ c n a a
+              ' c@ call,   \ c n a d
+               '0' literal,
+               ' - call,   \ c n a d
+             ' rot call,   \ c a d n
+            ' base call,
+               ' @ call,
+               ' * call,   \ c a d n
+               ' + call,   \ c a n
+            ' swap call,   \ c n a
+              ' 1+ call,   \ c n a
+             ' rot call,   \ n a c
+              ' 1- call,   \ n a c
+                   repeat,
+                   ret,
 
 ( --- end of dictionary ------------------------------------------------------ )
 
