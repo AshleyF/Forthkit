@@ -8,7 +8,7 @@ require kernel.fs
 : run-word ( addr -- ) pc reg ! run ;
 : rw run-word ;
 
-here . ." byte kernel"
+here . ." byte kernel" cr
 
 \ label 'dot
 \                  x popd,
@@ -82,6 +82,20 @@ label 'test
          ' execute call,
                ' ' call,
          ' execute call,
+             ' bye call,
+
+label 'go
+            ' quit call,
+             ' bye call,
+
+label 'loop
+                 0 literal,
+                 3 literal,
+                   ?do,
+               ' i call,
+               ' . call,
+              ' cr call,
+                   loop,
              ' bye call,
 
 run

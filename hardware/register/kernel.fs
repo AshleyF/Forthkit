@@ -21,7 +21,7 @@ require assembler.fs
 : push, ( reg ptr -- ) dup dup four sub,  st, ;
 : pop,  ( reg ptr -- ) four ld+, ;
 
-12 constant d  memory-size 2 + d ldv, \ data stack pointer
+12 constant d \ data stack pointer (initialized after dictionary below)
 
 : pushd, ( reg -- ) d push, ;
 : popd,  ( reg -- ) d pop, ;
@@ -48,7 +48,7 @@ require assembler.fs
 
 \ begin ... again
 \ begin ... until
-\ begin ... while ... repeat
+\ begin ... while ... repeat  (note: not begin ... while ... again!)
 : begin, ( C: -- dest ) here ; \ begin loop
 : again, ( C: dest -- ) jump, ; \ jump back to beginning
 : until, ( C: dest -- ) 0branch, s! ; \ branch on 0 to address
@@ -85,6 +85,18 @@ true warnings ! \ intentionally redefining (latest, header, ')
 ( --- primitives ------------------------------------------------------------- )
 
                branch, \ skip dictionary
+
+\ (clear-data) empty return stack
+0 header, (clear-data)
+ memory-size 2 + d ldv,
+                   ret,
+
+\ (clear-return) empty return stack
+0 header, (clear-return)
+                 x popr,
+     memory-size r ldv,
+          x x four add, \ ret,
+              pc x cp,
 
 \ execute ( i * x xt -- j * x ) perform the semantics identified by xt
 0 header, execute
@@ -954,12 +966,12 @@ var, base
             ' type call,
            ' space jump,
 
-\ .s ( -- ) display values on the stack non-destructively (depth dup 0 ?do dup i - pick . loop drop)
+\ .s ( -- ) display values on the stack non-destructively (depth dup 0 do dup i - pick . loop drop)
 0 header, .s
            ' depth call,
              ' dup call,
                  0 literal,
-                   ?do,
+                   do, \ TODO: ?do bug
              ' dup call,
                ' i call,
                ' - call,
@@ -982,12 +994,30 @@ memory-size $500 - literal, \ $ff bytes above stacks
                $ff literal, \ size ($400 bytes for stacks/$ff elements each)
                    ret,
 
+\ fill ( c-addr u char -- ) if u is greater than zero, store char in each of u consecutive characters of memory beginning at c-addr.
+0 header, fill
+            ' -rot call,
+                 0 literal,
+                   ?do,
+            ' 2dup call,
+              ' c! call,
+              ' 1+ call,
+                   loop,
+           ' 2drop jump,
+
+\ erase ( addr u -- ) if u is greater than zero, clear all bits in each of u consecutive address units of memory beginning at addr.
+0 header, erase
+                 0 literal,
+            ' fill jump,
+
 \ >in offset to parse area within input buffer
 var, >in
 
 \ refill ( -- flag ) fill input buffer from input (TODO: support evaluate strings)
 0 header, refill
           ' source call,
+            ' 2dup call,
+           ' erase call,
             ' drop call, \ TODO: bounds check
                    begin,
              ' key call,
@@ -1103,11 +1133,8 @@ var, >in
                    loop,
            ' 2drop jump,
 
-\ word ( char "<chars>ccc<char>" -- c-addr ) skip leading delimeters, parse ccc delimited by char, return transient counted string
-0 header, word
-             ' dup call, \ char char
-          ' (skip) call, \ char
-           ' parse call, \ c-addr u
+\ >counted ( c-addr u -- c-addr ) string address and length to counted string address (non-standard)
+0 header, >counted
              ' dup call, \ c-addr u u
              ' pad call, \ c-addr u u pad
               ' c! call, \ c-addr u -- length
@@ -1116,7 +1143,13 @@ var, >in
             ' swap call, \ c-addr pad+ u
            ' cmove call, \ 
              ' pad jump, \ pad
-                   ret,
+
+\ word ( char "<chars>ccc<char>" -- c-addr ) skip leading delimeters, parse ccc delimited by char, return transient counted string
+0 header, word
+             ' dup call,
+          ' (skip) call,
+           ' parse call,
+        ' >counted jump,
 
 \ count ( c-addr1 -- c-addr2 u ) counted string to c-addr and length
 0 header, count
@@ -1246,9 +1279,68 @@ var, latest \ common, but non-standard
                    repeat,
                    ret,
 
-( --- end of dictionary ------------------------------------------------------ )
+\ source-id ( -- 0 | -1 ) Identifies the input source (-1=string [evaluate], 0=input device)
+var, source-id
 
+\ state ( -- a-addr ) compilation-state flag (true=compiling)
+var, state
+
+\ interpret ( c-addr u -- ) (implementation defined)
+0 header, interpret
+        ' >counted call,
+            ' find call, \ c-addr 0 | xt 1 | xt -1
+              ' 0= call,
+                   if, \ not found?
+                 0 literal,
+            ' swap call,
+           ' count call,
+         ' >number call,
+           ' 2drop call,
+' dup call,
+' . call,
+                   else, \ found
+         ' execute call, \ TODO: compile
+                   then,
+                   ret,
+
+\ quit ( -- ) ( R: i * x -- ) Empty the return stack, store zero in SOURCE-ID if it is present, make
+\      the user input device the input source, and enter interpretation state. Do not display a message.
+\      Repeat the following: Accept a line from the input source into the input buffer, set >IN to zero,
+\      and interpret. Display the system prompt if in interpretation state, all processing has been
+\      completed, and no ambiguous condition exists.
+0 header, quit
+  ' (clear-return) call,
+                 0 literal,
+       ' source-id call,
+               ' ! call,
+           ' false call,
+           ' state call,
+               ' ! call,
+                   begin,
+          ' refill call,
+                   while,
+                   begin,
+      ' parse-name call, \ addr len
+             ' dup call,
+              ' 0> call,
+                   while,
+       ' interpret call,
+                   repeat,
+           ' 2drop call,
+              ' bl call,
+            ' emit call,
+            char o literal,
+            ' emit call,
+            char k literal,
+            ' emit call,
+              ' cr call,
+                   repeat,
+                   \ TODO: failed to refill
+                   ret,
+
+( --- end of dictionary ------------------------------------------------------ )
                    patch,
+    ' (clear-data) call,
               here literal, \ update dictionary pointer to compile-time position
               ' dp call,
                ' ! call,
@@ -1256,4 +1348,5 @@ var, latest \ common, but non-standard
           ' latest call,
                ' ! call,
          ' decimal call, \ default base
-              zero halt,
+            ' quit jump,
+\             zero halt,
