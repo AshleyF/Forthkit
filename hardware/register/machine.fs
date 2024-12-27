@@ -42,7 +42,7 @@ create registers 16 cells allot  registers 16 cells erase
 [else]
     11 of [: swap 16bit swap rshift ;] binop endof               \ shr z=y>>x (bitwise shift-right)
 [then]
-    12 of key dup emit swap reg ! endof                          \ in x=getc() (read from console)
+    12 of key dup 13 <> if dup emit then swap reg ! endof        \ in x=getc() (read from console)
     13 of reg @ emit endof                                       \ out putc(x) (write to console)
     14 of xyz @ rot @ rot @ read-block endof                     \ read(z,y,x)  (file z of size y -> address x)
     15 of xyz @ rot @ rot @ write-block endof                    \ write(z,y,x) (file z of size y <- address x)

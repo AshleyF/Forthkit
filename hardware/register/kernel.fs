@@ -954,8 +954,8 @@ var, base
              ' rot call,
             ' sign call,
               ' #> call,
-            ' type call,
-           ' space jump,
+           ' space call,
+            ' type jump,
 
 \ u. ( u -- ) display unsigned value in free field format (0 <# #s #> type space)
 0 header, u.
@@ -963,8 +963,8 @@ var, base
               ' <# call,
               ' #s call,
               ' #> call,
-            ' type call,
-           ' space jump,
+           ' space call,
+            ' type jump,
 
 \ .s ( -- ) display values on the stack non-destructively (depth dup 0 do dup i - pick . loop drop)
 0 header, .s
@@ -1267,15 +1267,24 @@ var, latest \ common, but non-standard
               ' c@ call,   \ c n a d
                '0' literal,
                ' - call,   \ c n a d
+             ' dup call,   \ c n a d d
+                10 literal, \ cn a d d 10
+               ' < call,   \ c n a d <
+                   if,     \ c n a d  valid?
              ' rot call,   \ c a d n
-            ' base call,
-               ' @ call,
+            ' base call,   \ c a d n b
+               ' @ call,   \ c a d n b
                ' * call,   \ c a d n
                ' + call,   \ c a n
             ' swap call,   \ c n a
               ' 1+ call,   \ c n a
              ' rot call,   \ n a c
               ' 1- call,   \ n a c
+                   else,   \ c n a d  invalid
+            ' drop call,   \ c n a
+             ' rot call,   \ n a c
+            ' exit call,
+                   then,   \ n a c
                    repeat,
                    ret,
 
@@ -1287,19 +1296,57 @@ var, state
 
 \ interpret ( c-addr u -- ) (implementation defined)
 0 header, interpret
-        ' >counted call,
-            ' find call, \ c-addr 0 | xt 1 | xt -1
-              ' 0= call,
-                   if, \ not found?
-                 0 literal,
-            ' swap call,
-           ' count call,
-         ' >number call,
-           ' 2drop call,
-' dup call,
-' . call,
-                   else, \ found
-         ' execute call, \ TODO: compile
+( c )   ' >counted call,
+( xn )      ' find call, \ c-addr 0 | xt 1 | xt -1
+( xnn )      ' dup call,
+( xnb )       ' 0= call,
+( xn )             if, \ not found?
+( x )       ' drop call,
+( au )     ' count call,
+( auau )    ' 2dup call,
+( auau0 )        0 literal,
+( au0au )   ' -rot call,
+( aunau) ' >number call,
+( aunauu )   ' dup call,
+( aunaub )    ' 0= call,
+( aunau )          if, \ proper number
+( aunaus ) ' state call,
+( aunaus )     ' @ call,
+( aunau )          if,   \ compile?
+( aun )    ' 2drop call,
+              3106 literal, ' , call, \ 220C -> ld+ two pc x -- x=[pc] pc += 2 -- load and skip literal
+( au )         ' , call, \ compile literal value
+            -14283 literal, ' , call, \ 35C8 -> st+ -four x d -- [d]=x d+=-4 -- push literal
+( )        ' 2drop call,
+( aunau )          else, \ interactive
+( aun )    ' 2drop call,
+( nau )     ' -rot call,
+( n )      ' 2drop call, \ leave number
+( n )              then,
+( aunau )          else, \ error
+( aun )    ' 2drop call,
+( au )      ' drop call,
+( )           ' cr call,
+( )         ' type call,
+( ? )       char ? literal,
+( )         ' emit call,
+( )                then,
+( xn )             else, \ found
+( xn1 )          1 literal,
+( xb )         ' = call,
+( x )              if,   \ immediate?
+( )      ' execute call,
+( x )              else, \ non-immediate
+( xs )     ' state call,
+( xs )         ' @ call,
+( x )              if,   \ compile?
+              2357 literal, ' , call, \ 3509 -> st+ -four pc r -- [r]=pc r+=4 -- push pc
+                33 literal, ' , call, \ 2100 -> ld+ zero pc pc -- pc=[pc] -- jump to following address
+( )            ' , call, \ xt is address to call
+( x )              else, \ interactive
+( )      ' execute call,
+                   then,
+                   then,
                    then,
                    ret,
 
