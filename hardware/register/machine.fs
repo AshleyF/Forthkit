@@ -25,7 +25,7 @@ create registers 16 cells allot  registers 16 cells erase
      0 of cr ." Halt " reg @ . quit endof                        \ halt(x) (halt with exit code x)
      1 of fetch-pc dup $80 and if $ff00 or then swap reg ! endof \ ldc x=v (load constant signed byte into x)
      2 of xyz over @ s@ swap ! reg+! endof                       \ ld+ z<-[y] y+=x (load from memory and inc/dec pointer)
-     3 of xyz @ over @ s! reg+! endof                            \ st+ z->[y] y+=x (store to memory and inc/dec poniter)
+     3 of xyz @ over @ s! reg+! endof                            \ st+ z->[y] y+=x (store to memory and inc/dec pointer)
      4 of xyz rot @ 0= if swap @ swap ! else 2drop then endof    \ cp? z=y if x=0 (conditional copy)
      5 of ['] + binop endof                                      \ add z=y+x (addition)
      6 of ['] - binop endof                                      \ sub z=y-x (subtraction)

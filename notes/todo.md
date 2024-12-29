@@ -26,8 +26,6 @@
 - [`:`](https://forth-standard.org/standard/core/Colon)
 - [`;`](https://forth-standard.org/standard/core/Semi)
 - [`IMMEDIATE`](https://forth-standard.org/standard/core/IMMEDIATE)
-- [`[`](https://forth-standard.org/standard/core/Bracket)
-- [`\]`](https://forth-standard.org/standard/core/right-bracket)
 - [`[COMPILE]`](https://forth-standard.org/standard/core/BracketCOMPILE) (extension) (immediate word find >cfa ,)
 - [`COMPILE,`](https://forth-standard.org/standard/core/COMPILEComma) (extension)
 - [`ABORT`](https://forth-standard.org/standard/core/ABORT) (0 1- throw)

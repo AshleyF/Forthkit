@@ -1288,6 +1288,264 @@ var, latest \ common, but non-standard
                    repeat,
                    ret,
 
+( --- assembler -------------------------------------------------------------- )
+
+\ pc ( -- pc )
+0 header, pc
+                pc literal,
+                   ret,
+\ zero ( -- zero )
+0 header, zero
+              zero literal,
+                   ret,
+
+\ one ( -- one )
+0 header, one
+               one literal,
+                   ret,
+
+\ two ( -- two )
+0 header, two
+               two literal,
+                   ret,
+
+\ four ( -- four )
+0 header, four
+              four literal,
+                   ret,
+
+\ eight ( -- eight )
+0 header, eight
+             eight literal,
+                   ret,
+
+\ twelve ( -- twelve )
+0 header, twelve
+            twelve literal,
+                   ret,
+
+\ #t ( -- #t )
+0 header, #t
+                #t literal,
+                   ret,
+
+\ #f ( -- #f )
+0 header, #f
+                #f literal,
+                   ret,
+
+\ x ( -- x )
+0 header, x
+                 x literal,
+                   ret,
+
+\ y ( -- y )
+0 header, y
+                 y literal,
+                   ret,
+
+\ z ( -- z )
+0 header, z
+                 z literal,
+                   ret,
+
+\ w ( -- w )
+0 header, w
+                 w literal,
+                   ret,
+
+\ d ( -- d )
+0 header, d
+                 d literal,
+                   ret,
+
+\ r ( -- r )
+0 header, r
+                 r literal,
+                   ret,
+
+\ 2nybbles ( x i -- )
+0 header, 2nybbles,
+                 4 literal,
+          ' lshift call,
+              ' or call,
+              ' c, jump,
+
+\ 4nybbles, ( z y x i -- )
+0 header, 4nybbles,
+       ' 2nybbles, call,
+       ' 2nybbles, jump,
+    
+\ halt, ( x -- ) halt(x) (halt with exit code x)
+0 header, halt,
+                 0 literal,
+       ' 2nybbles, jump,
+
+\ ldc, ( v x -- ) x=v (load constant signed v into x)
+0 header, ldc,
+                 1 literal,
+       ' 2nybbles, call,
+              ' c, jump,
+
+\ ld+, ( z y x -- ) z<-[y] y+=x (load from memory and inc/dec pointer)
+0 header, ld+,
+                 2 literal,
+       ' 4nybbles, jump,
+
+\ st+, ( z y x -- ) z->[y] y+=x (store to memory and inc/dec pointer)
+0 header, st+,
+                 3 literal,
+       ' 4nybbles, jump,
+
+\ cp?, ( z y x -- ) z=y if x=0 (conditional copy)
+0 header, cp?,
+                 4 literal,
+       ' 4nybbles, jump,
+
+\ add, ( z y x -- ) z=y+x (addition)
+0 header, add,
+                 5 literal,
+       ' 4nybbles, jump,
+
+\ sub, ( z y x -- ) z=y-x (subtraction)
+0 header, sub,
+                 6 literal,
+       ' 4nybbles, jump,
+
+\ mul, ( z y x -- ) z=y*x (multiplication)
+0 header, mul,
+                 7 literal,
+       ' 4nybbles, jump,
+
+\ div, ( z y x -- ) z=y/x (division)
+0 header, div,
+                 8 literal,
+       ' 4nybbles, jump,
+
+\ nand, ( z y x -- ) z=y nand x (not-and)
+0 header, nand,
+                 9 literal,
+       ' 4nybbles, jump,
+
+\ shl, ( z y x -- ) z=y<<x (bitwise shift-left)
+0 header, shl,
+                10 literal,
+       ' 4nybbles, jump,
+
+\ shr, ( z y x -- ) z=y>>x (bitwise shift-right)
+0 header, shr,
+                11 literal,
+       ' 4nybbles, jump,
+
+\ in, ( y x -- ) x=getc() (read from console)
+0 header, in,
+                12 literal,
+       ' 2nybbles, jump,
+
+\ out, ( y x -- ) putc(x) (write to console)
+0 header, out,
+                13 literal,
+       ' 2nybbles, jump,
+
+\ read, ( z y x -- ) read(z,y,x) (file z of size y -> address x)
+0 header, read,
+                14 literal,
+       ' 4nybbles, jump,
+
+\ write, ( z y x -- ) write(z,y,x) (file z of size y <- address x)
+0 header, write,
+                15 literal,
+       ' 4nybbles, jump,
+
+\ cp, ( y x -- ) y=x (unconditional copy)
+0 header, cp,
+            ' zero call,
+            ' cp?, jump,
+
+\ ld, ( y x -- ) y<-[x] (load from memory)
+0 header, ld,
+            ' zero call,
+            ' ld+, jump,
+
+\ st, ( y x -- ) y->[x] (store to memory)
+0 header, st,
+            ' zero call,
+            ' st+, jump,
+
+\ jump, ( addr -- ) unconditional jump to address (following cell)
+0 header, jump,
+              ' pc call,
+              ' pc call,
+             ' ld, call,
+               ' , jump,
+
+\ ldv, ( val reg -- )
+0 header, ldv,
+              ' pc call,
+             ' two call,
+            ' ld+, call,
+               ' , jump,
+
+\ push, ( reg ptr -- )
+0 header, push,
+             ' dup call,
+             ' dup call,
+            ' four call,
+            ' sub, call,
+             ' st, jump,
+
+\ pop, ( reg ptr -- )
+0 header, pop,
+            ' four call,
+            ' ld+, jump,
+
+\ pushd, ( reg -- )
+0 header, pushd,
+               ' d call,
+           ' push, jump,
+
+\ popd, ( reg -- )
+0 header, popd,
+               ' d call,
+            ' pop, jump,
+
+\ literal,
+0 header, literal,
+               ' x call,
+            ' ldv, call,
+               ' x call,
+          ' pushd, jump,
+
+\ pushr, ( reg -- )
+0 header, pushr,
+               ' r call,
+           ' push, jump,
+
+\ popr, ( reg -- )
+0 header, popr,
+               ' r call,
+            ' pop, jump,
+
+\ call, ( addr -- )
+0 header, call,
+              ' pc call,
+          ' pushr, call,
+           ' jump, jump,
+
+\ ret, ( -- )
+0 header, ret,
+               ' x call,
+           ' popr, call,
+               ' x call,
+               ' x call,
+            ' four call,
+            ' add, call,
+              ' pc call,
+               ' x call,
+             ' cp, jump,
+
+( --- interpreter ------------------------------------------------------------ )
+
 \ source-id ( -- 0 | -1 ) Identifies the input source (-1=string [evaluate], 0=input device)
 var, source-id
 
@@ -1314,9 +1572,10 @@ var, state
 ( aunaus )     ' @ call,
 ( aunau )          if,   \ compile?
 ( aun )    ' 2drop call,
-              3106 literal, ' , call, \ 220C -> ld+ two pc x -- x=[pc] pc += 2 -- load and skip literal
+               ' x call, ' pc call, ' two call, ' ld+, call, \ ld+ two pc x -- x=[pc] pc += 2 -- load and skip literal
 ( au )         ' , call, \ compile literal value
-            -14283 literal, ' , call, \ 35C8 -> st+ -four x d -- [d]=x d+=-4 -- push literal
+               ' d call, ' d call, ' four call, ' sub, call, \ sub four d d -- push literal
+               ' x call, ' d call, ' st, call, \ st d x
 ( )        ' 2drop call,
 ( aunau )          else, \ interactive
 ( aun )    ' 2drop call,
@@ -1340,8 +1599,9 @@ var, state
 ( xs )     ' state call,
 ( xs )         ' @ call,
 ( x )              if,   \ compile?
-              2357 literal, ' , call, \ 3509 -> st+ -four pc r -- [r]=pc r+=4 -- push pc
-                33 literal, ' , call, \ 2100 -> ld+ zero pc pc -- pc=[pc] -- jump to following address
+               ' r call, ' r call, ' four call, ' sub, call, \ sub four r r -- push pc
+              ' pc call, ' r call, ' st, call, \ st r pc
+              ' pc call, ' pc call, ' ld, call, \ ld pc pc -- pc=[pc] -- jump to following address
 ( )            ' , call, \ xt is address to call
 ( x )              else, \ interactive
 ( )      ' execute call,
@@ -1385,6 +1645,64 @@ var, state
                    \ TODO: failed to refill
                    ret,
 
+\ [ ( -- ) enter interpretation state (immediate word)
+$80 header, [
+           ' false call,
+           ' state call,
+               ' ! jump,
+
+\ ] ( -- ) enter compilation state
+0 header, ]
+            ' true call,
+           ' state call,
+               ' ! jump,
+
+\ ; ( -- ) end current definition, make visible in dictionary and enter interpretation state
+$80 header, ;
+           ' align literal, ' call, call, \ no-op on this machine
+               ' [ literal, ' call, call,
+               ' r call, ' r call, ' four call, ' add, call, \ add four r r -- r=r+4
+               ' x call, ' r call, ' ld, call, \ ld r x -- x=[r]
+               ' x call, ' x call, ' four call, ' add, call, \ add four x x -- x=x+4
+              ' pc call, ' x call, ' cp, call, \ cp x pc -- pc=x
+                   ret,
+
+\ header, ( flag "<spaces>name -- ) append header to dictionary (non-standard)
+0 header, header,
+          ' latest call,
+               ' @ call, \ link to current (soon to be previous) word
+            ' here call,
+          ' latest call,
+               ' ! call, \ update latest to this word
+               ' , call, \ append link
+      ' parse-name call, ( flag addr len -- )
+             ' rot call,
+            ' over call,
+              ' or call,
+              ' c, call, \ append flag/len
+            ' over call,
+               ' + call,
+            ' swap call, ( end start -- )
+                   do,   \ append name
+               ' i call,
+              ' c@ call,
+              ' c, call,
+                   loop,
+                   ret,  ( addr len )
+
+\ create ( "<spaces>name -- ) make dictionary header and compile push PFA and return
+0 header, create
+                 0 literal,
+         ' header, call,
+              3137 literal, ' , call, \ 410C -> cp? zero pc x   x=pc
+              3613 literal, ' , call, \ 1D0E -> ldc y 14        y=14
+            -13219 literal, ' , call, \ 5DCC -> add y x x       x=y+x
+            -14283 literal, ' , call, \ 35C8 -> st+ -four x d   push x
+            -26282 literal, ' , call, \ 5699 -> add four r r    ret
+            -27871 literal, ' , call, \ 2193 -> ld+ zero r t
+             13142 literal, ' , call, \ 5633 -> add four t t
+             12353 literal, ' , jump, \ 4130 -> cp? zero t pc
+
 ( --- end of dictionary ------------------------------------------------------ )
                    patch,
     ' (clear-data) call,
@@ -1397,3 +1715,25 @@ var, state
          ' decimal call, \ default base
             ' quit jump,
 \             zero halt,
+
+\ 7EFCFBB02CA0: 64 DD 31 D0  21 00 23 00 - 5B 1A 04 66  75 63 6B 23  d.1.!.#.[..fuck#
+\ 7EFCFBB02CB0: 08 07 00 64  CC 31 C8 64 - DD 31 D0 21  00 0C 19 64  ...d.1.d.1.!...d
+\ 7EFCFBB02CC0: DD 31 D0 21  00 4B 16 64 - DD 31 D0 21  00 73 00 64  .1.!.K.d.1.!.s.d
+\ 7EFCFBB02CD0: DD 31 D0 21  00 7E 0B 64 - DD 31 D0 21  00 67 00 64  .1.!.~.d.1.!.g.d
+\ 7EFCFBB02CE0: DD 31 D0 21  00 67 00 54 - DD 21 D8 54  88 41 80 00  .1.!.g.T.!.T.A..
+\ 7EFCFBB02CF0: 64 CC 31 C8  64 DD 31 D0 - 21 00 4B 06  23 08 65 00  d.1.d.1.!.K.#.e.
+\ 7EFCFBB02D00: 64 CC 31 C8  64 DD 31 D0 - 21 00 4B 06  23 08 6C 00  d.1.d.1.!.K.#.l.
+\ 7EFCFBB02D10: 64 CC 31 C8  64 DD 31 D0 - 21 00 4B 06  23 08 6C 00  d.1.d.1.!.K.#.l.
+\ 7EFCFBB02D20: 64 CC 31 C8  64 DD 31 D0 - 21 00 4B 06  23 08 6F 00  d.1.d.1.!.K.#.o.
+\ 7EFCFBB02D30: 64 CC 31 C8  64 DD 31 D0 - 21 00 4B 06  23 08 05 00  d.1.d.1.!.K.#...
+
+\ PUSH LITERAL 7
+\ 2308  ld+ two pc x  x<-[pc] pc+=2
+\ 0700  literal
+\ 64CC  sub four d d  d<-d-4
+\ 31C8  st+ zero d x  x->[d]
+
+\ 64DD  sub four r r
+\ 31 D0 21 00 0C 19 64
+
+\ st+ z->[y] y+=x (store to memory and inc/dec pointer)

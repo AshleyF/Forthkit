@@ -8,7 +8,7 @@ false warnings ! \ intentionally redefining (here c, ,)
 : c, ( c -- ) h @ c! 1 h +! ;
 : , ( cc -- ) dup c, 8 rshift c, ; \ 16-bit little endian
 : s! ( val addr -- ) memory + over 8 rshift over 1+ c! c! ; \ store 16-bit value at address (relative to memory)
-: s@ ( addr -- val ) memory + dup c@ swap 1+ c@ 8 lshift or ; \ fetch 16-bit value from address (relative to memory)
+: s@ ( addr -- val ) memory + dup c@ swap 1+ c@ 8 lshift or ; \ fetch 16-bit value from address (relative to memory) TODO: unused?
 
 true warnings !
 
@@ -18,7 +18,7 @@ true warnings !
 : halt,  (     x -- )  0 2nybbles, ;    \ halt(x)      (halt with exit code x)
 : ldc,   (   v x -- )  1 2nybbles, c, ; \ x=v          (load constant signed v into x)
 : ld+,   ( z y x -- )  2 4nybbles, ;    \ z<-[y] y+=x  (load from memory and inc/dec pointer)
-: st+,   ( z y x -- )  3 4nybbles, ;    \ z->[y] y+=x  (store to memory and inc/dec poniter)
+: st+,   ( z y x -- )  3 4nybbles, ;    \ z->[y] y+=x  (store to memory and inc/dec pointer)
 : cp?,   ( z y x -- )  4 4nybbles, ;    \ z=y if x=0   (conditional copy)
 : add,   ( z y x -- )  5 4nybbles, ;    \ z=y+x        (addition)
 : sub,   ( z y x -- )  6 4nybbles, ;    \ z=y-x        (subtraction)
