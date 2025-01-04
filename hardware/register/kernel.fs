@@ -1216,6 +1216,7 @@ var, latest \ common, but non-standard
              ' nip call,    \ xt link
                  2 literal,
                ' + call,    \ xt link+2
+               ' @ call,    \ xt len/flag
                $80 literal,
              ' and call,    \ xt flag
               ' 0= call,
@@ -1659,8 +1660,7 @@ $80 header, [
 
 \ ; ( -- ) end current definition, make visible in dictionary and enter interpretation state
 $80 header, ;
-           ' align literal, ' call, call, \ no-op on this machine
-               ' [ literal, ' call, call,
+               ' [ call,
                ' r call, ' r call, ' four call, ' add, call, \ add four r r -- r=r+4
                ' x call, ' r call, ' ld, call, \ ld r x -- x=[r]
                ' x call, ' x call, ' four call, ' add, call, \ add four x x -- x=x+4
@@ -1715,25 +1715,3 @@ $80 header, ;
          ' decimal call, \ default base
             ' quit jump,
 \             zero halt,
-
-\ 7EFCFBB02CA0: 64 DD 31 D0  21 00 23 00 - 5B 1A 04 66  75 63 6B 23  d.1.!.#.[..fuck#
-\ 7EFCFBB02CB0: 08 07 00 64  CC 31 C8 64 - DD 31 D0 21  00 0C 19 64  ...d.1.d.1.!...d
-\ 7EFCFBB02CC0: DD 31 D0 21  00 4B 16 64 - DD 31 D0 21  00 73 00 64  .1.!.K.d.1.!.s.d
-\ 7EFCFBB02CD0: DD 31 D0 21  00 7E 0B 64 - DD 31 D0 21  00 67 00 64  .1.!.~.d.1.!.g.d
-\ 7EFCFBB02CE0: DD 31 D0 21  00 67 00 54 - DD 21 D8 54  88 41 80 00  .1.!.g.T.!.T.A..
-\ 7EFCFBB02CF0: 64 CC 31 C8  64 DD 31 D0 - 21 00 4B 06  23 08 65 00  d.1.d.1.!.K.#.e.
-\ 7EFCFBB02D00: 64 CC 31 C8  64 DD 31 D0 - 21 00 4B 06  23 08 6C 00  d.1.d.1.!.K.#.l.
-\ 7EFCFBB02D10: 64 CC 31 C8  64 DD 31 D0 - 21 00 4B 06  23 08 6C 00  d.1.d.1.!.K.#.l.
-\ 7EFCFBB02D20: 64 CC 31 C8  64 DD 31 D0 - 21 00 4B 06  23 08 6F 00  d.1.d.1.!.K.#.o.
-\ 7EFCFBB02D30: 64 CC 31 C8  64 DD 31 D0 - 21 00 4B 06  23 08 05 00  d.1.d.1.!.K.#...
-
-\ PUSH LITERAL 7
-\ 2308  ld+ two pc x  x<-[pc] pc+=2
-\ 0700  literal
-\ 64CC  sub four d d  d<-d-4
-\ 31C8  st+ zero d x  x->[d]
-
-\ 64DD  sub four r r
-\ 31 D0 21 00 0C 19 64
-
-\ st+ z->[y] y+=x (store to memory and inc/dec pointer)

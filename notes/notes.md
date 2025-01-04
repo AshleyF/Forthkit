@@ -19,10 +19,11 @@
 
 - Building a VM in Forth makes debugging *much* easier
 - Stacks that maintain a pointer to the top are useful (move/push rather than push/move)
+- Tricky! `bl word find` stomps parsed word and finds "find" when interpreted! (fine compiled)
 
 ## Koans
 
-- `create buffer 100 allot`
+- `create mybuffer 100 allot` (also `100 buffer mybuffer`)
 
 ## Pick
 
