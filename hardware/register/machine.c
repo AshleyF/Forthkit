@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdio.h>
 
 unsigned short reg[0xf] = {};
 unsigned char mem[0x10000];

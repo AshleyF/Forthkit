@@ -1024,6 +1024,10 @@ var, >in
              ' dup call,
                 13 literal,
               ' <> call,
+            ' over call,
+                10 literal,
+              ' <> call,
+             ' and call,
                    while,
             ' over call,
                ' ! call,
@@ -1077,7 +1081,11 @@ var, >in
             ' over call, \ start u start
                ' + call, \ start end
             ' over call, \ start end start
-               ' - jump, \ start len
+               ' - call, \ start len
+             ' dup call, \ start len len
+              ' 1+ call, \ start len len+
+             ' >in call, \ start len in
+              ' +! jump, \ start len
 
 \ (skip) ( char "<chars>..." -- "..." ) skip leading delimeter chars
 0 header, (skip)
@@ -1555,57 +1563,57 @@ var, state
 
 \ interpret ( c-addr u -- ) (implementation defined)
 0 header, interpret
-( c )   ' >counted call,
-( xn )      ' find call, \ c-addr 0 | xt 1 | xt -1
-( xnn )      ' dup call,
-( xnb )       ' 0= call,
-( xn )             if, \ not found?
-( x )       ' drop call,
-( au )     ' count call,
-( auau )    ' 2dup call,
-( auau0 )        0 literal,
-( au0au )   ' -rot call,
-( aunau) ' >number call,
-( aunauu )   ' dup call,
-( aunaub )    ' 0= call,
-( aunau )          if, \ proper number
-( aunaus ) ' state call,
-( aunaus )     ' @ call,
-( aunau )          if,   \ compile?
-( aun )    ' 2drop call,
+        ' >counted call,
+            ' find call, \ c-addr 0 | xt 1 | xt -1
+             ' dup call,
+              ' 0= call,
+                   if, \ not found?
+            ' drop call,
+           ' count call,
+            ' 2dup call,
+                 0 literal,
+            ' -rot call,
+         ' >number call,
+             ' dup call,
+              ' 0= call,
+                   if, \ proper number
+           ' state call,
+               ' @ call,
+                   if,   \ compile?
+           ' 2drop call,
                ' x call, ' pc call, ' two call, ' ld+, call, \ ld+ two pc x -- x=[pc] pc += 2 -- load and skip literal
-( au )         ' , call, \ compile literal value
+               ' , call, \ compile literal value
                ' d call, ' d call, ' four call, ' sub, call, \ sub four d d -- push literal
                ' x call, ' d call, ' st, call, \ st d x
-( )        ' 2drop call,
-( aunau )          else, \ interactive
-( aun )    ' 2drop call,
-( nau )     ' -rot call,
-( n )      ' 2drop call, \ leave number
-( n )              then,
-( aunau )          else, \ error
-( aun )    ' 2drop call,
-( au )      ' drop call,
-( )           ' cr call,
-( )         ' type call,
-( ? )       char ? literal,
-( )         ' emit call,
-( )                then,
-( xn )             else, \ found
-( xn1 )          1 literal,
-( xb )         ' = call,
-( x )              if,   \ immediate?
-( )      ' execute call,
-( x )              else, \ non-immediate
-( xs )     ' state call,
-( xs )         ' @ call,
-( x )              if,   \ compile?
+           ' 2drop call,
+                   else, \ interactive
+           ' 2drop call,
+            ' -rot call,
+           ' 2drop call, \ leave number
+                   then,
+                   else, \ error
+           ' 2drop call,
+            ' drop call,
+              ' cr call,
+            ' type call,
+            char ? literal,
+            ' emit call,
+                   then,
+                   else, \ found
+                 1 literal,
+               ' = call,
+                   if,   \ immediate?
+         ' execute call,
+                   else, \ non-immediate
+           ' state call,
+               ' @ call,
+                   if,   \ compile?
                ' r call, ' r call, ' four call, ' sub, call, \ sub four r r -- push pc
               ' pc call, ' r call, ' st, call, \ st r pc
               ' pc call, ' pc call, ' ld, call, \ ld pc pc -- pc=[pc] -- jump to following address
-( )            ' , call, \ xt is address to call
-( x )              else, \ interactive
-( )      ' execute call,
+               ' , call, \ xt is address to call
+                   else, \ interactive
+         ' execute call,
                    then,
                    then,
                    then,
@@ -1690,18 +1698,35 @@ $80 header, ;
                    loop,
                    ret,  ( addr len )
 
-\ create ( "<spaces>name -- ) make dictionary header and compile push PFA and return
-0 header, create
-                 0 literal,
-         ' header, call,
-              3137 literal, ' , call, \ 410C -> cp? zero pc x   x=pc
-              3613 literal, ' , call, \ 1D0E -> ldc y 14        y=14
-            -13219 literal, ' , call, \ 5DCC -> add y x x       x=y+x
-            -14283 literal, ' , call, \ 35C8 -> st+ -four x d   push x
-            -26282 literal, ' , call, \ 5699 -> add four r r    ret
-            -27871 literal, ' , call, \ 2193 -> ld+ zero r t
-             13142 literal, ' , call, \ 5633 -> add four t t
-             12353 literal, ' , jump, \ 4130 -> cp? zero t pc
+\ postpone ( "<spaces>name" -- ) parse and find name, append compilation semantics
+$80 header, postpone
+      ' parse-name call, \ addr len
+        ' >counted call, \ caddr
+            ' find call, \ c-addr 0 | xt 1 | xt -1
+                 1 literal,
+               ' = call, \ only works for immediate words -- TODO: error for not found or non-immediate
+                   if,
+           ' call, call,
+                   then,
+                   ret,
+
+\ literal ( x -- ) append run-time semantics of pushing x
+$80 header, literal
+        ' literal, call,
+                   ret,
+
+\ immediate ( -- ) make most recent definition immediate
+0 header, immediate
+          ' latest call,
+               ' @ call,
+                 2 literal,
+               ' + call,  \ latest @ cell+ or >name [non-standard]
+             ' dup call,
+               ' @ call,
+               $80 literal,
+              ' or call,  \ set immediate flag
+            ' swap call,
+               ' ! jump,
 
 ( --- end of dictionary ------------------------------------------------------ )
                    patch,
