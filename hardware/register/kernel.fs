@@ -1712,8 +1712,7 @@ $80 header, postpone
 
 \ literal ( x -- ) append run-time semantics of pushing x
 $80 header, literal
-        ' literal, call,
-                   ret,
+        ' literal, jump,
 
 \ immediate ( -- ) make most recent definition immediate
 0 header, immediate
