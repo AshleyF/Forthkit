@@ -1581,10 +1581,7 @@ var, state
                ' @ call,
                    if,   \ compile?
            ' 2drop call,
-               ' x call, ' pc call, ' two call, ' ld+, call, \ ld+ two pc x -- x=[pc] pc += 2 -- load and skip literal
-               ' , call, \ compile literal value
-               ' d call, ' d call, ' four call, ' sub, call, \ sub four d d -- push literal
-               ' x call, ' d call, ' st, call, \ st d x
+        ' literal, call,
            ' 2drop call,
                    else, \ interactive
            ' 2drop call,
@@ -1608,10 +1605,7 @@ var, state
            ' state call,
                ' @ call,
                    if,   \ compile?
-               ' r call, ' r call, ' four call, ' sub, call, \ sub four r r -- push pc
-              ' pc call, ' r call, ' st, call, \ st r pc
-              ' pc call, ' pc call, ' ld, call, \ ld pc pc -- pc=[pc] -- jump to following address
-               ' , call, \ xt is address to call
+           ' call, call,
                    else, \ interactive
          ' execute call,
                    then,
@@ -1669,13 +1663,10 @@ $80 header, [
 \ ; ( -- ) end current definition, make visible in dictionary and enter interpretation state
 $80 header, ;
                ' [ call,
-               ' r call, ' r call, ' four call, ' add, call, \ add four r r -- r=r+4
-               ' x call, ' r call, ' ld, call, \ ld r x -- x=[r]
-               ' x call, ' x call, ' four call, ' add, call, \ add four x x -- x=x+4
-              ' pc call, ' x call, ' cp, call, \ cp x pc -- pc=x
+            ' ret, call,
                    ret,
 
-\ header, ( flag "<spaces>name -- ) append header to dictionary (non-standard)
+\ header, ( "<spaces>name -- ) append header to dictionary (non-standard, note: no flag)
 0 header, header,
           ' latest call,
                ' @ call, \ link to current (soon to be previous) word
@@ -1683,11 +1674,9 @@ $80 header, ;
           ' latest call,
                ' ! call, \ update latest to this word
                ' , call, \ append link
-      ' parse-name call, ( flag addr len -- )
-             ' rot call,
-            ' over call,
-              ' or call,
-              ' c, call, \ append flag/len
+      ' parse-name call, ( addr len -- )
+             ' dup call,
+              ' c, call, \ append len
             ' over call,
                ' + call,
             ' swap call, ( end start -- )

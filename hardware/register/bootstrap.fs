@@ -1,4 +1,4 @@
-0 header, : ] 0 header, ] ;
+header, : ] header, ] ;
 
 : [char] parse-name drop c@ postpone literal ; immediate
 
@@ -10,10 +10,10 @@
 
 \ create ( "<spaces>name" -- ) parse name, create definition, runtime ( -- a-addr ) pushes address of data field (does not allocate data space in data field). Execution semantics may be extended by does>.
 : create
-  0 header,  \ code to push dfa and return
-   x pc cp,  \ x=pc
-   14 y ldc, \ y=14
-  x x y add, \ x+=y
+        header,  \ code to push dfa and return
+   x pc cp,      \ x=pc
+   14 y ldc,     \ y=14
+  x x y add,     \ x+=y
       x pushd,
         ret,
 ;
