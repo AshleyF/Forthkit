@@ -27,13 +27,16 @@ header, : ] header, ] ;
   2 + ! \ to address passed to us
 ;
 
+\ ['] ( "<spaces>name" -- ) parse and find name
+: ['] ' postpone literal ; immediate
+
 \ does> ( C: colon-sys1 -- colon-sys2 ) append run-time and initialization semantics below to definition.
 \       ( -- ) ( R: nest-sys1 -- ) Runtime: replace execution semantics
 \       ( i * x -- i * x a-addr ) ( R: -- nest-sys2 ) Initiation: push data field address
 \       ( i * x -- j * x ) Execution: execute portion of definition beginning with initiation semantics
 : does>
   here 10 + literal, \ compile push instance code address
-   ' (does) jump,
+  ['] (does) jump,
 ; immediate
 
 \ variable ( "<spaces>name" -- ) parse name, create definition, reserve cell of data space, runtime ( -- a-addr ) push address of data space (note: uninitialized)

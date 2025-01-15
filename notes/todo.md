@@ -26,7 +26,6 @@
 - [`CHAR`](https://forth-standard.org/standard/core/CHAR)
 - [`ENVIRONMENT?`](https://forth-standard.org/standard/core/ENVIRONMENTq)
 - [`S"`](https://forth-standard.org/standard/core/Sq) (immediate state @ if ' litstring , here @ 0 , begin key dup '"' <> while c, repeat drop dup here @ swap - 4- swap ! align else here @ begin key dup '"' <> while over c! 1+ repeat drop here @ - here @ swap then)
-- [`[']`](https://forth-standard.org/standard/core/BracketTick) (immediate ' lit ,)
 - [`:NONAME`](https://forth-standard.org/standard/core/ColonNONAME) (extension) (0 0 create here @ docol , ])
 - [`ACTION-OF`](https://forth-standard.org/standard/core/ACTION-OF) (extension)
 - [`BUFFER:`](https://forth-standard.org/standard/core/BUFFERColon) (extension)
