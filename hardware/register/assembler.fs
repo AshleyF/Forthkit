@@ -55,17 +55,21 @@ true warnings !
 
 ( --- read/write blocks ------------------------------------------------------ )
 
+: block-file ( n -- c-addr u ) \ returns a string in pad of the form "block<n>.bin"
+  s" block"
+  rot 0 <# #s #> s+ \ s+ is a gforth extension
+  s" .bin" s+
+;
+
 : read-block ( block memaddr len )
-  rot drop \ TODO: support numbered blocks
-  s" block0.bin" 2dup file-status 0<> if ." Block file not found " else drop then
+  rot block-file 2dup file-status 0<> if ." Block file not found " else drop then
   r/o open-file throw
   rot memory + -rot dup >r
   read-file throw drop r>
   close-file throw ;
 
 : write-block ( block memaddr len )
-  rot drop \ TODO: support numbered blocks
-  s" block0.bin" w/o create-file throw
+  rot block-file w/o create-file throw
   rot memory + -rot dup >r
   write-file throw r>
   close-file throw ;

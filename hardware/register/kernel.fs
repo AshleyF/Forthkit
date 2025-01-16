@@ -44,7 +44,7 @@ require assembler.fs
 \ ... if ... else ... then
 : if, ( C: -- orig ) 0branch, ; \ dummy branch on 0, push pointer to address
 : then, ( orig -- ) patch, ; \ patch if/else to continue here
-: else, ( C: orig1 -- orig2 ) branch, swap then, ;  \ patch previous branch to here, dummy unconditionally branch over false block
+: else, ( C: orig1 -- orig2 ) branch, swap then, ; \ patch previous branch to here, dummy unconditionally branch over false block
 
 \ begin ... again
 \ begin ... until
@@ -306,7 +306,7 @@ true warnings ! \ intentionally redefining (latest, header, ')
                  x out,
                    ret,
 
-\ read-block ( file size addr -- ) block file of size -> address
+\ read-block ( file addr size -- ) block file of size -> address
 0 header, read-block
                  x popd,
                  y popd,
@@ -314,7 +314,7 @@ true warnings ! \ intentionally redefining (latest, header, ')
              z y x read,
                    ret,
 
-\ write-block ( file size addr -- ) block file of size -> address
+\ write-block ( file addr size -- ) block file of size -> address
 0 header, write-block
                  x popd,
                  y popd,
@@ -1717,14 +1717,17 @@ $80 header, literal
                ' ! jump,
 
 ( --- end of dictionary ------------------------------------------------------ )
+
                    patch,
     ' (clear-data) call,
-              here literal, \ update dictionary pointer to compile-time position
-              ' dp call,
-               ' ! call,
-          latest @ literal, \ update latest to compile-time
-          ' latest call,
-               ' ! call,
          ' decimal call, \ default base
+\              here literal, \ update dictionary pointer to compile-time position
+\              ' dp call,
+\               ' ! call,
+\          latest @ literal, \ update latest to compile-time
+\          ' latest call,
+\               ' ! call,
             ' quit jump,
-\             zero halt,
+
+here     ' dp     16 + s! \ update dictionary pointer to compile-time position
+latest @ ' latest 16 + s! \ update latest to compile-time

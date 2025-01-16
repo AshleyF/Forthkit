@@ -18,6 +18,10 @@ header, : ] header, ] ;
         ret,
 ;
 
+: >body ( xt -- a-addr ) 16 + ;
+
+: buffer: ( u "<name>" -- ; -- addr ) create allot ;
+
 ( patch return to jump to instance code address given )
 : (does)
   latest @ 2 + \ to length/flag
@@ -44,3 +48,28 @@ header, : ] header, ] ;
 
 \ constant ( x "<spaces>name" -- ) parse name, create definition to push x at runtime ( -- x )
 : constant create , does> @ ;
+
+\ can redefine
+32 constant bl
+2 constant cell
+
+\ can redefine
+: cells cell * ; \ note: less efficient than 2*
+: cell+ cell + ;
+
+\ another create ... does> ... example
+: point create , , does> dup cell+ @ swap @ ;
+
+( --- primitive control-flow ------------------------------------------------- )
+
+: branch, ( -- dest ) 0 jump,  here 2 - ; \ dummy jump, push pointer to patch
+: 0branch, ( -- dest ) x popd,  0 y ldv,  here 2 -  pc y x cp?, ; \ dummy jump if 0 to address, push pointer to patch
+: patch, ( orig -- ) here swap ! ; \ patch jump to continue here (note: s! -> !)
+
+\ ... if ... then
+\ ... if ... else ... then
+: if ( C: -- orig ) 0branch, ; immediate \ dummy branch on 0, push pointer to address
+: then ( orig -- ) patch, ; immediate \ patch if/else to continue here
+: else ( C: orig1 -- orig2 ) branch, swap patch, ; immediate \ patch previous branch to here, dummy unconditionally branch over false block (note: then -> patch,)
+
+: write-boot-block ( -- ) 0 0 here write-block ; \ taken from assembler.fs

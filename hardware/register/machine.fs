@@ -44,8 +44,8 @@ create registers 16 cells allot  registers 16 cells erase
 [then]
     12 of stdin key-file swap reg ! endof                        \ in x=getc() (read from console)
     13 of reg @ emit endof                                       \ out putc(x) (write to console)
-    14 of xyz @ rot @ rot @ read-block endof                     \ read(z,y,x)  (file z of size y -> address x)
-    15 of xyz @ rot @ rot @ write-block endof                    \ write(z,y,x) (file z of size y <- address x)
+    14 of xyz @ swap @ rot @ read-block endof                    \ read(z,y,x)  (file z of size y -> address x)
+    15 of xyz @ swap @ rot @ write-block endof                   \ write(z,y,x) (file z of size y <- address x)
     throw
   endcase ;
 : steps ( n -- ) 0 do step loop ;
