@@ -43,3 +43,5 @@
 - [`SAVE-INPUT`](https://forth-standard.org/standard/core/SAVE-INPUT) (extension)
 - [`TO`](https://forth-standard.org/standard/core/TO) (extension) (immediate word find >dfa 4+ state @ if ' lit , , ' ! , else ! then)
 - [`VALUE`](https://forth-standard.org/standard/core/VALUE) (extension) (word create docol , ' lit , , ' exit ,)
+
+- Optimize ; return call/jump

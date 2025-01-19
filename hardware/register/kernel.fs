@@ -59,7 +59,7 @@ require assembler.fs
 
 false warnings ! \ intentionally redefining (latest header, ')
 
-variable latest  0 latest !
+variable latest  $ffff latest !
 
 : header, ( flag "<spaces>name" -- )
   latest @          \ link to current (soon to be previous) word
@@ -74,7 +74,7 @@ variable latest  0 latest !
   bl word latest @ \ ( find link -- )
   begin
     2dup memory + 3 + dup 1- c@ $7f and \ get name/len
-    rot count 2over compare 0= if + memory - -rot 2drop exit then \ return xt if names match
+    rot count 2over str= ( compare 0= ) if + memory - -rot 2drop exit then \ return xt if names match
     2drop s@ dup 0= if ." Word not found: " drop count type cr exit then \ follow link, until end
   again ;
 
@@ -85,6 +85,9 @@ true warnings ! \ intentionally redefining (latest, header, ')
 ( --- primitives ------------------------------------------------------------- )
 
                branch, \ skip dictionary
+
+\ leave empty space for new image
+memory $8000 + h !
 
 \ (clear-data) empty return stack
 0 header, (clear-data)
@@ -1238,6 +1241,8 @@ var, latest \ common, but non-standard
            ' 2drop call,    \ find link
                ' @ call,    \ find link (follow link)
              ' dup call,
+\            $ffff literal, \ want 0000 to be a valid link
+\              ' = call,
               ' 0= call,
                    if,
             ' drop call,    \ find

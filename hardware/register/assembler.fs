@@ -1,5 +1,5 @@
 $10000 constant memory-size
-create memory memory-size allot  memory memory-size 0 fill
+memory-size buffer: memory ( create memory memory-size allot )  memory memory-size erase
 variable h  memory h !
 
 false warnings ! \ intentionally redefining (here c, ,)

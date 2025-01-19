@@ -20,6 +20,7 @@
 - Building a VM in Forth makes debugging *much* easier
 - Stacks that maintain a pointer to the top are useful (move/push rather than push/move)
 - Tricky! `bl word find` stomps parsed word and finds "find" when interpreted! (fine compiled)
+- Making code portable with relative jumps would be useful!
 
 ## Koans
 
