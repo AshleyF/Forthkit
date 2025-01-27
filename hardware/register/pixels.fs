@@ -6,7 +6,7 @@
 width 2 / constant columns
 width height * 8 / constant size
 
-create screen size allot
+size buffer: screen
 create mask-table 1 c, 8 c, 2 c, 16 c, 4 c, 32 c, 64 c, 128 c,
 
 : clear ( -- )

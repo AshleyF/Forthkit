@@ -39,7 +39,7 @@ header, : ] header, ] ;
 \       ( i * x -- i * x a-addr ) ( R: -- nest-sys2 ) Initiation: push data field address
 \       ( i * x -- j * x ) Execution: execute portion of definition beginning with initiation semantics
 : does>
-  here 12 + literal, \ compile push instance code address
+  here 12 + postpone literal \ compile push instance code address
   ['] (does) jump,
 ; immediate
 
@@ -72,29 +72,29 @@ header, : ] header, ] ;
 : then ( orig -- ) patch, ; immediate \ patch if/else to continue here
 : else ( C: orig1 -- orig2 ) branch, swap patch, ; immediate \ patch previous branch to here, dummy unconditionally branch over false block (note: then -> patch,)
 
-: begin ( C: -- dest ) here ; \ begin loop
-: again ( C: dest -- ) jump, ; \ jump back to beginning
-: until ( C: dest -- ) 0branch, ! ( s! -> ! ) ; \ branch on 0 to address
-: while ( C: dest -- orig dest ) 0branch, swap ; \ continue while condition met (0= if), 
-: repeat ( C: orig dest -- ) again ( again, -> again ) here swap ! ( s! -> ! ) ; \ jump back to beginning, patch while to here
+: begin ( C: -- dest ) here ; immediate \ begin loop
+: again ( C: dest -- ) jump, ; immediate \ jump back to beginning
+: until ( C: dest -- ) 0branch, ! ( s! -> ! ) ; immediate \ branch on 0 to address
+: while ( C: dest -- orig dest ) 0branch, swap ; immediate \ continue while condition met (0= if), 
+: repeat ( C: orig dest -- ) postpone again ( again, -> postpone again, because now immediate ) here swap ! ( s! -> ! ) ; immediate \ jump back to beginning, patch while to here
 
 : do ( limit start -- ) ( C: -- false addr ) \ begin do-loop (immediate 2>r begin false)
            ['] 2>r call,
                    false \ no addresses to patch (initially)
-                   begin ( begin, -> begin ) ;
+          postpone begin ( begin, -> postpone begin ) ; immediate
 
 : ?do ( limit start -- ) ( C: -- false addr true addr )
           ['] 2dup call,
+           ['] 2>r call,
             ['] <> call,
                    false \ terminator for patching
-                   if ( if, -> if )
+          postpone if ( if, -> postpone if )
                    true  \ patch if to loop
-           ['] 2>r call,
-                   begin ( begin, -> begin ) ;
+          postpone begin ( begin, -> postpone begin ) ; immediate
 
 : leave ( C: -- addr true )
                    branch,
-                   -rot true -rot ; \ patch to loop (swap under if address)
+                   -rot true -rot ; immediate \ patch to loop (swap under if address)
 
 : +loop ( n -- ) ( C: ... flag addr -- ) \ end do-loop, add n to loop counter (immediate r> + r@ over >r < if again then 2r> 2drop)
              ['] r> call,
@@ -103,25 +103,28 @@ header, : ] header, ] ;
            ['] over call,
              ['] >r call,
               ['] < call,
-                    if ( if, -> if )
-                    swap again ( again, -> again )
-                    then ( then, -> then, )
+                    postpone if ( if, -> if )
+                    swap postpone again ( again, -> again )
+                    postpone then ( then, -> then, )
                     begin while
                     patch,
                     repeat
             ['] 2r> call,
-          ['] 2drop call, ;
+          ['] 2drop call, ; immediate
 
 : loop ( C: addr -- )
-                 1 literal,
-                   +loop ; \ end do-loop (immediate 1 +loop)
+        1 postpone literal
+          postpone +loop ; immediate \ end do-loop (immediate 1 +loop)
 
-: str= \ non-standard gforth
-  rot over <> if drop 2drop false exit then \ not equal lengths
-  0 do
-    2dup c@ swap c@ <> if 2drop false unloop exit then \ chars not equal
-    char+ swap char+ 
-  loop
-  2drop true ;
+: i 2r@  ( including return from here ) drop ;
+: j 2r> 2r@ drop -rot 2>r ;
+
+\ : str= \ non-standard gforth
+\   rot over <> if drop 2drop false exit then \ not equal lengths
+\   0 do
+\     2dup c@ swap c@ <> if 2drop false unloop exit then \ chars not equal
+\     char+ swap char+ 
+\   loop
+\   2drop true ;
 
 : write-boot-block ( -- ) 0 0 here write-block ; \ taken from assembler.fs
