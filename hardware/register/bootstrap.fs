@@ -142,4 +142,8 @@ header, : ] header, ] ;
 
 : ." postpone s" ['] type call, ; immediate
 
+: latest-cfa latest @ 2 + dup c@ 127 and + 1+ ; ( non-standard )
+: recurse latest-cfa call, ; immediate
+: tail-recurse latest-cfa jump, ; immediate
+
 : write-boot-block ( -- ) 0 0 here write-block ; \ taken from assembler.fs

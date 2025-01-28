@@ -7,7 +7,6 @@
 - [`SM/REM`](https://forth-standard.org/standard/core/SMDivREM)
 - [`MOVE`](https://forth-standard.org/standard/core/MOVE)
 - [`ACCEPT`](https://forth-standard.org/standard/core/ACCEPT)
-- [`RECURSE`](https://forth-standard.org/standard/core/RECURSE) (immediate latest @ >cfa ,)
 - [`ABORT`](https://forth-standard.org/standard/core/ABORT) (0 1- throw)
 - [`ABORT"`](https://forth-standard.org/standard/core/ABORTq)
 - [`EVALUATE`](https://forth-standard.org/standard/core/EVALUATE)
