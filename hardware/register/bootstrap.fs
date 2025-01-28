@@ -127,4 +127,11 @@ header, : ] header, ] ;
 \   loop
 \   2drop true ;
 
+: spaces 0 max 0 ?do space loop ;
+
+: u< 2dup xor 0< if nip else - then 0< ;
+: u> swap u< ;
+
+: within ( test low high -- flag ) over - rot rot - u> ;
+
 : write-boot-block ( -- ) 0 0 here write-block ; \ taken from assembler.fs
