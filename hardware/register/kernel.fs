@@ -26,7 +26,7 @@ require assembler.fs
 : pushd, ( reg -- ) d push, ;
 : popd,  ( reg -- ) d pop, ;
 
-: literal, x ldv,  x pushd, ;
+: literal, x ldv,  x pushd, ; \ 8 bytes
 
 13 constant r  memory-size r ldv, \ return stack pointer
 
@@ -87,7 +87,7 @@ true warnings ! \ intentionally redefining (latest, header, ')
                branch, \ skip dictionary
 
 \ leave empty space for new image
-memory $8000 + h !
+\ memory $8000 + h !
 
 \ (clear-data) empty return stack
 0 header, (clear-data)

@@ -1,9 +1,11 @@
 header, : ] header, ] ;
 
-: [char] parse-name drop c@ postpone literal ; immediate
+: \ 10 ( newline ) parse 2drop ; immediate
+
+: char parse-name drop c@ ;
+: [char] char postpone literal ; immediate
 
 : ( [char] ) parse 2drop ; immediate
-: \ 10 ( newline ) parse 2drop ; immediate
 
 ( now we can use comments like this! )
 \ or like this to the end of the line!
@@ -133,5 +135,11 @@ header, : ] header, ] ;
 : u> swap u< ;
 
 : within ( test low high -- flag ) over - rot rot - u> ;
+
+: .( [char] ) parse type ; immediate
+
+: s" branch, here [char] " parse tuck here swap cmove dup allot rot patch, swap literal, literal, ; immediate
+
+: ." postpone s" ['] type call, ; immediate
 
 : write-boot-block ( -- ) 0 0 here write-block ; \ taken from assembler.fs
