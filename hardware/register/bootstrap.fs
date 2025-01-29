@@ -140,6 +140,39 @@ header, : ] header, ] ;
 
 : s" branch, here [char] " parse tuck here swap cmove dup allot rot patch, swap literal, literal, ; immediate
 
+\ branch,  -> branch                          compile dummy jump
+\ here     -> branch here
+\ [char] " -> branch here "
+\ parse    -> branch here addr len
+\ tuck     -> branch here len addr len
+\ here     -> branch here len addr len here
+\ swap     -> branch here len addr here len
+\ cmove    -> branch here len                 copy string into compiled word
+\ dup      -> branch here len len
+\ allot    -> branch here len
+\ rot      -> here len branch
+\ patch,   -> here len                        patch dummy jump
+\ swap     -> len here
+\ literal, -> len                             compile literal address
+\ literal, ->                                 compile literal length
+
+: c" branch, here [char] " parse tuck dup c, here swap cmove allot swap patch, literal, ; immediate
+
+\ branch,  -> branch                          compile dummy jump
+\ here     -> branch here
+\ [char] " -> branch here "
+\ parse    -> branch here addr len
+\ tuck     -> branch here len addr len
+\ dup      -> branch here len addr len len
+\ c,       -> branch here len addr len        compile string count
+\ here     -> branch here len addr len here
+\ swap     -> branch here len addr here len
+\ cmove    -> branch here len                 copy string into compiled word
+\ allot    -> branch here
+\ swap     -> here branch
+\ patch,   -> here                            patch dummy jump
+\ literal, ->                                 compile literal address
+
 : ." postpone s" ['] type call, ; immediate
 
 : latest-cfa latest @ 2 + dup c@ 127 and + 1+ ; ( non-standard )

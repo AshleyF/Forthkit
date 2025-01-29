@@ -5,10 +5,7 @@
 - [`FM/MOD`](https://forth-standard.org/standard/core/FMDivMOD)
 - [`M*`](https://forth-standard.org/standard/core/MTimes)
 - [`SM/REM`](https://forth-standard.org/standard/core/SMDivREM)
-- [`MOVE`](https://forth-standard.org/standard/core/MOVE)
 - [`ACCEPT`](https://forth-standard.org/standard/core/ACCEPT)
-- [`ABORT`](https://forth-standard.org/standard/core/ABORT) (0 1- throw)
-- [`ABORT"`](https://forth-standard.org/standard/core/ABORTq)
 - [`EVALUATE`](https://forth-standard.org/standard/core/EVALUATE)
 - [`ENVIRONMENT?`](https://forth-standard.org/standard/core/ENVIRONMENTq)
 
@@ -19,7 +16,6 @@
 - [`COMPILE,`](https://forth-standard.org/standard/core/COMPILEComma) (extension)
 - [`:NONAME`](https://forth-standard.org/standard/core/ColonNONAME) (extension) (0 0 create here @ docol , ])
 - [`ACTION-OF`](https://forth-standard.org/standard/core/ACTION-OF) (extension)
-- [`C"`](https://forth-standard.org/standard/core/Cq) (extension)
 - [`CASE`](https://forth-standard.org/standard/core/CASE) (extension) (immediate 0)
 - [`OF`](https://forth-standard.org/standard/core/OF) (extension) (immediate ' over , ' = , [compile] if ' drop ,)
 - [`ENDOF`](https://forth-standard.org/standard/core/ENDOF) (extension) (immediate [compile] else)
