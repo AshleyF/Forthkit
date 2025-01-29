@@ -24,7 +24,7 @@
 
 ## Koans
 
-- `create mybuffer 100 allot` (also `100 buffer mybuffer`)
+- `create mybuffer 100 allot` (instead `100 buffer: mybuffer`)
 
 ## Pick
 

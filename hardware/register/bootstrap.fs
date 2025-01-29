@@ -1,6 +1,6 @@
 header, : ] header, ] ;
 
-: \ 10 ( newline ) parse 2drop ; immediate
+: \ 10 parse 2drop ; immediate
 
 : char parse-name drop c@ ;
 : [char] char postpone literal ; immediate
@@ -146,4 +146,9 @@ header, : ] header, ] ;
 : recurse latest-cfa call, ; immediate
 : tail-recurse latest-cfa jump, ; immediate
 
+: move 0 ?do over @ over ! cell+ swap cell+ swap loop 2drop ; \ TODO: handle overlap
+
 : write-boot-block ( -- ) 0 0 here write-block ; \ taken from assembler.fs
+
+.( writing boot block )
+write-boot-block

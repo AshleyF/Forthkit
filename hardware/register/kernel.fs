@@ -834,7 +834,8 @@ var, dp \ initialized after dictionary (below)
 0 header, pad
             ' here call,
               1024 literal, \ arbitrary distance away
-               ' + jump,
+               ' + call,
+         ' aligned jump,
 
 \ np ( -- addr ) return address of pictured numeric output pointer (non-standard)
 var, np \ initialized after dictionary (below)
@@ -944,8 +945,8 @@ var, base
 
 \ s>d ( n -- d ) convert number to double-cell
 0 header, s>d
-                 0 literal,
-                   ret,
+             ' dup call,
+              ' 0< jump,
 
 \ . ( n -- ) display value in free field format (dup abs s>d <# #s rot sign #> type space)
 0 header, .
@@ -1137,9 +1138,9 @@ var, >in
               ' c@ call,
             ' over call,
               ' c! call,
-              ' 1+ call,
+           ' char+ call,
             ' swap call,
-              ' 1+ call,
+           ' char+ call,
             ' swap call,
                    loop,
            ' 2drop jump,
@@ -1172,7 +1173,23 @@ var, >in
 
 var, latest \ common, but non-standard
 
-\ (equal) ( c-addr1 u1 c-addr2 u2 -- flag ) compare strings for equality
+0 header, (tolower) \ non-standard
+             ' dup call,
+         char A 1- literal,
+               ' > call,
+            ' over call,
+         char Z 1+ literal,
+               ' < call,
+             ' and call,
+                   if,
+                32 literal,
+               ' + call,
+                   then,
+                   ret,
+
+: tolower dup [char] A [char] Z within if 32 + then ;
+
+\ (equal) ( c-addr1 u1 c-addr2 u2 -- flag ) compare strings for equality (non-standard)
 0 header, (equal)
              ' rot call,
             ' over call,
@@ -1189,10 +1206,12 @@ var, latest \ common, but non-standard
                ' i call,
                ' + call,
               ' c@ call,
+       ' (tolower) call,
             ' swap call,
                ' i call,
                ' + call,
               ' c@ call,
+       ' (tolower) call,
               ' <> call,
                    if,
            ' 2drop call,
