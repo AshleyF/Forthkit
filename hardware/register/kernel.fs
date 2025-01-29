@@ -1290,7 +1290,7 @@ var, latest \ common, but non-standard
 \         is entirely converted. c-addr2 is the location of the first unconverted character or the first
 \         character past the end of the string if the string was entirely converted. u2 is the number of
 \         unconverted characters in the string. An ambiguous condition exists if ud2 overflows.
-0 header, >number
+0 header, >number \ TODO: support double ud1/ud2?
                    begin,  \ n a c
              ' dup call,   \ n a c c
               ' 0> call,   \ n a c c0>
@@ -1594,6 +1594,20 @@ var, state
                    if, \ not found?
             ' drop call,
            ' count call,
+            ' over call, \ determine whether prefixed with -
+              ' c@ call,
+            char - literal,
+               ' = call,
+                   if,
+              ' 1- call, \ decrement length
+            ' swap call,
+              ' 1+ call, \ increment address
+            ' swap call,
+                -1 literal, \ multiplier
+                   else,
+                 1 literal, \ multiplier
+                   then,
+            ' -rot call,
             ' 2dup call,
                  0 literal,
             ' -rot call,
@@ -1601,16 +1615,14 @@ var, state
              ' dup call,
               ' 0= call,
                    if, \ proper number
+           ' 2drop call,
+            ' -rot call,
+           ' 2drop call,
+               ' * call,
            ' state call,
                ' @ call,
                    if,   \ compile?
-           ' 2drop call,
         ' literal, call,
-           ' 2drop call,
-                   else, \ interactive
-           ' 2drop call,
-            ' -rot call,
-           ' 2drop call, \ leave number
                    then,
                    else, \ error
            ' 2drop call,
@@ -1619,6 +1631,8 @@ var, state
             ' type call,
             char ? literal,
             ' emit call,
+    ' (clear-data) call,
+            ' exit call,
                    then,
                    else, \ found
                  1 literal,
@@ -1671,6 +1685,10 @@ var, state
                    repeat,
                    \ TODO: failed to refill
                    ret,
+
+0 header, abort
+    ' (clear-data) call,
+            ' quit jump,
 
 \ [ ( -- ) enter interpretation state (immediate word)
 $80 header, [

@@ -148,6 +148,9 @@ header, : ] header, ] ;
 
 : move 0 ?do over @ over ! cell+ swap cell+ swap loop 2drop ; \ TODO: handle overlap
 
+: (abort") rot 0<> if type abort else 2drop then ; \ internal non-standard
+: abort" postpone s" ['] (abort") call, ; immediate
+
 : write-boot-block ( -- ) 0 0 here write-block ; \ taken from assembler.fs
 
 .( writing boot block )
