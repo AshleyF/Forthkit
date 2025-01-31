@@ -1,3 +1,5 @@
+: buffer: create allot ; \ TODO: not defined in gforth?!
+
 $10000 constant memory-size
 memory-size buffer: memory ( create memory memory-size allot )  memory memory-size erase
 variable h  memory h !

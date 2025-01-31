@@ -1,5 +1,7 @@
 \ pixel graphics library using Unicode Braille characters
 
+: buffer: create allot ; \ TODO: not defined in gforth?!
+
 160 constant width
 160 constant height
 
