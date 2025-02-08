@@ -1,4 +1,6 @@
+[undefined] buffer: [if]
 : buffer: create allot ; \ TODO: not defined in gforth?!
+[then]
 
 $10000 constant memory-size
 memory-size buffer: memory ( create memory memory-size allot )  memory memory-size erase

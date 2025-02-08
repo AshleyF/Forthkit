@@ -74,7 +74,7 @@ hard-reset ." Test nand "
      42 y ldc,
     z y x nand,
     3 steps
-    z reg @ 42 7 and invert = . cr
+    z reg @ 42 7 and invert $ffff and = . cr
 
 hard-reset ." Test shl "
       4 x ldc,
@@ -100,13 +100,6 @@ hard-reset ." Test out "
         x out,
     2 steps cr
 
-hard-reset ." Test read "
-      1 x ldc,
-      2 y ldc,
-      3 z ldc,
-    z y x read,
-    4 steps cr
-
 hard-reset ." Test write "
       1 x ldc,
       2 y ldc,
@@ -114,7 +107,14 @@ hard-reset ." Test write "
     z y x write,
     4 steps cr
 
+hard-reset ." Test read "
+      1 x ldc,
+      2 y ldc,
+      3 z ldc,
+    z y x read,
+    4 steps cr
+
 hard-reset ." Test halt "
-     -1 x ldc,
+     42 x ldc,
         x halt,
   100 steps
