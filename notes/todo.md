@@ -5,8 +5,6 @@
 - [`FM/MOD`](https://forth-standard.org/standard/core/FMDivMOD)
 - [`M*`](https://forth-standard.org/standard/core/MTimes)
 - [`SM/REM`](https://forth-standard.org/standard/core/SMDivREM)
-- [`ACCEPT`](https://forth-standard.org/standard/core/ACCEPT)
-- [`EVALUATE`](https://forth-standard.org/standard/core/EVALUATE)
 - [`ENVIRONMENT?`](https://forth-standard.org/standard/core/ENVIRONMENTq)
 
 - [`ROLL`](https://forth-standard.org/standard/core/ROLL) (extension)

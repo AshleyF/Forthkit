@@ -992,11 +992,18 @@ var, base
 
 ( --- interpreter ------------------------------------------------------------ )
 
+\ source-id ( -- addr ) source buffer address (initialized below)
+var, source-addr
+
+\ source-len ( -- len ) source buffer length (initialized below)
+var, source-len
+
 \ source ( -- c-addr u )
 0 header, source
-memory-size $500 - literal, \ $ff bytes above stacks
-               $ff literal, \ size ($400 bytes for stacks/$ff elements each)
-                   ret,
+    ' source-addr call,
+              ' @ call,
+     ' source-len call,
+              ' @ jump,
 
 \ fill ( c-addr u char -- ) if u is greater than zero, store char in each of u consecutive characters of memory beginning at c-addr.
 0 header, fill
@@ -1017,42 +1024,70 @@ memory-size $500 - literal, \ $ff bytes above stacks
 \ >in offset to parse area within input buffer
 var, >in
 
-\ refill ( -- flag ) fill input buffer from input (TODO: support evaluate strings)
+\ accept ( c-addr +n1 -- +n2 ) receive string of, at most, n1 chars into c-addr, returning number of chars (n2)
+0 header, accept
+                 0 literal, \ c-addr n1 0
+                   begin,   \ c-addr n1 n2
+              ' 1+ call,    \ c-addr n1 n2+                  increment n2
+            ' 2dup call,    \ c-addr n1 n2+ n1 n2+
+               ' < call,    \ c-addr n1 n2+ <
+                   if,      \ c-addr n1 n2+                  bounds check
+            ' drop call,    \ c-addr n1
+             ' nip call,    \ n1
+            ' exit call,    \ n1
+                   then,    \ c-addr n1 n2+
+             ' rot call,    \ n1 n2+ c-addr
+             ' key call,    \ n1 n2+ c-addr key
+            ' swap call,    \ n1 n2+ key c-addr
+            ' 2dup call,    \ n1 n2+ key c-addr key c-addr
+               ' ! call,    \ n1 n2+ key c-addr              store key
+              ' 1+ call,    \ n1 n2+ key c-addr+
+            ' swap call,    \ n1 n2+ c=addr+ key
+             ' dup call,    \ n1 n2+ c-addr+ key key 
+                13 literal, \ n1 n2+ c-addr+ key key 13
+              ' <> call,    \ n1 n2+ c-addr+ key <>13
+            ' swap call,    \ n1 n2+ c-addr+ <>13 key
+                10 literal, \ n1 n2+ c-addr+ <>13 key 10
+              ' <> call,    \ n1 n2+ c-addr+ <>13 <>10
+             ' and call,    \ n1 n2+ c-addr+ <>CRLF
+                   while,   \ n1 n2+ c-addr+
+            ' -rot call,    \ c-addr+ n1 n2+
+                   repeat,  \ c-addr+ n1 n2+
+            ' drop call,    \ n1 n2+
+             ' nip jump,    \ n2+
+
+\ source-id ( -- 0 | -1 ) Identifies the input source (-1=string [evaluate], 0=input device)
+var, source-id
+
+\ refill ( -- flag ) fill input buffer from input (do nothing and return false when evaluating strings)
 0 header, refill
+       ' source-id call,
+               ' @ call,
+              ' 0= call,
+             ' dup call, \ return value
+                   if,
           ' source call,
-            ' 2dup call,
-           ' erase call,
-            ' drop call, \ TODO: bounds check
-                   begin,
-             ' key call,
-             ' dup call,
-                13 literal,
-              ' <> call,
-            ' over call,
-                10 literal,
-              ' <> call,
-             ' and call,
-                   while,
-            ' over call,
-               ' ! call,
-              ' 1+ call,
-                   repeat,
-           ' 2drop call,
+            ' 2dup call, \ TODO REMOVE
+           ' erase call, \ TODO REMOVE
+          ' accept call,
+            ' drop call, \ TODO SET LEN
                  0 literal,
              ' >in call,
                ' ! call,
-            ' true jump,
+                   then,
+                   ret,
 
 \ parse ( char "ccc<char>" -- c-addr u ) parse ccc delimited by char
 0 header, parse
           ' source call, \ char c-addr u
-             ' >in call, \ char c-addr u in
-               ' @ call, \ char c-addr u in
-             ' rot call, \ char u in c-addr
-               ' + call, \ char u start
-            ' tuck call, \ char start u start
-               ' + call, \ char start end
-            ' over call, \ char start end start
+            ' over call, \ char c-addr u c-addr
+               ' + call, \ char c-addr end
+              ' 1+ call, \ char c-addr end+
+            ' swap call, \ char end c-addr
+             ' >in call, \ char end c-addr in-addr
+               ' @ call, \ char end c-addr in
+               ' + call, \ char end start
+            ' tuck call, \ char start end start
                    ?do,  \ char start
             ' over call, \ char start char
                ' i call, \ char start char i
@@ -1081,8 +1116,6 @@ var, >in
                    loop,
              ' nip call, \ start
           ' source call, \ start c-addr u
-             ' nip call, \ start u
-            ' over call, \ start u start
                ' + call, \ start end
             ' over call, \ start end start
                ' - call, \ start len
@@ -1579,9 +1612,6 @@ var, latest \ common, but non-standard
 
 ( --- interpreter ------------------------------------------------------------ )
 
-\ source-id ( -- 0 | -1 ) Identifies the input source (-1=string [evaluate], 0=input device)
-var, source-id
-
 \ state ( -- a-addr ) compilation-state flag (true=compiling)
 var, state
 
@@ -1651,6 +1681,61 @@ var, state
                    then,
                    ret,
 
+0 header, (evaluate) \ internal (non-standard)
+                   begin,
+      ' parse-name call, \ addr len
+             ' dup call,
+              ' 0> call,
+                   while,
+       ' interpret call,
+                   repeat,
+                   ret,
+
+\ evaluate ( i * x c-addr u -- j * x ) save the current input source specification.
+\   Store minus-one (-1) in SOURCE-ID if it is present.
+\   Make the string described by c-addr and u both the input source and input buffer, set >IN to zero, and
+\   interpret. When the parse area is empty, restore the prior input source specification.
+0 header, evaluate
+      ' source-len call,
+               ' @ call,
+              ' >r call, \ store original source-len
+      ' source-len call,
+               ' ! call,
+     ' source-addr call,
+               ' @ call,
+              ' >r call, \ store original orig-source-addr
+     ' source-addr call,
+               ' ! call,
+       ' source-id call,
+               ' @ call,
+              ' >r call, \ store original source-id
+                -1 literal,
+       ' source-id call,
+               ' ! call, \ set source-id=-1
+             ' >in call,
+               ' @ call,
+              ' >r call, \ store original >in
+                 0 literal,
+             ' >in call,
+               ' ! call, \ set >in=0
+      ' (evaluate) call,
+                 0 literal,
+       ' source-id call,
+               ' ! call, \ set source-id=-1
+              ' r> call,
+             ' >in call,
+               ' ! call, \ restore >in
+              ' r> call,
+       ' source-id call,
+               ' ! call, \ restore source-id
+              ' r> call,
+     ' source-addr call,
+               ' ! call, \ restore source-addr
+              ' r> call,
+      ' source-len call,
+               ' ! jump, \ restore source-len
+                    ret,
+
 \ quit ( -- ) ( R: i * x -- ) Empty the return stack, store zero in SOURCE-ID if it is present, make
 \      the user input device the input source, and enter interpretation state. Do not display a message.
 \      Repeat the following: Accept a line from the input source into the input buffer, set >IN to zero,
@@ -1667,13 +1752,7 @@ var, state
                    begin,
           ' refill call,
                    while,
-                   begin,
-      ' parse-name call, \ addr len
-             ' dup call,
-              ' 0> call,
-                   while,
-       ' interpret call,
-                   repeat,
+      ' (evaluate) call,
            ' 2drop call,
               ' bl call,
             ' emit call,
@@ -1763,12 +1842,18 @@ $80 header, literal
                    patch,
     ' (clear-data) call,
          ' decimal call, \ default base
-\              here literal, \ update dictionary pointer to compile-time position
-\              ' dp call,
-\               ' ! call,
-\          latest @ literal, \ update latest to compile-time
-\          ' latest call,
-\               ' ! call,
+memory-size $500 - literal, \ $ff bytes above stacks
+     ' source-addr call,
+               ' ! call,
+               $ff literal, \ size ($400 bytes for stacks/$ff elements each)
+      ' source-len call,
+               ' ! call,
+\             here literal, \ update dictionary pointer to compile-time position
+\             ' dp call,
+\              ' ! call,
+\         latest @ literal, \ update latest to compile-time
+\         ' latest call,
+\              ' ! call,
             ' quit jump,
 
 here     ' dp     16 + s! \ update dictionary pointer to compile-time position
