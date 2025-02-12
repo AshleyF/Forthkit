@@ -10,4 +10,5 @@ echo "write-boot-block bye" | cat bootstrap.fs - | gforth debugger.fs
 
 # cat kernel-meta.fs - | ./machine
 
-./machine
+echo "Running machine"
+cat pixels.fs - | ./machine

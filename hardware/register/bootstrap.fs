@@ -184,6 +184,23 @@ header, : ] header, ] ;
 : (abort") rot 0<> if type abort else 2drop then ; \ internal non-standard
 : abort" postpone s" ['] (abort") call, ; immediate
 
+\ evaluate ( i * x c-addr u -- j * x ) save the current input source specification.
+\   Store minus-one (-1) in SOURCE-ID if it is present.
+\   Make the string described by c-addr and u both the input source and input buffer, set >IN to zero, and
+\   interpret. When the parse area is empty, restore the prior input source specification.
+: evaluate
+  source-len  @ >r    source-len  !
+  source-addr @ >r    source-addr !
+  source-id   @ >r -1 source-id   !
+  >in         @ >r  0 >in         !
+  (evaluate)
+  0  source-id   !
+  r> >in         !
+  r> source-id   !
+  r> source-addr !
+  r> source-len  !
+;
+
 : write-boot-block ( -- ) 0 0 here write-block ; \ taken from assembler.fs
 
 .( writing boot block )
