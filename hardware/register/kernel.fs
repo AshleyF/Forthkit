@@ -748,16 +748,6 @@ def xor 2dup or -rot and invert and ;
                    then, \ can't use in def
             ' drop jump,
 
-0 header, fuck
-            ' 2dup call,
-               ' < call,
-                   if, \ can't use in def
-             ' nip call,
-            ' exit call,
-                   then, \ can't use in def
-            ' drop jump,
-                   ret,
-
 ( --- secondary control-flow ------------------------------------------------- )
 
 \ <limit> <start> do ... loop
