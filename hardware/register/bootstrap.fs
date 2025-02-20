@@ -134,7 +134,7 @@ header, : ] header, ] ;
 : u< 2dup xor 0< if nip else - then 0< ;
 : u> swap u< ;
 
-: within ( test low high -- flag ) over - rot rot - u> ;
+: within ( test low high -- flag ) over - -rot - u> ;
 
 : .( [char] ) parse type ; immediate
 
