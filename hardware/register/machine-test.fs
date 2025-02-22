@@ -63,11 +63,11 @@ hard-reset ." Test mul "
     z reg @ 42 7 * = . cr
 
 hard-reset ." Test div "
-      7 x ldc,
-     42 y ldc,
+     10 x ldc,
+    -20 y ldc,
     z y x div,
     3 steps
-    z reg @ 42 7 / = . cr
+    z reg @ -20 10 / $ffff and = . cr
 
 hard-reset ." Test nand "
       7 x ldc,

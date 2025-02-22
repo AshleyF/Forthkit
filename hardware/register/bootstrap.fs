@@ -201,6 +201,8 @@ header, : ] header, ] ;
   r> source-len  !
 ;
 
+: >= 2dup > -rot = or ; \ non-standard
+
 : write-boot-block ( -- ) 0 0 here write-block ; \ taken from assembler.fs
 
 .( writing boot block )

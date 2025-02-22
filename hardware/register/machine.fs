@@ -2,13 +2,14 @@ require assembler.fs \ memory
 
 create registers 16 cells allot  registers 16 cells erase
 
+: 32bit ( n -- n32 ) dup 15 rshift 0<> if -1 16 lshift or then ;
 : 16bit ( n -- n16 ) $ffff and ;
 : reg ( i -- addr ) cells registers + ; \ register address
 : reg+! ( v reg -- ) swap @ over +! dup @ 16bit swap ! ; \ +! while ensuring 16-bit
 : fetch-pc registers @ memory + c@ 1 registers +! ; \ fetch [pc++]
 : nybbles ( byte -- n2 n1 ) dup $f and swap 4 rshift ( $f and ) ; \ split byte into nybbles 
 : xyz ( x -- reg-x reg-y reg-z ) reg fetch-pc nybbles reg swap reg ;
-: binop ( x op -- ) swap xyz >r @ swap @ rot execute 16bit r> ! ; \ execute binary operation ( y x -- )
+: binop ( x op -- ) swap xyz >r @ 32bit swap @ 32bit rot execute 16bit r> ! ; \ execute binary operation ( y x -- )
 
 \ [undefined] [: [if]
 \ : [: ( -- ) postpone ahead :noname ; immediate compile-only

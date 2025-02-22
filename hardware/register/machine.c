@@ -56,10 +56,10 @@ int main(void)
             case 2: reg[z] = (mem[reg[y]] | (mem[reg[y] + 1] << 8)); reg[y] += reg[x]; break; // LD+
             case 3: mem[reg[y]] = reg[z]; mem[reg[y] + 1] = (reg[z] >> 8); reg[y] += reg[x]; break; // ST+
             case 4: if (reg[x] == 0) reg[z] = reg[y]; break; // CP?
-            case 5: reg[z] = reg[y] + reg[x]; break; // ADD
-            case 6: reg[z] = reg[y] - reg[x]; break; // SUB
-            case 7: reg[z] = reg[y] * reg[x]; break; // MUL
-            case 8: reg[z] = reg[y] / reg[x]; break; // DIV
+            case 5: reg[z] = (unsigned short)((int)(short)reg[y] + (int)(short)reg[x]); break; // ADD
+            case 6: reg[z] = (unsigned short)((int)(short)reg[y] - (int)(short)reg[x]); break; // SUB
+            case 7: reg[z] = (unsigned short)((int)(short)reg[y] * (int)(short)reg[x]); break; // MUL
+            case 8: reg[z] = (unsigned short)((int)(short)reg[y] / (int)(short)reg[x]); break; // DIV
             case 9: reg[z] = ~(reg[y] & reg[x]); break; // NAND
             case 10: reg[z] = reg[y] << reg[x]; break; // SHL
             case 11: reg[z] = (unsigned short)reg[y] >> reg[x]; break; // SHR
@@ -71,3 +71,6 @@ int main(void)
         }
     }
 }
+
+// TODO: sign extension for LD+ & ST+ ?
+// TODO: rethink SHR... arithmatic vs. logical
