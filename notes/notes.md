@@ -1,5 +1,12 @@
 # Notes
 
+## Bugs
+
+- Can't define words in terms of prior versions (infinite recursion!)
+- Machine build seems to not work on Mac (clang compiler)
+- u. doesn't work for signed values
+  - Need to rationalize signed/unsigned behavior in general
+
 ## Bootstrapping
 
 - Make dot word (`.`) -- even simple single-digit

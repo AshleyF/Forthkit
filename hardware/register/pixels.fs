@@ -45,38 +45,50 @@ create mask-table 1 c, 8 c, 2 c, 16 c, 4 c, 32 c, 64 c, 128 c,
     i screen + c@ 10240 or utf8-emit
   loop ;
 
+27 constant esc
 : show-sixel
-  27 emit ." P7;1q"
-  height 3 - 0 do \ TODO: missed bottom rows
+  esc emit ." P7;1q"
+  height 0 do \ TODO: missed bottom rows
     width 0 do
       0
-      i j     get if  3 or then
-      i j 1 + get if 12 or then
-      i j 2 + get if 48 or then
-      63 + dup emit emit
+      i j     get if  7 or then
+      j height 1 - < if
+        i j 1 + get if 56 or then
+      then
+      63 + dup emit dup emit emit
     loop
     [char] - emit
-  3 +loop
-  27 emit [char] \ emit ;
+  2 +loop
+  esc emit [char] \ emit cr ;
 
 : show-sixel-tiny
-  27 emit ." P7;1q"
-  height 6 - 0 do \ TODO: missed bottom rows
+  esc emit ." P7;1q"
+  height 0 do \ TODO: missed bottom rows
     width 0 do
       0
       i j     get if  1 or then
-      i j 1 + get if  2 or then
-      i j 2 + get if  4 or then
-      i j 3 + get if  8 or then
-      i j 4 + get if 16 or then
-      i j 5 + get if 32 or then
+      j height 1 - < if
+        i j 1 + get if  2 or then
+        j height 2 - < if
+          i j 2 + get if  4 or then
+          j height 3 - < if
+            i j 3 + get if  8 or then
+            j height 4 - < if
+              i j 4 + get if 16 or then
+              j height 5 - < if
+                i j 5 + get if 32 or then
+              then
+            then
+          then
+        then
+      then
       63 + emit
     loop
     [char] - emit
   6 +loop
-  27 emit [char] \ emit ;
+  esc emit [char] \ emit cr ;
 
-: show show-sixel ;
+: show show-sixel-tiny ;
 
 variable line 0 line !
 : pixels parse-name 0 do dup c@ [char] * = if i line @ set then 1+ loop drop 1 line +! ;

@@ -30,8 +30,9 @@ pi 180e f/ fconstant rads
 : head ( t -- ) s>f fhead ;
 
 : pose ( x y t -- ) head go ;
+: home 0 0 0 pose ;
 
-: start ( -- ) clear 0 0 0 pose ;
+: start ( -- ) clear home ;
 : turn ( a -- ) s>f theta f@ f+ fhead ;
 : plot ( x y -- )
   fround f>s hwidth +

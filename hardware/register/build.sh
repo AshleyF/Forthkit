@@ -8,7 +8,5 @@ echo "Building image..."
 rm -f ./block0.bin
 echo "write-boot-block bye" | cat bootstrap.fs - | gforth debugger.fs
 
-# cat kernel-meta.fs - | ./machine
-
 echo "Running machine"
-cat pixels.fs turtle-fixed.fs - | ./machine
+cat pixels.fs turtle-fixed.fs turtle-geometry-book.fs - | ./machine
