@@ -948,7 +948,8 @@ def binary 2 base ! ;
 \             ' hold call, \ 0 n b
 \                ' / call, \ 0 m
 \             ' swap jump, \ TODO: support double numbers
-def # swap base @ 2dup mod 48 + hold / swap ;
+def # swap base @ 2dup mod 48 + hold / swap ; \ TODO: doesn't work with negative values!
+\ base @ ud/mod rot dup #9 u> #7 and + #48 + hold ;
 
 \ #s ( ud -- ud ) convert all digits using # (appends at least 0)
 0 header, #s
@@ -1004,16 +1005,6 @@ def s>d dup 0< ;
 \             ' type jump,
 def . dup abs s>d <# #s rot sign #> space type ;
 
-\ u. ( u -- ) display unsigned value in free field format (0 <# #s #> type space)
-\ 0 header, u.
-\                  0 literal,
-\               ' <# call,
-\               ' #s call,
-\               ' #> call,
-\            ' space call,
-\             ' type jump,
-def u. 0 <# #s #> space type ;
-
 \ d. ( u -- ) display unsigned value in free field format (from double word set)
 \ 0 header, d.
 \               ' <# call,
@@ -1022,6 +1013,12 @@ def u. 0 <# #s #> space type ;
 \            ' space call,
 \             ' type jump,
 def d. <# #s #> space type ;
+
+\ u. ( u -- ) display unsigned value in free field format (0 <# #s #> type space)
+\ 0 header, u.
+\                  0 literal,
+\               ' d. jump,
+def u. 0 d. ;
 
 \ .s ( -- ) display values on the stack non-destructively (depth dup 0 do dup i - pick . loop drop)
 0 header, .s

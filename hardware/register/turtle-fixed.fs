@@ -27,10 +27,10 @@ table .
 variable x variable y variable theta
 variable dx variable dy
 
-\ : point-x x @ 8 rshift width 2/ + ;
-\ : point-y y @ 8 rshift height 2/ + ;
-: point-x x @ 256 / width 2/ + ;
-: point-y y @ 256 / height 2/ + ;
+\ : point-x x @ 8 rshift width 2/ + ; / TODO: rshift doesn't handle sign extension
+\ : point-y y @ 8 rshift height 2/ + ; / TODO: rshift doesn't handle sign extension
+: point-x x @ 128 + 256 / width 2/ + ;
+: point-y y @ 128 + 256 / height 2/ + ;
 : valid-x? point-x 0 width 1- within ;
 : valid-y? point-y 0 height 1- within ;
 : valid? valid-x? valid-y? and ;
@@ -131,3 +131,51 @@ variable 'koch
 \ -80 0 go
 \ 50 2 snowflake
 \ show
+
+\ --- turtle geometry adapter ---
+
+variable pen true pen !
+: pendown true pen ! ;
+: penup false pen ! ;
+
+: start clear 0 0 -90 pose pendown ;
+
+: forward pen @ if move else jump then ;
+: back 180 turn move 180 turn ;
+: right turn ;
+: left -1 * turn ;
+
+: iterate 0 postpone literal postpone do ; immediate
+
+\ --- turtle geometry examples ---
+
+: turtle 14
+  plot dup 2/ jump
+  166 turn dup move
+  104 turn dup 2/ move \ really 0.5176 *
+  104 turn dup move
+  -14 turn 2/ negate jump ;
+
+: pg4
+  start
+  50 forward turtle
+  90 right 75 forward 45 left turtle
+  50 back turtle
+  45 left penup 50 forward turtle
+  show ;
+
+: square0 
+  50 forward 90 right
+  50 forward 90 right
+  50 forward 90 right
+  50 forward 90 right ;
+
+: square1 
+  4 iterate
+    50 forward 90 right
+  loop ;
+
+: square 
+  4 iterate
+    dup forward 90 right
+  loop drop ;
