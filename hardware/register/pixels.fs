@@ -47,11 +47,12 @@ create mask-table 1 c, 8 c, 2 c, 16 c, 4 c, 32 c, 64 c, 128 c,
 
 27 constant esc
 : show-sixel
-  esc emit ." P7;1q"
+  esc emit ." P;1q"
+  [char] " emit ." 1;1" \ 1:1 pad:pan ratio (square pixels)
   height 0 do \ TODO: missed bottom rows
     width 0 do
       0
-      i j     get if  7 or then
+      i j get if 7 or then
       j height 1 - < if
         i j 1 + get if 56 or then
       then
@@ -62,7 +63,8 @@ create mask-table 1 c, 8 c, 2 c, 16 c, 4 c, 32 c, 64 c, 128 c,
   esc emit [char] \ emit cr ;
 
 : show-sixel-tiny
-  esc emit ." P7;1q"
+  esc emit ." P;1q" \ transparent zero pixel value (also, default 0 aspect ratio -- override below)
+  [char] " emit ." 1;1" \ 1:1 pad:pan ratio (square pixels)
   height 0 do \ TODO: missed bottom rows
     width 0 do
       0

@@ -4,12 +4,12 @@ variable pen true pen !
 : pendown true pen ! ;
 : penup false pen ! ;
 
-: start clear 0 0 -90 pose pendown ;
+: start clear home pendown ; \ TODO redefine in terms of old start
 
 : forward pen @ if move else jump then ;
 : back 180 turn move 180 turn ;
-: right turn ;
-: left -1 * turn ;
+: left turn ;
+: right -1 * turn ;
 
 : iterate 0 postpone literal postpone do ; immediate
 
@@ -66,7 +66,7 @@ variable pen true pen !
     square-piece square-piece
   loop ;
 
-: p6 start -80 -40 go 10 square 20 0 go 10 20 rectangle show ;
+: p6 start -80 -40 go 20 square 20 0 go 20 40 rectangle show ;
 
 : try-angle ( size -- )
   3 iterate
@@ -86,7 +86,7 @@ variable pen true pen !
 : house ( size -- )
   dup square dup forward 30 right triangle ;
 
-: p8 start -80 0 go 30 house0 0 0 -90 pose 30 house show ;
+: p8 start -80 0 go 30 house0 home 30 house show ;
 
 : thing
   30 forward 90 right
@@ -114,7 +114,7 @@ variable pen true pen !
 : arcr ( r deg -- ) 6 / iterate dup forward 6 right loop drop ; \ 6x step, tighter
 : arcl ( r deg -- ) 6 / iterate dup forward 6 left loop drop ;
 
-: p10 start -50 0 go circle home 4 90 arcr home 4 90 arcl show ;
+: p10 start -60 0 go circle home 4 90 arcr home 4 90 arcl show ;
 
 : circles 9 iterate 4 360 arcr 40 right loop ;
 
@@ -141,8 +141,36 @@ variable pen true pen !
 
 : p12 start circles show
       start 8 flower show
-      start 45 65 go 3 sun show ;
+      start 50 -70 go 3 sun show ;
 
-: go demo
-  p4 p5 p6 p7 p8 p9 p10 p12
-; go
+: npoly ( side angle n -- )
+  iterate
+    2dup right forward
+  loop 2drop ;
+
+: poly ( side angle -- ) 360 over / npoly ;
+
+: p16
+  start -60 20 go  70  72     poly show
+  start -30 40 go 120 144  5 npoly show
+  start -70  0 go   1   1     poly show
+  start -40 20 go  60  60     poly show
+  start -30 40 go 120 135  8 npoly show
+  start -30 40 go 100 108 10 npoly show ;
+
+: new-npoly ( side angle n -- )
+  iterate
+    2dup    right forward
+    2dup 2* right forward
+  loop 2drop ;
+
+: p17 
+  start -50  0 go  50  30  4 new-npoly show
+  start -20 50 go  40 144  5 new-npoly show
+  start -60 20 go  70  45  8 new-npoly show
+  start -30 60 go  14 125 25 new-npoly show ;
+
+: all demo
+  p4 p5 p6 p7 p8 p9 p10 p12 p16 p17
+;
+all

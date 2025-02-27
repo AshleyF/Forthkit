@@ -28,9 +28,9 @@ variable x variable y variable theta
 variable dx variable dy
 
 \ : point-x x @ 8 rshift width 2/ + ; / TODO: rshift doesn't handle sign extension
-\ : point-y y @ 8 rshift height 2/ + ; / TODO: rshift doesn't handle sign extension
+\ : point-y y @ 8 rshift height 2/ swap - ; / TODO: rshift doesn't handle sign extension
 : point-x x @ 128 + 256 / width 2/ + ;
-: point-y y @ 128 + 256 / height 2/ + ;
+: point-y y @ 128 + 256 / height 2/ swap - ;
 : valid-x? point-x 0 width 1- within ;
 : valid-y? point-y 0 height 1- within ;
 : valid? valid-x? valid-y? and ;
@@ -40,7 +40,7 @@ variable dx variable dy
 \ : go 256 * y ! 256 * x ! ;
 : head dup theta ! dup cos dx ! sin dy ! ;
 : pose head go ;
-: home 0 0 0 pose ;
+: home 0 0 90 pose ;
 
 : start clear home ;
 : turn theta @ + head ;
@@ -59,13 +59,13 @@ variable dx variable dy
 : hexagon  ( len -- )  6 polygon ;
 : circle   ( len -- ) 36 polygon ;
 
-: shapes start 0 -70 go 50 hexagon 50 pentagon 50 square 50 triangle show ;
+: shapes start 30 30 go 50 hexagon 50 pentagon 50 square 50 triangle show ;
 
 : star ( len -- ) 144 5 draw ;
 
 : burst start 60 60 go 60 0 do i 6 * head 0 0 go 80 move loop show ;
 
-: squaral start -70 -35 go 20 0 do 140 move 126 turn loop show ;
+: squaral start 35 -70 go 20 0 do 140 move 126 turn loop show ;
 
 : rose start 0 54 0 do 2 + dup move 84 turn loop show ;
 

@@ -30,7 +30,7 @@ pi 180e f/ fconstant rads
 : head ( t -- ) s>f fhead ;
 
 : pose ( x y t -- ) head go ;
-: home 0 0 0 pose ;
+: home 0 0 90 pose ;
 
 : start ( -- ) clear home ;
 : turn ( a -- ) s>f theta f@ f+ fhead ;
@@ -64,13 +64,13 @@ pi 180e f/ fconstant rads
 : hexagon  ( len -- )  6 polygon ;
 : circle   ( len -- ) 36 polygon ;
 
-: shapes start 0 -70 go 50 hexagon 50 pentagon 50 square 50 triangle show ;
+: shapes start 30 30 go 50 hexagon 50 pentagon 50 square 50 triangle show ;
 
 : star ( len -- ) 144 5 draw ;
 
 : burst start 60 0 do i 6 * head 0 0 go 80 move loop show ;
 
-: squaral start -70 -35 go 20 0 do 140 move 126 turn loop show ;
+: squaral start 35 -70 go 20 0 do 140 move 126 turn loop show ;
 
 : rose start 0 54 0 do 2 + dup move 84 turn loop show ;
 
