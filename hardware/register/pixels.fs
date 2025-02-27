@@ -291,3 +291,55 @@ show
 \   loop
 \   show ;
 \ draw-face
+
+\ --- incremental sixels ---------------------------------------------------------
+
+\ if (r >= 255 && b <= 0 && g < 255) g += 5;
+\ else if (g >= 255 && b <= 0 && r > 0) r -= 5;
+\ else if (r <= 0 && g >= 255 && b < 255) b += 5;
+\ else if (r <= 0 && b >= 255 && g > 0) g -= 5;
+\ else if (g <= 0 && b >= 255 && r < 255) r += 5;
+\ else if (r >= 255 && g <= 0 && b > 0) b -= 5;
+
+\ : power ( y x -- ) \ non-standard
+\   1 -rot
+\   begin
+\     dup 0= if 2drop exit then
+\     1- -rot swap over * swap rot
+\   again ;
+
+\ variable r  100 r !
+\ variable g    0 g !
+\ variable b    0 b !
+\ : next-color
+\        r @ 100 =  b @   0 =  and  g @ 100 <  and if  1 g +!
+\   else g @ 100 =  b @   0 =  and  r @   0 >  and if -1 r +!
+\   else r @    0=  g @ 100 =  and  b @ 100 <  and if  1 b +!
+\   else r @    0=  b @ 100 =  and  g @   0 >  and if -1 g +!
+\   else g @    0=  b @ 100 =  and  r @ 100 <  and if  1 r +!
+\   else r @ 100 =  g @   0 =  and  b @   0 >  and if -1 b +!
+\   then then then then then then ;
+\ : emit-num s>d <# #s #> type ;
+
+\ : home-cursor esc emit ." [H" ;
+\ : clear esc emit ." [2J" home-cursor ;
+\ : set ( x y -- )
+\   home-cursor
+\   esc emit ." P;1q"
+\   [char] " emit ." 1;1" \ 1:1 pad:pan ratio (square pixels)
+\ \  ." #0;2;"
+\ \  r @ emit-num [char] ; emit
+\ \  g @ emit-num [char] ; emit
+\ \  b @ emit-num
+\ \  next-color
+\   dup 6 / 0 ?do [char] - emit loop \ to line
+\   6 mod 2 swap power 63 + \ sixel
+\   \ swap [char] ! emit emit-num 63 emit
+\   swap 0 ?do 63 emit loop \ to column \ TODO: use repeat protocol
+\   emit
+\   esc emit [char] \ emit
+\   \ foo @ . foo @ 1 + foo !
+\   ; \ 10000 0 do loop ;
+\ 
+\ : show 100 0 do 10000 0 do loop loop ; \ pause
+\ : show ;

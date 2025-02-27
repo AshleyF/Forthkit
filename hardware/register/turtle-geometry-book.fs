@@ -7,7 +7,7 @@ variable pen true pen !
 : start clear home pendown ; \ TODO redefine in terms of old start
 
 : forward pen @ if move else jump then ;
-: back 180 turn move 180 turn ;
+: back 180 turn forward 180 turn ;
 : left turn ;
 : right -1 * turn ;
 
@@ -141,36 +141,56 @@ variable pen true pen !
 
 : p12 start circles show
       start 8 flower show
-      start 50 -70 go 3 sun show ;
+      start 48 -65 go 3 sun show ;
 
-: npoly ( side angle n -- )
+: npoly ( angle side n -- )
   iterate
-    2dup right forward
+    2dup forward right
   loop 2drop ;
 
-: poly ( side angle -- ) 360 over / npoly ;
+: poly ( angle side -- ) 360 over / npoly ;
 
 : p16
-  start -60 20 go  70  72     poly show
-  start -30 40 go 120 144  5 npoly show
-  start -70  0 go   1   1     poly show
-  start -40 20 go  60  60     poly show
-  start -30 40 go 120 135  8 npoly show
-  start -30 40 go 100 108 10 npoly show ;
+  start -60 -20 go  72  70     poly show
+  start -30 -40 go 144 120  5 npoly show
+  start -70   0 go   1   1     poly show
+  start -60 -20 go  60  60     poly show
+  start -30 -40 go 135 120  8 npoly show
+  start -30 -40 go 108 100 10 npoly show ;
 
-: new-npoly ( side angle n -- )
+: new-npoly ( angle side n -- )
   iterate
-    2dup    right forward
-    2dup 2* right forward
+    2dup forward    right
+    2dup forward 2* right
   loop 2drop ;
 
 : p17 
-  start -50  0 go  50  30  4 new-npoly show
-  start -20 50 go  40 144  5 new-npoly show
-  start -60 20 go  70  45  8 new-npoly show
-  start -30 60 go  14 125 25 new-npoly show ;
+  start -50 -20 go   30 50  4 new-npoly show
+  start -20   0 go  144 40  5 new-npoly show
+  start -60 -40 go   45 70  8 new-npoly show
+  start -30  60 go  125 14 25 new-npoly show ;
+
+: polyspi ( inc angle side -- )
+  valid? if
+    2dup forward right plot \ plot to show vertex when penup
+    2 pick + tail-recurse
+  else 2drop then ;
+
+: p18 
+  start 2  95 2 polyspi show
+  start 4  90 4 polyspi show
+  start 6 120 6 polyspi show
+  start 3 117 3 polyspi show
+;
+
+: p19
+  start penup 2  95 2 polyspi show
+  start penup 1  95 1 polyspi show
+  start penup 1 117 1 polyspi show
+  start penup 1 111 1 polyspi show ;
 
 : all demo
   p4 p5 p6 p7 p8 p9 p10 p12 p16 p17
+  p18 p19
 ;
 all

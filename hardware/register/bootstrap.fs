@@ -177,7 +177,7 @@ header, : ] header, ] ;
 
 : latest-cfa latest @ 2 + dup c@ 127 and + 1+ ; ( non-standard )
 : recurse latest-cfa call, ; immediate
-: tail-recurse latest-cfa jump, ; immediate
+: tail-recurse latest-cfa jump, ; immediate ( non-standard )
 
 : move 0 ?do over @ over ! cell+ swap cell+ swap loop 2drop ; \ TODO: handle overlap
 
@@ -202,6 +202,14 @@ header, : ] header, ] ;
 ;
 
 : >= 2dup > -rot = or ; \ non-standard
+: <= 2dup < -rot = or ; \ non-standard
+
+: power ( y x -- ) \ non-standard
+  1 -rot
+  begin
+    dup 0= if 2drop exit then
+    1- -rot swap over * swap rot
+  again ;
 
 : write-boot-block ( -- ) 0 0 here write-block ; \ taken from assembler.fs
 
