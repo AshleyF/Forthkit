@@ -67,9 +67,9 @@ variable dx variable dy
 
 : squaral start 35 -70 go 20 0 do 140 move 126 turn loop show ;
 
-: rose start 0 54 0 do 2 + dup move 84 turn loop show ;
+: rose start 0 54 0 do 2 + dup move 84 turn loop drop show ;
 
-: spiral-rec 1 + dup move 92 turn dup 110 < if recurse then ;
+: spiral-rec 1 + dup move 92 turn dup 110 < if tail-recurse then drop ;
 : spiral start 1 spiral-rec show ;
 
 \ shim for old version of gforth (e.g. apt install gforth gives 0.7.3)

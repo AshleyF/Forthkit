@@ -174,7 +174,7 @@ variable pen true pen !
   valid? if
     2dup forward right plot \ plot to show vertex when penup
     2 pick + tail-recurse
-  else 2drop then ;
+  else 2drop drop then ;
 
 : p18 
   start 2  95 2 polyspi show
@@ -187,7 +187,8 @@ variable pen true pen !
   start penup 2  95 2 polyspi show
   start penup 1  95 1 polyspi show
   start penup 1 117 1 polyspi show
-  start penup 1 111 1 polyspi show ;
+  start penup 1 111 1 polyspi show
+;
 
 : all demo
   p4 p5 p6 p7 p8 p9 p10 p12 p16 p17

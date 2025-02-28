@@ -7,6 +7,3 @@ gcc -Wall -O3 -std=c99 -o ./machine ./machine.c
 echo "Building image..."
 rm -f ./block0.bin
 echo "write-boot-block bye" | cat bootstrap.fs - | gforth debugger.fs
-
-echo "Running machine"
-cat pixels.fs turtle-fixed.fs turtle-geometry-book.fs - | ./machine

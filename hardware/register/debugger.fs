@@ -2,8 +2,8 @@ require machine.fs
 require kernel.fs
 
 : dump-registers ( -- ) registers 16 cells dump ;
-: dump-memory ( -- ) here memory - dup . ." bytes" memory swap dump ; \ dump allocated memory (to here)
-: dump-stacks ( -- ) d reg @ r reg @ min dup memory + memory-size rot - dump ; \ dump stacks
+: dump-memory ( -- ) memory memory-size dump ;
+: dump-stacks ( -- ) d reg @ r reg @ min dup memory + memory-size rot - dump ;
 
 : run-word ( addr -- ) pc reg ! run ;
 : rw run-word ;

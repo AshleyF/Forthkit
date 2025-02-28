@@ -46,51 +46,51 @@ create mask-table 1 c, 8 c, 2 c, 16 c, 4 c, 32 c, 64 c, 128 c,
   loop ;
 
 27 constant esc
-: show-sixel
-  esc emit ." P;1q"
-  [char] " emit ." 1;1" \ 1:1 pad:pan ratio (square pixels)
-  height 0 do \ TODO: missed bottom rows
-    width 0 do
-      0
-      i j get if 7 or then
-      j height 1 - < if
-        i j 1 + get if 56 or then
-      then
-      63 + dup emit dup emit emit
-    loop
-    [char] - emit
-  2 +loop
-  esc emit [char] \ emit cr ;
+\ : show-sixel
+\   esc emit ." P;1q"
+\   [char] " emit ." 1;1" \ 1:1 pad:pan ratio (square pixels)
+\   height 0 do \ TODO: missed bottom rows
+\     width 0 do
+\       0
+\       i j get if 7 or then
+\       j height 1 - < if
+\         i j 1 + get if 56 or then
+\       then
+\       63 + dup emit dup emit emit
+\     loop
+\     [char] - emit
+\   2 +loop
+\   esc emit [char] \ emit cr ;
 
-: show-sixel-tiny
-  esc emit ." P;1q" \ transparent zero pixel value (also, default 0 aspect ratio -- override below)
-  [char] " emit ." 1;1" \ 1:1 pad:pan ratio (square pixels)
-  height 0 do \ TODO: missed bottom rows
-    width 0 do
-      0
-      i j     get if  1 or then
-      j height 1 - < if
-        i j 1 + get if  2 or then
-        j height 2 - < if
-          i j 2 + get if  4 or then
-          j height 3 - < if
-            i j 3 + get if  8 or then
-            j height 4 - < if
-              i j 4 + get if 16 or then
-              j height 5 - < if
-                i j 5 + get if 32 or then
-              then
-            then
-          then
-        then
-      then
-      63 + emit
-    loop
-    [char] - emit
-  6 +loop
-  esc emit [char] \ emit cr ;
-
-: show show-sixel-tiny ;
+\ : show-sixel-tiny
+\   esc emit ." P;1q" \ transparent zero pixel value (also, default 0 aspect ratio -- override below)
+\   [char] " emit ." 1;1" \ 1:1 pad:pan ratio (square pixels)
+\   height 0 do \ TODO: missed bottom rows
+\     width 0 do
+\       0
+\       i j     get if  1 or then
+\       j height 1 - < if
+\         i j 1 + get if  2 or then
+\         j height 2 - < if
+\           i j 2 + get if  4 or then
+\           j height 3 - < if
+\             i j 3 + get if  8 or then
+\             j height 4 - < if
+\               i j 4 + get if 16 or then
+\               j height 5 - < if
+\                 i j 5 + get if 32 or then
+\               then
+\             then
+\           then
+\         then
+\       then
+\       63 + emit
+\     loop
+\     [char] - emit
+\   6 +loop
+\   esc emit [char] \ emit cr ;
+\ 
+\ : show show-sixel-tiny ;
 
 variable line 0 line !
 : pixels parse-name 0 do dup c@ [char] * = if i line @ set then 1+ loop drop 1 line +! ;
@@ -308,38 +308,39 @@ show
 \     1- -rot swap over * swap rot
 \   again ;
 
-\ variable r  100 r !
-\ variable g    0 g !
-\ variable b    0 b !
-\ : next-color
-\        r @ 100 =  b @   0 =  and  g @ 100 <  and if  1 g +!
-\   else g @ 100 =  b @   0 =  and  r @   0 >  and if -1 r +!
-\   else r @    0=  g @ 100 =  and  b @ 100 <  and if  1 b +!
-\   else r @    0=  b @ 100 =  and  g @   0 >  and if -1 g +!
-\   else g @    0=  b @ 100 =  and  r @ 100 <  and if  1 r +!
-\   else r @ 100 =  g @   0 =  and  b @   0 >  and if -1 b +!
-\   then then then then then then ;
-\ : emit-num s>d <# #s #> type ;
+variable r  100 r !
+variable g    0 g !
+variable b    0 b !
+: next-color
+       r @ 100 =  b @   0 =  and  g @ 100 <  and if  1 g +!
+  else g @ 100 =  b @   0 =  and  r @   0 >  and if -1 r +!
+  else r @    0=  g @ 100 =  and  b @ 100 <  and if  1 b +!
+  else r @    0=  b @ 100 =  and  g @   0 >  and if -1 g +!
+  else g @    0=  b @ 100 =  and  r @ 100 <  and if  1 r +!
+  else r @ 100 =  g @   0 =  and  b @   0 >  and if -1 b +!
+  then then then then then then ;
+: emit-num s>d <# #s #> type ;
+: set-color 
+  ." #0;2;"
+  r @ emit-num [char] ; emit
+  g @ emit-num [char] ; emit
+  b @ emit-num
+  next-color ;
 
-\ : home-cursor esc emit ." [H" ;
-\ : clear esc emit ." [2J" home-cursor ;
-\ : set ( x y -- )
-\   home-cursor
-\   esc emit ." P;1q"
-\   [char] " emit ." 1;1" \ 1:1 pad:pan ratio (square pixels)
-\ \  ." #0;2;"
-\ \  r @ emit-num [char] ; emit
-\ \  g @ emit-num [char] ; emit
-\ \  b @ emit-num
-\ \  next-color
-\   dup 6 / 0 ?do [char] - emit loop \ to line
-\   6 mod 2 swap power 63 + \ sixel
-\   \ swap [char] ! emit emit-num 63 emit
-\   swap 0 ?do 63 emit loop \ to column \ TODO: use repeat protocol
-\   emit
-\   esc emit [char] \ emit
-\   \ foo @ . foo @ 1 + foo !
-\   ; \ 10000 0 do loop ;
-\ 
-\ : show 100 0 do 10000 0 do loop loop ; \ pause
+: home-cursor esc emit ." [H" ;
+: clear esc emit ." [40m" esc emit ." [2J" home-cursor ;
+: set ( x y -- )
+  home-cursor
+  esc emit ." P;1q"
+  [char] " emit ." 1;1" \ 1:1 pad:pan ratio (square pixels)
+  set-color
+  dup 6 / 0 ?do [char] - emit loop \ to line
+  6 mod 2 swap power 63 + \ sixel
+  \ swap [char] ! emit emit-num 63 emit
+  swap 0 ?do 63 emit loop \ to column \ TODO: use repeat protocol
+  emit
+  esc emit [char] \ emit
+  ; \ 100 0 do loop ;
+
+: show 100 0 do 10000 0 do loop loop ; \ pause
 \ : show ;
