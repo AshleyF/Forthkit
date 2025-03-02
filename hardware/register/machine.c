@@ -53,7 +53,14 @@ int main(void)
         {
             case 0: return reg[x]; // HALT
             case 1: reg[x] = (signed char)((y << 4) | z); break; // LDC
-            case 2: reg[z] = (mem[reg[y]] | (mem[reg[y] + 1] << 8)); reg[y] += reg[x]; break; // LD+
+            case 2:
+                reg[z] = (mem[reg[y]] | (mem[reg[y] + 1] << 8)); reg[y] += reg[x];
+                if (z == 0 && y == 0 && x == 1) // jump?
+                {
+                    //printf("JUMP: %i\n", reg[z]);
+                }
+                break; // LD+
+            reg[z] = (mem[reg[y]] | (mem[reg[y] + 1] << 8)); reg[y] += reg[x]; break; // LD+
             case 3: mem[reg[y]] = reg[z]; mem[reg[y] + 1] = (reg[z] >> 8); reg[y] += reg[x]; break; // ST+
             case 4: if (reg[x] == 0) reg[z] = reg[y]; break; // CP?
             case 5: reg[z] = (unsigned short)((int)(short)reg[y] + (int)(short)reg[x]); break; // ADD

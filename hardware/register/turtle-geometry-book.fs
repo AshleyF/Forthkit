@@ -190,8 +190,22 @@ variable pen true pen !
   start penup 1 111 1 polyspi show
 ;
 
+: inspi ( inc angle side count -- )
+  0 do
+    2dup forward right
+    -rot over + rot \ tail-recurse
+  loop
+  2drop drop
+;
+
+: p20
+  start 7 1 5 10000 inspi show
+  start 20 2 2 20000 inspi show
+;
+
 : all demo
   p4 p5 p6 p7 p8 p9 p10 p12 p16 p17
   p18 p19
+  p20
 ;
 all
