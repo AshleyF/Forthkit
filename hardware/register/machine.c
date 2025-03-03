@@ -11,7 +11,7 @@ FILE* openBlock(unsigned short block, const char * mode)
     return fopen(filename, mode);
 }
 
-void readBlock(unsigned short block, long maxsize, unsigned short address)
+void readBlock(unsigned short block, unsigned short address, long maxsize)
 {
     FILE *file = openBlock(block, "r");
     fseek(file, 0, SEEK_END);
@@ -24,7 +24,7 @@ void readBlock(unsigned short block, long maxsize, unsigned short address)
     fclose(file);
 }
 
-void writeBlock(unsigned short block, long size, unsigned short address)
+void writeBlock(unsigned short block, unsigned short address, long size)
 {
     FILE *file = openBlock(block, "w");
     if (!file || !fwrite(mem + address, 1, size, file))
@@ -40,7 +40,7 @@ void writeBlock(unsigned short block, long size, unsigned short address)
 
 int main(void)
 {
-    readBlock(0, sizeof(mem), 0);
+    readBlock(0, 0, sizeof(mem));
     while (1)
     {
         unsigned char c = NEXT;

@@ -25,7 +25,10 @@ variable b    0 b !
   next-color ;
 
 : home-cursor esc emit ." [H" ;
-: clear esc emit ." [40m" esc emit ." [2J" home-cursor ;
+: clear
+  esc emit ." [40m" \ black background
+  esc emit ." [2J" \ clear
+  home-cursor ;
 : set ( x y -- )
   home-cursor
   esc emit ." P;1q"

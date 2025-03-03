@@ -200,7 +200,7 @@ variable pen true pen !
 
 : p20
   start 7 1 5 10000 inspi show
-  start 20 2 2 20000 inspi show
+  start -110 70 go 20 2 2 20000 inspi show
 ;
 
 : all demo

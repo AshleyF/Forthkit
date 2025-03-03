@@ -49,4 +49,5 @@
   6 +loop
   esc emit [char] \ emit cr ;
 
+\ : show show-sixel ; \ replace `show`
 : show show-sixel-tiny ; \ replace `show`

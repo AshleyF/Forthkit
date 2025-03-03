@@ -11,16 +11,9 @@ here
 constant table
 table .
 : cos
-  abs 360 mod dup 180 >= if
-    360 swap -
-  then
-  dup 90 >= if
-    -1 180 rot -
-  else
-    1 swap
-  then
-  table + c@ 1+ *
-;
+  abs 360 mod dup 180 >= if 360 swap - then
+  dup 90 >= if -1 180 rot - else 1 swap then
+  table + c@ 1+ * ;
 
 : sin 90 - cos ;
 
