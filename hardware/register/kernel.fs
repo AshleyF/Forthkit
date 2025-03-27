@@ -106,12 +106,12 @@ true warnings ! \ intentionally redefining (latest, header, ')
 \ leave empty space for new image
 \ memory $8000 + h !
 
-\ (clear-data) empty return stack
+\ (clear-data) empty return stack (non-standard)
 0 header, (clear-data)
  memory-size 2 + d ldv,
                    ret,
 
-\ (clear-return) empty return stack
+\ (clear-return) empty return stack (non-standard)
 0 header, (clear-return)
                  x popr,
      memory-size r ldv,
@@ -310,7 +310,11 @@ true warnings ! \ intentionally redefining (latest, header, ')
 \ 2/ ( x -- result ) divide by 2 (1 rshift)
 0 header, 2/
                  x popd,
+              15 y ldc,
+           y one y shl,
+             y y x and, \ get sign bit
            x x one shr,
+           x x y or, \ replace sign bit
                  x pushd,
                    ret,
 
@@ -567,6 +571,7 @@ true warnings ! \ intentionally redefining (latest, header, ')
                x d ld,
               15 y ldc,
              x x y shr, \ sign bit to 1s place
+           x x one and,
                x x not, \ negate
            x x one add,
                x d st,
@@ -579,6 +584,7 @@ true warnings ! \ intentionally redefining (latest, header, ')
              x y x sub, \ negative if y less than x
               15 y ldc,
              x x y shr, \ sign bit to 1s place
+           x x one and,
                x x not, \ negate
            x x one add,
                x d st,
@@ -590,6 +596,7 @@ true warnings ! \ intentionally redefining (latest, header, ')
            x x one sub, \ negative if not greater than zero
               15 y ldc,
              x x y shr, \ sign bit to 1s place
+           x x one and,
                x x not, \ negate
            x x one add,
                x x not, \ invert
@@ -604,6 +611,7 @@ true warnings ! \ intentionally redefining (latest, header, ')
            x x one sub, \ negative if y is equal to x
               15 y ldc,
              x x y shr, \ sign bit to 1s place
+           x x one and,
                x x not, \ negate
            x x one add,
                x x not, \ invert

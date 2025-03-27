@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdio.h>
 
 unsigned short reg[0xf] = {};
 unsigned char mem[0x10000];
@@ -69,7 +68,7 @@ int main(void)
             case 8: reg[z] = (unsigned short)((int)(short)reg[y] / (int)(short)reg[x]); break; // DIV
             case 9: reg[z] = ~(reg[y] & reg[x]); break; // NAND
             case 10: reg[z] = reg[y] << reg[x]; break; // SHL
-            case 11: reg[z] = (unsigned short)reg[y] >> reg[x]; break; // SHR
+            case 11: reg[z] = (unsigned short)reg[y] >> reg[x]; break; // SHR (arithmetic)
             case 12: reg[0]--; reg[x] = getc(stdin); break; // IN
             case 13: reg[0]--; putc(reg[x], stdout); break; // OUT
             case 14: readBlock(reg[z], reg[y], reg[x]); break; // READ
@@ -80,4 +79,3 @@ int main(void)
 }
 
 // TODO: sign extension for LD+ & ST+ ?
-// TODO: rethink SHR... arithmatic vs. logical

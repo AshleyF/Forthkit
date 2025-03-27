@@ -28,6 +28,9 @@
 - Stacks that maintain a pointer to the top are useful (move/push rather than push/move)
 - Tricky! `bl word find` stomps parsed word and finds "find" when interpreted! (fine compiled)
 - Making code relocatable with relative jumps would be useful!
+- Writing the outer interpreter in assembly is easier to get started than with standard words
+- Making the machine too primitive (e.g. 16 instructions) leads to bloat
+- Machine in Forth (rather than C) is much easier to debug
 
 ## Koans
 
