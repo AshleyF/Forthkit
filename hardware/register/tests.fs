@@ -246,5 +246,59 @@ T{       0 MIN-INT MAX ->       0 }T
 T{ MAX-INT MIN-INT MAX -> MAX-INT }T
 T{ MAX-INT       0 MAX -> MAX-INT }T
 
+\ F.3.6 Stack Operators
+\ The stack operators can be tested without any prepatory work. The "normal" operators (F.6.1.1260 DROP,
+\ F.6.1.1290 DUP, F.6.1.1990 OVER, F.6.1.2160 ROT, and F.6.1.2260 SWAP) should be tested first, followed by
+\ the two-cell variants (F.6.1.0370 2DROP, F.6.1.0380 2DUP, F.6.1.0400 2OVER and F.6.1.0430 2SWAP) with
+\ F.6.1.0630 ?DUP and F.6.1.1200 DEPTH being performed last.
+
+\ F.6.1.1260 DROP
+T{ 1 2 DROP -> 1 }T
+T{ 0   DROP ->   }T
+
+\ F.6.1.1290 DUP
+T{ 1 DUP -> 1 1 }T
+
+\ F.6.1.1990 OVER
+T{ 1 2 OVER -> 1 2 1 }T
+
+\ F.6.1.2160 ROT
+T{ 1 2 3 ROT -> 2 3 1 }T
+
+\ F.6.1.2260 SWAP
+T{ 1 2 SWAP -> 2 1 }T
+
+\ F.6.1.0370 2DROP
+T{ 1 2 2DROP -> }T
+
+\ F.6.1.0380 2DUP
+T{ 1 2 2DUP -> 1 2 1 2 }T
+
+\ F.6.1.0400 2OVER
+T{ 1 2 3 4 2OVER -> 1 2 3 4 1 2 }T
+
+\ F.6.1.0430 2SWAP
+T{ 1 2 3 4 2SWAP -> 3 4 1 2 }T
+
+\ F.6.1.0630 ?DUP
+T{ -1 ?DUP -> -1 -1 }T
+T{  0 ?DUP ->  0    }T
+T{  1 ?DUP ->  1  1 }T
+
+\ F.6.1.1200 DEPTH
+T{ 0 1 DEPTH -> 0 1 2 }T
+T{   0 DEPTH -> 0 1   }T
+T{     DEPTH -> 0     }T
+
+\ F.3.7 Return Stack Operators
+\ The test F.6.1.0580 >R will test all three basic return stack operators (>R, R>, and R@).
+
+\ F.6.1.0580 >R
+T{ : GR1 >R R> ; -> }T
+T{ : GR2 >R R@ R> DROP ; -> }T
+T{ 123 GR1 -> 123 }T
+T{ 123 GR2 -> 123 }T
+T{  1S GR1 ->  1S }T      ( Return stack holds cells )
+
 .( Test complete.)
-\ bye
+bye
