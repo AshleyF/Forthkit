@@ -1,18 +1,19 @@
 require assembler.fs
 
-    2 constant one       1    one ldc, \ literal 1
-    3 constant two       2    two ldc, \ literal 2
-    4 constant four      4   four ldc, \ literal 4
-    5 constant eight     8  eight ldc, \ literal 8
-    6 constant twelve   12 twelve ldc, \ literal 12
+    2 constant one       1     one ldc, \ literal 1
+    3 constant two       2     two ldc, \ literal 2
+    4 constant four      4    four ldc, \ literal 4
+    5 constant eight     8   eight ldc, \ literal 8
+    6 constant twelve   12  twelve ldc, \ literal 12
+    7 constant fifteen  15 fifteen ldc, \ literal 15
     
-    7 constant #t       -1     #t ldc, \ literal true (-1)
+    8 constant #t       -1     #t ldc, \ literal true (-1)
  zero constant #f                      \ literal false (0)
  
-    8 constant x
-    9 constant y
-   10 constant z
-   11 constant w
+    9 constant x
+   10 constant y
+   11 constant z
+   12 constant w
 
 : ldv, ( val reg -- ) pc two ld+, , ;
 
@@ -21,14 +22,14 @@ require assembler.fs
 : push, ( reg ptr -- ) dup dup four sub,  st, ;
 : pop,  ( reg ptr -- ) four ld+, ;
 
-12 constant d \ data stack pointer (initialized after dictionary below)
+13 constant d \ data stack pointer (initialized after dictionary below)
 
 : pushd, ( reg -- ) d push, ;
 : popd,  ( reg -- ) d pop, ;
 
 : literal, x ldv,  x pushd, ; \ 8 bytes
 
-13 constant r  memory-size r ldv, \ return stack pointer
+14 constant r  memory-size r ldv, \ return stack pointer
 
 : pushr, ( reg -- ) r push, ;
 : popr,  ( reg -- ) r pop, ;
@@ -310,8 +311,7 @@ true warnings ! \ intentionally redefining (latest, header, ')
 \ 2/ ( x -- result ) divide by 2 (1 rshift)
 0 header, 2/
                  x popd,
-              15 y ldc,
-           y one y shl,
+     y one fifteen shl,
              y y x and, \ get sign bit
            x x one shr,
            x x y or, \ replace sign bit
@@ -569,33 +569,30 @@ true warnings ! \ intentionally redefining (latest, header, ')
 \ 0< ( x -- b ) true if x less than zero (15 rshift negate 1+)
 0 header, 0<
                x d ld,
-              15 y ldc,
-             x x y shr, \ sign bit to 1s place
+       x x fifteen shr, \ sign bit to 1s place
            x x one and,
                x x not, \ negate
            x x one add,
                x d st,
                    ret,
 
-\ < ( y x -- b ) true if y less than x (- 0<)
+\ < ( y x -- b ) true if y less than x (- 0<) TODO: handle overflow (see bootstrap)!
 0 header, <
                  x popd,
                y d ld,
-             x y x sub, \ negative if y less than x
-              15 y ldc,
-             x x y shr, \ sign bit to 1s place
-           x x one and,
-               x x not, \ negate
-           x x one add,
-               x d st,
+             z y x sub, \ negative if y less than x
+       z z fifteen shr, \ sign bit to 1s place
+           z z one and,
+               z z not, \ negate
+           z z one add,
+               z d st,
                    ret,
 
 \ 0> ( x -- b ) true if x greater than zero (1- 15 rshift 1-)
 0 header, 0>
                x d ld,
            x x one sub, \ negative if not greater than zero
-              15 y ldc,
-             x x y shr, \ sign bit to 1s place
+       x x fifteen shr, \ sign bit to 1s place
            x x one and,
                x x not, \ negate
            x x one add,
@@ -603,14 +600,13 @@ true warnings ! \ intentionally redefining (latest, header, ')
                x d st,
                    ret,
 
-\ > ( y x -- b ) true if y greater than x (- 0>)
+\ > ( y x -- b ) true if y greater than x (- 0>) TODO: handle overflow (see bootstrap)!
 0 header, >
                  x popd,
                y d ld,
              x y x sub, \ negative if y less than x
            x x one sub, \ negative if y is equal to x
-              15 y ldc,
-             x x y shr, \ sign bit to 1s place
+       x x fifteen shr, \ sign bit to 1s place
            x x one and,
                x x not, \ negate
            x x one add,
@@ -736,26 +732,6 @@ def xor 2dup or -rot and invert and ;
                    then, \ can't use in def
                    ret,
 
-\ min ( y x -- min ) lessor value (2dup < if drop exit then nip)
-0 header, min
-            ' 2dup call,
-               ' < call,
-                   if, \ can't use in def
-            ' drop call,
-            ' exit call,
-                   then, \ can't use in def
-             ' nip jump,
-
-\ max ( y x -- max ) greater value (2dup < if nip exit then drop)
-0 header, max
-            ' 2dup call,
-               ' < call,
-                   if, \ can't use in def
-             ' nip call,
-            ' exit call,
-                   then, \ can't use in def
-            ' drop jump,
-
 ( --- secondary control-flow ------------------------------------------------- )
 
 \ <limit> <start> do ... loop
@@ -859,8 +835,12 @@ def cr 10 emit ;
 
 \ type ( addr len -- ) display the character string (0 max 0 ?do dup c@ emit char+ loop drop)
 0 header, type
+             ' dup call, \ essentially 0 max, but we don't have max yet
+              ' 0< call,
+                   if,
+            ' drop call,
                  0 literal,
-             ' max call,
+                   then,
                  0 literal,
                    ?do, \ can't use in def
              ' dup call,

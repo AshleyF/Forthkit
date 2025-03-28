@@ -201,8 +201,33 @@ header, : ] header, ] ;
   r> source-len  !
 ;
 
+: original< < ; \ TODO fix redefinitions
+: < ( y x -- b )
+  over 0< over 0< invert and if \ only y negative?
+    2drop true exit
+  then
+  over 0< invert over 0< and if \ only x negative?
+    2drop false exit
+  then
+  original< \ otherwise fall back to original implementation
+;
+
+: original> > ; \ TODO fix redefinitions
+: > ( y x -- b )
+  over 0< over 0< invert and if \ only y negative?
+    2drop false exit
+  then
+  over 0< invert over 0< and if \ only x negative?
+    2drop true exit
+  then
+  original> \ otherwise fall back to original implementation
+;
+
 : >= 2dup > -rot = or ; \ non-standard
 : <= 2dup < -rot = or ; \ non-standard
+
+: min ( y x -- min ) 2dup < if drop exit then nip ;
+: max ( y x -- max ) 2dup < if nip exit then drop ;
 
 : power ( y x -- ) \ non-standard
   1 -rot

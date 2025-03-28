@@ -49,7 +49,7 @@ true warnings !
 
 : not, (   y x -- ) dup nand, ;                        \ y=~x  (bitwise/logical not)
 : and, 2 pick -rot nand, dup not, ;
-: or,  ( z y x -- ) dup dup not, over dup not, nand, ; \ z=y|x (bitwise/logical and)
+: or,  ( z y x -- ) dup dup not, over dup not, nand, ; \ z=y|x (bitwise/logical or)
 
 ( --- assembler tools -------------------------------------------------------- )
 
