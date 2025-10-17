@@ -31,6 +31,7 @@
 - Writing the outer interpreter in assembly is easier to get started than with standard words
 - Making the machine too primitive (e.g. 16 instructions) leads to bloat
 - Machine in Forth (rather than C) is much easier to debug
+- Can conditionally comment out with `if postpone \ then` (see `IFFLOORED`/`IFSYM` in tests)
 
 ## Koans
 
