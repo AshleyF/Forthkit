@@ -129,8 +129,6 @@ header, : ] header, ] ;
 \   loop
 \   2drop true ;
 
-: spaces 0 max 0 ?do space loop ;
-
 : u< 2dup xor 0< if nip else - then 0< ;
 : u> swap u< ;
 
@@ -228,6 +226,8 @@ header, : ] header, ] ;
 
 : min ( y x -- min ) 2dup < if drop exit then nip ;
 : max ( y x -- max ) 2dup < if nip exit then drop ;
+
+: spaces 0 max 0 ?do space loop ;
 
 : power ( y x -- ) \ non-standard
   1 -rot

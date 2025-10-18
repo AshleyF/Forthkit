@@ -32,7 +32,8 @@ create mask-table 1 c, 8 c, 2 c, 16 c, 4 c, 32 c, 64 c, 128 c,
 : reset ( x y -- )
   char-cell-mask swap invert and swap screen + c! ;
 
-: u>= 2dup > -rot = or ; \ TODO: U
+: u>= ( u1 u2 -- flag )
+  over over u< 0= ;
 
 : utf8-emit ( c -- )
     dup 128 < if emit exit then
