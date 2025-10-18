@@ -1704,15 +1704,14 @@ Our `run.sh` script demonstrates the achievement:
 ```bash
 #!/usr/bin/env bash
 echo "Running"
-cat pixels.fs sixels.fs turtle-fixed.fs turtle-geometry-book.fs - | ./machine
+cat pixels.fs turtle-fixed.fs turtle-geometry-book.fs - | ./machine
 ```
 
 This pipeline does something remarkable:
 1. **`./machine`** - Our C virtual machine (no gforth dependency!)
 2. **`pixels.fs`** - Pixel graphics library (ported to our Forth)  
-3. **`sixels.fs`** - Modern terminal graphics output
-4. **`turtle-fixed.fs`** - Fixed-point turtle graphics
-5. **`turtle-geometry-book.fs`** - Complete turtle geometry examples
+3. **`turtle-fixed.fs`** - Fixed-point turtle graphics
+4. **`turtle-geometry-book.fs`** - Complete turtle geometry examples
 
 The entire graphics system runs as native bytecode on our virtual machine. We've achieved complete independence from the host development environment.
 
@@ -1786,34 +1785,6 @@ The fixed-point coordinates use 8.8 format (8 integer bits, 8 fractional bits):
 
 This gives us sub-pixel precision while using only integer arithmetic—crucial for smooth graphics on a system without floating-point support.
 
-### Terminal Graphics with Sixels
-
-While Unicode Braille characters provide excellent resolution, we can achieve even better results using **sixels**—a terminal graphics protocol from the 1980s that's experiencing a renaissance in modern terminals.
-
-```forth
-27 constant esc
-
-: show-sixel-tiny
-  esc emit ." P;1q"           \ Start sixel sequence
-  [char] " emit ." 1;1"       \ Set 1:1 aspect ratio  
-  height 0 do
-    width 0 do
-      0                       \ Start with empty sixel
-      i j     get if  1 or then  \ Bit 0: current pixel
-      i j 1 + get if  2 or then  \ Bit 1: pixel below  
-      i j 2 + get if  4 or then  \ Bit 2: two pixels below
-      i j 3 + get if  8 or then  \ Bit 3: three pixels below
-      i j 4 + get if 16 or then  \ Bit 4: four pixels below
-      i j 5 + get if 32 or then  \ Bit 5: five pixels below
-      63 + emit               \ Convert to sixel character
-    loop
-    [char] - emit             \ End of scanline
-  6 +loop                     \ Process 6 rows at a time
-  esc emit [char] \ emit cr ; \ End sixel sequence
-```
-
-Sixels work by encoding 6 vertical pixels in each character, giving us 1:1 pixel mapping instead of Braille's 2:4 sub-character resolution. The protocol dates to DEC terminals but works in many modern terminals including xterm, iTerm2, and Windows Terminal.
-
 ### Complete Turtle Graphics Port
 
 Our turtle graphics system translates naturally to the fixed-point arithmetic:
@@ -1884,30 +1855,9 @@ These examples demonstrate:
 - **Boundary checking** to prevent infinite recursion
 - **Complex compositions** built from simple primitives
 
-### Color Graphics Extension
+### Output and Performance
 
-For terminals supporting color sixels, we can add a sophisticated color cycling system:
-
-```forth
-variable r  100 r !
-variable g    0 g !  
-variable b    0 b !
-
-: next-color
-       r @ 100 =  b @   0 =  and  g @ 100 <  and if  1 g +!
-  else g @ 100 =  b @   0 =  and  r @   0 >  and if -1 r +!
-  else r @    0=  g @ 100 =  and  b @ 100 <  and if  1 b +!
-  \ ... (full HSV color wheel traversal)
-  then then then ;
-
-: set-color 
-  ." #0;2;"
-  r @ emit-num [char] ; emit
-  g @ emit-num [char] ; emit  
-  b @ emit-num ;
-```
-
-This creates smooth color gradients as we draw, cycling through the entire color spectrum. Each pixel can have its own color, enabling sophisticated visual effects.
+Our graphics system outputs Unicode Braille characters, with each character representing a 2×4 pixel grid. This provides excellent resolution for geometric drawings while maintaining compatibility with any Unicode-capable terminal.
 
 ### Performance Characteristics
 
@@ -1950,7 +1900,7 @@ This final chapter represents the culmination of our journey:
 
 1. **Complete System Independence**: No dependency on host development tools
 2. **Full Graphics Capability**: From pixels to complex turtle geometry  
-3. **Modern Terminal Support**: Sixels for high-resolution output
+3. **Modern Terminal Compatibility**: Unicode Braille characters for universal support
 4. **Educational Platform**: Logo-compatible turtle graphics for learning
 5. **Performance**: Native execution speeds for interactive graphics
 6. **Extensibility**: Platform for further graphics and application development
