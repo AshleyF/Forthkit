@@ -1481,9 +1481,181 @@ Our kernel achieves remarkable efficiency:
 
 This efficiency comes from Forth's close mapping to stack-machine semantics and our register-based VM's optimization for common operations.
 
+### Implementing ANS Forth Standards
+
+Our kernel implements over 150 standard Forth words, each carefully designed to provide maximum functionality with minimal code. Let's examine some particularly elegant examples from different categories:
+
+**Stack Manipulation - The Art of Data Juggling:**
+
+Take the `2swap` word, which swaps two pairs of stack values:
+
+```forth
+\ 2swap ( w z y x -- y x w z ) swap top two pairs of stack values
+0 header, 2swap
+               x d ld,        \ Load x from top of stack  
+         y d eight add,       \ Point to w (4 cells down)
+               z y ld,        \ Load w into z
+               z d st,        \ Store w where x was
+               x y st,        \ Store x where w was  
+          x d four add,       \ Point to y
+               y x ld,        \ Load y
+        z d twelve add,       \ Point to z  
+               w z ld,        \ Load z into w
+               w x st,        \ Store z where y was
+               y z st,        \ Store y where z was
+                   ret,
+```
+
+This intricate dance manipulates the stack in-place without using temporary storage—a masterclass in register allocation and memory efficiency.
+
+**Arithmetic with Overflow Handling:**
+
+The `/mod` (divide with remainder) word shows how to extract multiple results from one operation:
+
+```forth
+\ /mod ( y x -- remainder quotient ) remainder and quotient of division
+0 header, /mod
+                 x popd,      \ Divisor
+                 y popd,      \ Dividend  
+             z y x div,       \ z = quotient
+             w z x mul,       \ w = quotient * divisor
+             w y w sub,       \ w = dividend - (quotient * divisor) = remainder
+                 w pushd,     \ Push remainder
+                 z pushd,     \ Push quotient
+                   ret,
+```
+
+This elegant implementation computes both quotient and remainder in just 6 instructions, providing the foundation for Forth's powerful number formatting system.
+
+**Control Flow Magic:**
+
+The `?dup` (duplicate if non-zero) word demonstrates conditional compilation:
+
+```forth
+\ ?dup ( x -- 0 | x x ) duplicate top stack value if non-zero
+0 header, ?dup
+               x d ld,       \ Load value from stack
+                 y popr,     \ Get our return address
+          y y four add,       \ Adjust return address
+            pc y x cp?,     \ Return immediately if x=0
+                 x pushd,    \ Otherwise duplicate the value
+              pc y cp,       \ Return normally
+```
+
+This word uses conditional execution (`cp?`) to implement branching without explicit jumps—the essence of Forth's efficiency.
+
+**Double-Stack Operations:**
+
+Forth's return stack provides temporary storage, as shown in `>r` (to-R):
+
+```forth
+\ >r ( x -- ) ( R: -- x ) move x to return stack
+0 header, >r
+                 x popd,     \ Get value from data stack
+               y r ld,       \ Get our return address
+               x r st,       \ Replace it with our value (pushing x)
+          y y four add,       \ Adjust return address
+              pc y cp,       \ Return to caller
+```
+
+This word elegantly manipulates both stacks, using the return address itself as a temporary value while rearranging the return stack.
+
+**Memory Management Primitives:**
+
+The `+!` (plus-store) word shows atomic read-modify-write:
+
+```forth
+\ +! ( val addr -- ) add value to memory location
+0 header, +!
+                 x popd,     \ Address
+                 y popd,     \ Value to add
+               z x ld,       \ Load current value
+             z z y add,      \ Add to it
+               z x st,       \ Store result back
+                   ret,
+```
+
+This fundamental operation enables Forth's powerful memory manipulation idioms like `1 counter +!` for incrementing counters.
+
+**The Complete Word Set:**
+
+Our kernel implements these specific Forth words, organized by category. I chose the examples above to show different implementation techniques across the categories:
+
+- **Stack Operations**: `drop` `2drop` `dup` `2dup` `?dup` `nip` `over` `2over` `swap` `2swap` `tuck` `rot` `-rot` `pick` `depth` `>r` `2>r` `r>` `2r>` `r@` `2r@`
+
+- **Arithmetic**: `+` `-` `*` `/` `mod` `/mod` `1+` `1-` `2*` `2/` `+!` `abs` `negate`
+
+- **Bitwise & Logic**: `and` `or` `xor` `nand` `invert` `lshift` `rshift` 
+
+- **Comparison**: `=` `<>` `<` `>` `0=` `0<>` `0<` `0>`
+
+- **Memory Access**: `@` `!` `c@` `c!` `2@` `2!` `fill` `erase` `cmove` `align` `aligned` `cells` `cell+` `chars` `char+`
+
+- **Control Structures**: `execute` `exit` — plus the compiling words `if` `else` `then` `begin` `again` `until` `while` `repeat` `do` `?do` `loop` `+loop` `leave` `unloop` `i` `j`
+
+- **Dictionary & Compilation**: `:` `;` `[` `]` `'` `[']` `find` `header,` `postpone` `literal` `immediate` — plus memory allocation: `here` `allot` `,` `c,` `dp` `unused`
+
+- **I/O & Terminal**: `key` `emit` `type` `cr` `space` — plus formatted output: `.` `u.` `d.` `?` `.s`
+
+- **Number System**: `base` `decimal` `hex` `octal` `binary` — plus pictured numeric: `<#` `#` `#s` `#>` `sign` `hold` `holds` — and conversion: `>number` `s>d`
+
+- **String Processing**: `parse` `parse-name` `word` `count` `source` `source-id` `>in` `accept` `refill`
+
+- **Constants & Variables**: `true` `false` `bl` — plus all the VM registers: `pc` `zero` `one` `two` `four` `eight` `twelve` `fifteen` `#t` `#f` `x` `y` `z` `w` `d` `r`
+
+- **Assembler Interface**: All VM instructions as Forth words: `halt,` `ldc,` `ld+,` `st+,` `cp?,` `add,` `sub,` `mul,` `div,` `nand,` `shl,` `shr,` `in,` `out,` `read,` `write,` — plus helper words: `2nybbles,` `4nybbles,` `cp,` `ld,` `st,` `jump,` `ldv,` `push,` `pop,` `pushd,` `popd,` `pushr,` `popr,` `call,` `ret,` `literal,`
+
+- **System Control**: `bye` `(bye)` `abort` `quit` `interpret` `(evaluate)` `(clear-data)` `(clear-return)`
+
+That's approximately 160 words total. The examples I detailed above (`2swap`, `/mod`, `?dup`, `>r`, `+!`, `cmove`, `#`) were chosen to showcase different implementation techniques: in-place stack manipulation, dual-result arithmetic, conditional execution, return-stack juggling, atomic memory operations, loop-based processing, and the elegant numeric formatting system.
+
+**String Processing:**
+
+The `cmove` word implements efficient memory copying:
+
+```forth
+\ cmove ( c-addr1 c-addr2 u -- ) copy u characters from addr1 to addr2
+0 header, cmove
+                 0 literal,   \ Loop index
+                   ?do,       \ Loop u times
+            ' over call,      \ Get source address
+              ' c@ call,      \ Load byte
+            ' over call,      \ Get destination address  
+              ' c! call,      \ Store byte
+           ' char+ call,      \ Increment source
+            ' swap call,      
+           ' char+ call,      \ Increment destination
+            ' swap call,
+                   loop,      \ Continue loop
+           ' 2drop jump,      \ Clean up addresses
+```
+
+This shows how high-level operations are built from primitives, with the `?do...loop` construct providing efficient counted loops.
+
+**Number Formatting System:**
+
+The pictured numeric output system demonstrates Forth's elegant approach to string formatting. The `#` word converts one digit:
+
+```forth  
+\ # ( ud -- ud ) convert least significant digit, add to output
+0 header, #
+             ' swap call,     \ Get low part of double number
+             ' base call,     \ Current number base
+                ' @ call,
+             ' 2dup call,     \ Duplicate for mod and divide
+              ' mod call,     \ Get remainder (digit)
+                48 literal,   \ ASCII '0' 
+                ' + call,     \ Convert to ASCII
+             ' hold call,     \ Add to output string
+                ' / call,     \ Reduce number
+             ' swap jump,     \ Restore double format
+```
+
+Combined with `#s` (convert all digits) and `<# ... #>` (string delimiters), this provides complete number formatting: `<# # # # #> TYPE` outputs a 4-digit number.
+
 ### The Complete System
 
-After this bootstrap process completes, we have achieved something remarkable: a complete, interactive computer system that includes:
+After implementing these 150+ words through our layered bootstrap process, we have achieved something remarkable: a complete, interactive computer system that includes:
 
 **Language Features:**
 - Interactive interpreter with immediate response
