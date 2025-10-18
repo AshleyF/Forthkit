@@ -117,16 +117,23 @@ The beauty of Forth lies in its simplicity. These `constant` definitions create 
 
 ### Drawing Your First Pixels
 
-Let's jump right in with a simple example. Load the pixels library and try this:
+Let's jump right in with a simple example. Our native pixels library is defined directly in `pixels.fs`:
 
 ```forth
-\ Load the pixels library
-include library/pixels/pixels.f
+\ pixel graphics library using Unicode Braille characters
+
+160 constant width
+160 constant height
+width 2 / constant columns
+width height * 8 / constant size
+
+size buffer: screen
+create mask-table 1 c, 8 c, 2 c, 16 c, 4 c, 32 c, 64 c, 128 c,
 
 \ Clear the canvas and set a few pixels
 clear
 10 10 set
-11 10 set
+11 10 set  
 12 10 set
 show
 ```
@@ -152,11 +159,17 @@ The magic happens in how we map canvas coordinates to these dot positions. A pix
 Here's how the library handles this mapping:
 
 ```forth
-: cell 4 / floor columns * swap 2 / floor + ;
-: mask 4 mod 2 * swap 2 mod + size + b@ ;
+: char-cell ( x y -- cell )
+  4 / columns * swap 2 / + ;
+
+: mask ( x y -- mask )
+  4 mod 2 * swap 2 mod + mask-table + c@ ;
+
+: char-cell-mask ( x y -- cell mask char )
+  2dup char-cell -rot mask over screen + c@ ;
 ```
 
-The `cell` word finds which Braille character contains our pixel, while `mask` determines which dot within that character to modify.
+The `char-cell` word finds which Braille character contains our pixel, while `mask` uses a lookup table to determine which dot within that character to modify. The `char-cell-mask` word efficiently combines both operations.
 
 ### Drawing Patterns
 
@@ -182,75 +195,96 @@ You should see a cross pattern made of tiny Braille dots! The `do...loop` constr
 
 ### Creating Art with ASCII Templates
 
-One of the most delightful features of our pixel library is the ability to create graphics from ASCII art templates. The library includes a clever mechanism using the `sym` word and special syntax:
+One of the most delightful features of our pixel library is the ability to create graphics from ASCII art templates. The `pixels-test.fs` file demonstrates this with a clever parsing mechanism:
 
 ```forth
-variable x variable y
-
-: start clear 0 x ! 0 y ! ;
-: | 0 do 35 = if x @ y @ set then 1 x +! loop 0 x ! 1 y +! ;
+variable line 0 line !
+: pixels parse-name 0 do dup c@ [char] * = if i line @ set then 1+ loop drop 1 line +! ;
 ```
 
-The `|` word processes a sequence of ASCII values, setting pixels wherever it encounters the value 35 (which is `#` in ASCII). Here's a simple smiley face:
+The `pixels` word reads the next token as a string and processes each character. When it finds a `*` character, it sets a pixel at the current position. Here's how you use it:
 
 ```forth
-start
-sym _#_#_ |
-sym _#_#_ |  
-sym #___# |
-sym _###_ |
+clear
+pixels ```````````````````````````````****``
+pixels `````````````````````````````**````*`
+pixels ```````````*******``````````*```````*
+pixels ````````****```*``**```````*````*```*
 show
 ```
 
-The `sym` word (defined in the prelude) converts the token that follows it into a sequence of ASCII values plus the count. So `sym _#_#_` pushes the ASCII values for each character followed by the count 5.
+The `parse-name` word gets the next whitespace-delimited token, and we scan through each character looking for asterisks to convert into pixels.
 
-### A Complete Example: Drawing a Turtle
+### A Complete Example: Simple Patterns
 
-Let's create something more substantial—a detailed turtle graphic:
+Let's create some patterns using the ASCII art template system. The `pixels-test.fs` includes several examples:
 
 ```forth
-: turtle start
-  sym ```````````````````````````````####`` |
-  sym `````````````````````````````##````#` |
-  sym ```````````#######``````````#```````# |
-  sym ````````####```#``##```````#````#```# |
-  sym ``````##`###```###``##`````#````````# |
-  sym `````##`#```#`#```#`#`#```#`````````# |
-  sym ````#``#`````#`````#```#``#``````###` |
-  sym ```#``#`#```#`#```#`#`#####```````#`` |
-  sym ``####```###```###``##````#`````##``` |
-  sym `##``#```#`#```#```#`````#`````#````` |
-  sym #``#`#```#`#```#``#``````#````#`````` |
-  sym #```#`#`#`#`#`#`##`````##````#``````` |
-  sym #````###########`````##`````##``````` |
-  sym `#``````````````````#``````##```````` |
-  sym ``#```````````````##`##```#`#```````` |
-  sym ``################`#```###`#````````` |
-  sym `#```#````````#````#``````#`````````` |
-  sym #```###```````#```#`````##`##```````` |
-  sym #``#```#######````#######````#``````` |
-  sym `##`````````#````#```````#```#``````` |
-  sym ````````````#```#`````````###```````` |
-  sym `````````````###````````````````````` |
-  show ;
-
-turtle
+clear
+pixels ```````````````````````````````****``
+pixels `````````````````````````````**````*`
+pixels ```````````*******``````````*```````*
+pixels ````````****```*``**```````*````*```*
+pixels ``````**`***```***``**`````*````````*
+pixels `````**`*```*`*```*`*`*```*`````````*
+pixels ````*``*`````*`````*```*``*``````***`
+pixels ```*``*`*```*`*```*`*`*****```````*``
+pixels ``****```***```***``**````*`````**```
+pixels `**``*```*`*```*```*`````*`````*`````
+pixels *``*`*```*`*```*``*``````*````*``````
+pixels *```*`*`*`*`*`*`**`````**````*```````
+pixels *````***********`````**`````**```````
+pixels `*``````````````````*``````**````````
+pixels ``*```````````````**`**```*`*````````
+pixels ``****************`*```***`*`````````
+pixels `*```*````````*````*``````*``````````
+pixels *```***```````*```*`````**`**````````
+pixels *``*```*******````*******````*```````
+pixels `**`````````*````*```````*```*```````
+pixels ````````````*```*`````````***````````
+pixels `````````````***`````````````````````
+show
 ```
 
-When you run this, you'll see a detailed turtle rendered in beautiful Braille characters! This demonstrates how we can create complex graphics using simple, composable Forth words.
+This creates a pattern that demonstrates the flexibility of the ASCII art approach. You can also create larger, more complex patterns like the detailed mandala example in the test file. This demonstrates how we can create complex graphics using simple, composable Forth words.
 
-### What We've Learned
+### Key Implementation Features
 
-Through this pixel graphics exercise, we've encountered several fundamental Forth concepts:
+The native pixel library demonstrates several important techniques:
 
-1. **Constants and Variables**: `160 constant width` creates compile-time constants, while `variable x` creates runtime storage
-2. **Stack Manipulation**: Words like `swap`, `dup`, `over`, and `drop` that rearrange data
-3. **Memory Operations**: `b!` and `b@` for byte storage and retrieval
-4. **Control Structures**: `do...loop` for iteration
-5. **Word Definition**: Creating new words with `: word-name ... ;`
-6. **Factoring**: Breaking complex operations into simple, reusable parts
+**Memory Management:**
+```forth
+size buffer: screen                    \ Allocates pixel buffer
+create mask-table 1 c, 8 c, 2 c, 16 c, 4 c, 32 c, 64 c, 128 c,
+```
 
-The pixel library showcases Forth's philosophy of building complex systems from simple, well-defined components. Each word does one thing well, and we compose them to create more sophisticated behaviors.
+**Efficient Pixel Operations:**
+```forth
+: set ( x y -- )
+  char-cell-mask or swap screen + c! ;
+
+: get ( x y -- b )
+  char-cell-mask and swap drop 0<> ;
+
+: reset ( x y -- )  
+  char-cell-mask swap invert and swap screen + c! ;
+```
+
+**UTF-8 Output:**
+```forth
+: utf8-emit ( c -- )
+    dup 128 < if emit exit then
+    0 swap 63 begin 2dup > while 2/ >r dup 63 and 128 or swap 6 rshift r> repeat
+    127 xor 2* or begin dup 128 u>= while emit repeat drop ;
+
+: show
+  size 0 do
+    i columns mod 0= if 10 emit then \ newline as appropriate
+    i screen + c@ 10240 or utf8-emit
+  loop ;
+```
+
+The `utf8-emit` word handles the complexity of encoding Unicode Braille characters (starting at U+2800 = 10240) as proper UTF-8 byte sequences. This allows the graphics to display correctly in Unicode-capable terminals.
 
 ### Exercises
 
@@ -292,45 +326,54 @@ The turtle's pose consists of `x`, `y` position and `theta` heading. We also mai
 Since our pixel canvas uses a top-left origin but turtle graphics traditionally uses a center origin, we need coordinate transformation:
 
 ```forth
-: point-x x @ width 2 / + 0.5 + floor ;
-: point-y y @ height 2 / + 0.5 + floor ;
-: valid-x? point-x 0 width 1 - within ;
-: valid-y? point-y 0 height 1 - within ;
-: valid? valid-x? valid-y? and ;
-: plot valid? if point-x point-y set then ;
+width  2/ constant hwidth
+height 2/ constant hheight
+
+: valid? ( x y -- b )
+  0 height 1- within swap
+  0 width  1- within and ;
+
+: plot ( x y -- )
+  fround f>s hwidth +
+  fround f>s hheight + \ x y on data stack
+  2dup valid? if set else 2drop then ;
 ```
 
-The `point-x` and `point-y` words convert from turtle coordinates (centered at 0,0) to pixel coordinates. The `valid?` predicate ensures we only draw pixels that fall within our canvas bounds. The `plot` word is our interface to the pixels library—it sets a pixel at the turtle's current position if that position is valid.
+The `plot` word converts floating-point turtle coordinates to integer pixel coordinates, translates from center-origin to top-left origin, validates bounds, and sets the pixel if valid. The `fround f>s` sequence rounds floating-point values to integers.
 
 ### Mathematical Constants and Conversions
 
 ```forth
-3.14159265359 constant pi
-pi 180.0 / constant rads
-180.0 pi / constant degs
-: deg2rad rads * ;
-: rad2deg degs * ;
+pi 180e f/ fconstant rads
+180e pi f/ fconstant degs
+
+: deg2rad rads f* ;
+: rad2deg degs f* ;
 ```
 
-We define `pi` as a constant and derive conversion factors. Note how we compute `rads` and `degs` at compile time—the division happens once when the constants are defined, not every time we convert angles.
+We define `rads` and `degs` as floating-point constants for angle conversion. The `e` suffix creates floating-point literals, and `fconstant` creates compile-time floating-point constants. This allows efficient conversion between degrees and radians.
 
 ### Basic Turtle Commands
 
-The fundamental turtle operations are surprisingly simple:
+The fundamental turtle operations use floating-point arithmetic in gforth:
 
 ```forth
-: go y ! x ! ;
-: head dup theta ! deg2rad dup cos dx ! sin dy ! ;
-: pose head go ;
+fvariable x fvariable y fvariable theta
+fvariable dx fvariable dy
+
+: go ( x y -- ) s>f y f! s>f x f! ;
+: fhead ( t -- ) fdup theta f! deg2rad fdup fcos dx f! fsin dy f! ;
+: head ( t -- ) s>f fhead ;
+: pose ( x y t -- ) head go ;
 ```
 
-The `go` command moves the turtle to absolute coordinates without drawing. The `head` command sets the turtle's heading and updates the `dx`/`dy` direction vectors. The `pose` command combines both operations—setting position and heading in one word.
+The `go` command moves the turtle to absolute coordinates. The `fhead` command sets heading using floating-point trigonometry, while `head` provides an integer interface. The `pose` command combines both operations.
 
 ```forth
-: start clear 0 0 0 pose ;
-: turn theta @ + head ;
-: move 0 do dx @ x +! dy @ y +! plot loop ;
-: jump dup dx @ * x +! dy @ * y +! ;
+: start ( -- ) clear home ;
+: turn ( a -- ) s>f theta f@ f+ fhead ;
+: move ( d -- ) 0 do fover fover plot 2 fpick f+ fswap 3 fpick f+ fswap loop ;
+: jump ( d -- ) s>f fdup dx f@ f* x f+! dy f@ f* y f+! ;
 ```
 
 These commands form our turtle graphics vocabulary:
@@ -341,11 +384,11 @@ These commands form our turtle graphics vocabulary:
 
 ### Your First Turtle Program
 
-Let's try some basic turtle commands:
+Let's try some basic turtle commands using gforth:
 
 ```forth
-include library/pixels/pixels.f
-include library/turtle/turtle.f
+require pixels.fs
+require turtle-float.fs
 
 start
 50 move
@@ -365,12 +408,12 @@ This draws a simple square. The turtle moves forward 50 units, turns 90 degrees,
 Let's create a more general solution for drawing regular polygons:
 
 ```forth
-: angle 360 swap / ;
-: draw -rot 0 do 2dup move turn loop 2drop ;
-: polygon dup angle draw ;
+: angle ( sides -- angle ) 360 swap / ;
+: draw ( len angle sides -- ) 0 do 2dup turn move loop 2drop ;
+: polygon ( len sides -- ) dup angle swap draw ;
 ```
 
-The `angle` word computes the turn angle for a regular polygon (360° divided by the number of sides). The `draw` word performs a sequence of move-and-turn operations. The `polygon` word ties it together—given a size and number of sides, it draws the complete shape.
+The `angle` word computes the turn angle for a regular polygon (360° divided by the number of sides). The `draw` word performs a counted loop of turn-and-move operations. The `polygon` word ties it together, computing the angle and calling draw.
 
 Now we can create specific polygons with elegant definitions:
 
@@ -1783,28 +1826,49 @@ The fixed-point coordinates use 8.8 format (8 integer bits, 8 fractional bits):
 : go 8 lshift y ! 8 lshift x ! ;
 ```
 
-This gives us sub-pixel precision while using only integer arithmetic—crucial for smooth graphics on a system without floating-point support.
+### Transition to Fixed-Point Arithmetic
 
-### Complete Turtle Graphics Port
+When we move to our custom virtual machine, we lose floating-point support but gain efficiency. The `turtle-fixed.fs` implementation replaces floating-point trigonometry with lookup tables and fixed-point arithmetic:
 
-Our turtle graphics system translates naturally to the fixed-point arithmetic:
+```forth
+\ Pre-computed cosine table for 0-90 degrees
+here
+255 c, 255 c, 255 c, 255 c, 254 c, 254 c, 254 c, 253 c, 253 c, 252 c,
+\ ... (complete table for 91 values)
+constant table
+
+: cos
+  abs 360 mod dup 180 >= if 360 swap - then
+  dup 90 >= if -1 180 rot - else 1 swap then
+  table + c@ 1+ * ;
+
+: sin 90 - cos ;
+```
+
+This clever implementation uses symmetry to reduce the lookup table to just 0-90 degrees, then applies sign corrections for other quadrants.
+
+### Complete Turtle Graphics Port  
+
+Our turtle graphics system translates to fixed-point arithmetic:
 
 ```forth
 variable x variable y variable theta
 variable dx variable dy
 
+: point-x x @ 128 + 256 / width 2/ + ;
+: point-y y @ 128 + 256 / height 2/ swap - ;
+: valid? valid-x? valid-y? and ;
+: plot valid? if point-x point-y set then ;
+
+: go 8 lshift y ! 8 lshift x ! ;
+: head dup theta ! dup cos dx ! sin dy ! ;
 : pose head go ;
 : start clear home ;
 : turn theta @ + head ;
 : move 0 do dx @ x +! dy @ y +! plot loop ;
-
-: polygon ( len sides -- ) dup angle swap draw ;
-: triangle ( len -- )  3 polygon ;
-: square   ( len -- )  4 polygon ;
-: circle   ( len -- ) 36 polygon ;
 ```
 
-The interface remains identical to our gforth version, but everything now compiles to efficient VM bytecode. Complex figures like fractals work perfectly:
+The interface remains nearly identical to our gforth version, but coordinates use 8.8 fixed-point format (8 integer bits, 8 fractional bits). This gives us sub-pixel precision while using only integer arithmetic—crucial for smooth graphics on a system without floating-point support. Complex figures like fractals work perfectly:
 
 ```forth
 : spiral-rec 1 + dup move 92 turn dup 110 < if tail-recurse then drop ;
