@@ -1,3 +1,5 @@
+require pixels.fs
+
 variable line 0 line !
 : pixels parse-name 0 do dup c@ [char] * = if i line @ set then 1+ loop drop 1 line +! ;
 

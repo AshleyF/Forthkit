@@ -1,6 +1,6 @@
 \ pixel graphics library using Unicode Braille characters
 
-: buffer: create allot ; \ TODO: not defined in gforth?!
+\ : buffer: create allot ; \ TODO: not defined in gforth?!
 
 160 constant width
 160 constant height
@@ -33,7 +33,7 @@ create mask-table 1 c, 8 c, 2 c, 16 c, 4 c, 32 c, 64 c, 128 c,
   char-cell-mask swap invert and swap screen + c! ;
 
 : u>= ( u1 u2 -- flag )
-  over over u< 0= ;
+  u< 0= ;
 
 : utf8-emit ( c -- )
     dup 128 < if emit exit then
