@@ -990,7 +990,11 @@ From our minimal instruction set, we can build more convenient operations:
 ```forth
 0 constant pc
 1 constant zero
+```
 
+Note that `pc` represents register 0 (the program counter), while `zero` represents register 1. Register 1 is conventionally used as a "zero register" - it contains the value 0 and is used for operations that need a zero value or unconditional behavior. For example, `zero cp?,` means "copy if register 1 equals 0", which is always true since register 1 contains 0, making it an unconditional copy.
+
+```forth
 : cp, ( y x -- ) zero cp?, ;     \ Unconditional copy  
 : ld, ( y x -- ) zero ld+, ;     \ Simple load
 : st, ( y x -- ) zero st+, ;     \ Simple store
