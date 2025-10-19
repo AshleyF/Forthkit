@@ -8,16 +8,15 @@ variable h  memory h !
 
 : block-filename ( n -- addr len ) 
   s" block" rot 0 <# #s #> s+ s" .bin" s+ ;
-: read-block ( addr size block# -- ) 
-  block-filename r/o open-file 0= if 
-    >r swap rot r@ read-file drop drop r> close-file drop 
+: read-block ( block# offset size -- ) 
+  rot block-filename r/o open-file throw
+  rot memory + -rot dup >r
+  read-file throw drop r>
+  close-file throw ;
+: write-block ( block# addr size -- ) 
+  rot block-filename w/o create-file 0= if 
+    >r r@ write-file drop r> close-file drop 
   else 
     drop 2drop 
   then ;
-: write-block ( addr size block# -- ) 
-  block-filename w/o create-file 0= if 
-    >r swap rot r@ write-file drop r> close-file drop 
-  else 
-    drop 2drop 
-  then ;
-: read-boot-block ( -- ) memory memory-size 0 read-block ;
+: read-boot-block ( -- ) 0 0 memory-size read-block ;

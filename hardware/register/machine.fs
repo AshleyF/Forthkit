@@ -17,7 +17,7 @@ registers 16 cells erase
 
 : step ( -- ) fetch-pc nybbles
   case
-     0 of cr ." Halt " reg @ . quit endof
+     0 of reg @ (bye) endof
      1 of fetch-pc dup $80 and if $ff00 or then swap reg ! endof
      2 of xyz over @ s@ swap ! reg+! endof
      3 of xyz @ over @ s! reg+! endof

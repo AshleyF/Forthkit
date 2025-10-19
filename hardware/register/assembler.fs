@@ -53,4 +53,4 @@ true warnings !
   s" .bin" s+
 ;
 
-: write-boot-block ( -- ) 0 0 here write-block ;
+: write-boot-block ( -- ) 0 memory here write-block ;
