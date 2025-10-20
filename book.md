@@ -1072,6 +1072,157 @@ The `write-boot-block` word performs the final step:
 
 This writes everything we've assembled (from address 0 to `here`) as block 0—our bootable image.
 
+### Interactive Development with the Debugger
+
+For development and testing, we have a powerful interactive debugging environment. The `debugger.fs` file provides enhanced development tools that build on top of our virtual machine.
+
+**Basic Assembly Development:**
+```bash
+gforth hello.fs
+```
+
+This loads the assembler, processes your assembly source, and stores the resulting bytecode in memory. At this point, you have assembled code but no running virtual machine.
+
+**Running with the Production VM:**
+After assembling, you can run the program in two ways:
+
+1. **Write to disk and run with C VM:**
+```forth
+write-boot-block bye
+```
+Then execute: `./machine`
+
+2. **Run directly in Forth VM:**
+```forth
+require machine.fs
+reboot
+```
+
+**Enhanced Debugging Experience:**
+For interactive development, load the debugger:
+
+```forth
+gforth hello.fs
+require debugger.fs
+```
+
+This gives you access to powerful debugging commands:
+
+**Memory Inspection:**
+```forth
+dump-memory             \ Show assembled program memory
+dump-all-memory         \ Show entire memory space
+here memory - .         \ Show how much code was assembled
+```
+
+**Register Examination:**
+```forth
+dump-all-registers      \ Display all 16 registers
+0 dump-register         \ Show program counter (R0)
+5 dump-register         \ Examine register 5
+```
+
+**Single-Step Execution:**
+```forth
+hard-reset              \ Reset VM to initial state
+step                    \ Execute one instruction
+step step step          \ Execute several instructions
+regs                    \ Check register state after execution
+```
+
+**Interactive Program Modification:**
+```forth
+\ Add new code to the current program
+72 emit,                \ Add instruction to output 'H'
+here 1- memory + c@ .   \ Verify the bytecode was emitted
+```
+
+**Complete Debugging Session Example:**
+
+```forth
+\ Load and assemble a program
+gforth hello.fs
+
+\ Load debugging tools
+require debugger.fs
+
+\ Examine the assembled program
+." Program size: " here memory - . ." bytes" cr
+dump-memory             \ Show assembled program
+```
+
+**Sample Output:**
+```
+Program size: 44 bytes
+7A33816481B0: 21 00 13 00  48 65 6C 6C - 6F 2C 20 57  6F 72 6C 64  !...Hello, World
+7A33816481C0: 21 00 01 12  01 13 08 14 - 12 95 55 B3  55 16 04 22  !.........U.U.."
+7A33816481D0: 67 95 77 97  77 47 40 D7 - 21 00 1F                  g.w.wG@.!..
+```
+
+This shows the complete 44-byte program with the readable "Hello, World" string visible in the first line, followed by the bytecode for register initialization and the main loop.
+
+**Continuing the debugging session:**
+
+```forth
+\ Reset and single-step through execution
+hard-reset
+." Initial state:" cr 
+dump-all-registers
+
+\ Execute first instruction (should be the jump)
+step
+." After jump:" cr 
+." PC = " 0 dump-register cr
+
+\ Continue stepping through the main loop
+step step step
+." After register setup:" cr 
+dump-all-registers
+
+\ Run several loop iterations
+5 0 do step dump-all-registers cr loop
+```
+
+**Debugging Workflow Benefits:**
+
+1. **Immediate Feedback**: See exactly what bytecode your assembly generates
+2. **State Inspection**: Examine registers and memory at any point
+3. **Incremental Development**: Test individual instructions before building complete programs
+4. **Education**: Understand how high-level constructs map to machine operations
+5. **Troubleshooting**: Isolate exactly where programs fail or behave unexpectedly
+
+**Advanced Debugging Techniques:**
+
+```forth
+\ Breakpoint simulation - run until PC reaches specific address
+: run-to ( addr -- )
+  begin 0 dump-register over <> while step repeat drop ;
+
+\ Memory modification during execution
+: patch-memory ( value addr -- )
+  memory + c! ;
+
+\ Register modification during execution  
+: set-reg ( value reg# -- )
+  reg ! ;
+
+\ Trace execution with automatic state display
+: trace-steps ( n -- )
+  0 do 
+    i . ." : " step 
+    ." PC=" 0 dump-register ." R1=" 1 dump-register cr 
+  loop ;
+
+\ Show specific registers of interest
+: show-key-regs ( -- )
+  ." PC=" 0 dump-register 
+  ." MSG=" 6 dump-register 
+  ." CH=" 7 dump-register cr ;
+```
+
+This interactive development environment transforms assembly programming from a compile-test-debug cycle into an exploratory process where you can understand exactly how your code executes, instruction by instruction.
+
+---
 
 ## Hello World: A Complete Example
 
@@ -1093,7 +1244,7 @@ char l c,
 char l c,
 char o c,
 char , c,
-bl c,
+  bl   c,
 char W c,
 char o c,
 char r c,
@@ -1101,35 +1252,37 @@ char l c,
 char d c,
 char ! c,
 0 c,
-0 c,
 
 label 'halt
 zero halt,
 
 patch,
 
-2 constant one  1 one ldc, \ literal 1
-3 constant msg  'message msg ldc,
-4 constant ch
-5 constant halt-addr  'halt halt-addr ldc,
+2 constant one    1 one   ldc, \ literal 1
+3 constant eight  8 eight ldc, \ literal 8
+
+4 constant halt-addr  'halt halt-addr ldc,
+5 constant mask  mask mask not,  mask mask eight shr,
+
+6 constant msg  'message msg ldc,
+7 constant ch
 
 label 'print
-ch msg one ld+, \ ch = memory[msg++]
-pc halt-addr ch cp?, \ if ch == 0, copy halt-addr to PC (jump out)
-ch out, \ output character
-'print jump, \ jump back to 'print
-
-write-boot-block bye
+     ch msg one ld+,  \ ch = memory[msg++]
+     ch ch mask and,  \ single byte
+pc halt-addr ch cp?,  \ if ch == 0, pc=halt-addr (jump out)
+             ch out,  \ output character
+         'print jump, \ jump back to 'print
 ```
 
 ### Understanding the Generated Bytecode
 
-When we assemble this program, it generates exactly 35 bytes of machine code. Let's examine each part:
+When we assemble this program, it generates exactly 44 bytes of machine code. Let's examine each part:
 
 ```
-00000000  21 00 14 00 48 65 6c 6c  6f 2c 20 57 6f 72 6c 64  |!...Hello, World|
-00000010  21 00 00 01 12 01 13 04  15 13 22 34 44 50 d4 21  |!........."4DP.!|
-00000020  00 1a 00                                          |...|
+7A33816481B0: 21 00 13 00  48 65 6C 6C - 6F 2C 20 57  6F 72 6C 64  !...Hello, World
+7A33816481C0: 21 00 01 12  01 13 08 14 - 12 95 55 B3  55 16 04 22  !.........U.U.."
+7A33816481D0: 67 95 77 97  77 47 40 D7 - 21 00 1F                  g.w.wG@.!..
 ```
 
 Let's decode this byte by byte:
@@ -1137,26 +1290,31 @@ Let's decode this byte by byte:
 ### Memory Layout Analysis
 
 **Jump Over Data (bytes 0-3):**
-- `21 00` - Unconditional jump instruction (opcode 2, dest=pc, src=pc, offset=0)
-- `14 00` - Jump target address (20 decimal, where code starts)
+- `21 00` - Unconditional jump instruction (opcode 2, dest=R1, src=R1, offset=R0)  
+- `13 00` - Jump target address (19 decimal, where code starts after the string)
 
-**String Data (bytes 4-19):**
-- `48 65 6c 6c 6f 2c 20 57 6f 72 6c 64 21 00 00` - "Hello, World!" + null terminators
+**String Data (bytes 4-18):**
+- `48 65 6c 6c 6f 2c 20 57 6f 72 6c 64 21 00` - "Hello, World!" + null terminator (15 bytes)
 
-**Halt Instruction (bytes 20-21):**
+**Halt Instruction (byte 19):**
 - `01` - Halt instruction (opcode 0, register 1 contains exit code)
 
-**Register Initialization (bytes 22-27):**
-- `12 01` - Load constant 1 into register 2 (LDC instruction: opcode 1, value 1, register 2)
-- `13 04` - Load constant 4 into register 3 (string start address)
-- `15 13` - Load constant 19 into register 5 (halt address)
+**Register Initialization (bytes 20-31):**
+- `12 01` - Load constant 1 into register 2 (LDC: opcode 1, value 1, register 2)
+- `13 08` - Load constant 8 into register 3 (LDC: opcode 1, value 8, register 3)  
+- `14 12` - Load constant 18 into register 4 (halt address)
+- `95 55` - Complex mask operation: `mask mask not,` (NAND R5,R5 -> R9)
+- `b3 55` - Shift mask: `mask mask eight shr,` (SHR R5,R5,R3 -> R11)
+- `16 04` - Load constant 4 into register 6 (message start address)
 
-**Main Loop (bytes 28-34):**
-- `22 34` - Load with increment (LD+ instruction: opcode 2, dest=R4, src=R3, increment=R2)
-- `44 50` - Conditional copy (CP? instruction: opcode 4, dest=R0/PC, src=R5, condition=R4)
-- `d4` - Output character (OUT instruction: opcode 13, register 4)
-- `21 00` - Unconditional jump
-- `1a 00` - Jump target address (26 decimal, back to main loop)
+**Main Loop (bytes 32-43):**
+- `22 67` - Load with increment: `ch msg one ld+,` (LD+ R7,R6,R2)
+- `95 77` - Mask operation: `ch ch mask and,` (NAND R7,R7 -> R9, then AND)
+- `97 77` - Complete the masking (NAND result with itself for AND effect)
+- `47 40` - Conditional copy: `pc halt-addr ch cp?,` (CP? R0,R4,R7)
+- `d7` - Output character: `ch out,` (OUT R7)
+- `21 00` - Unconditional jump back to loop
+- `1f 00` - Jump target address (31 decimal, back to main loop start)
 
 ### Instruction Format Details
 
@@ -1184,9 +1342,12 @@ Byte 2: [immediate_value:8]
 The most elegant part is how the loop uses conditional copy for control flow:
 
 1. **Load character:** `ch msg one ld+,` loads the next character and increments the pointer
-2. **Test for zero:** `pc halt-addr ch cp?,` copies the halt address to PC if character is zero
-3. **Output character:** `ch out,` outputs the character (only if we didn't jump)
-4. **Loop back:** `'print jump,` unconditionally returns to the start
+2. **Mask to byte:** `ch ch mask and,` ensures we have a clean single byte value
+3. **Test for zero:** `pc halt-addr ch cp?,` copies the halt address to PC if character is zero
+4. **Output character:** `ch out,` outputs the character (only if we didn't jump)
+5. **Loop back:** `'print jump,` unconditionally returns to the start
+
+The byte masking step ensures clean character handling by eliminating any high-order bits that might interfere with the zero comparison, making the loop termination more reliable.
 
 This demonstrates the power of our `CP?` instruction - instead of traditional conditional branches, we use conditional assignment to the program counter register. When the null terminator is reached, execution automatically jumps to the halt routine.
 
@@ -1197,11 +1358,13 @@ Our program uses registers efficiently:
 - **R0 (pc)**: Program counter (managed by VM)
 - **R1 (zero)**: Always contains 0 (used for unconditional operations)  
 - **R2 (one)**: Contains 1 (for pointer increment)
-- **R3 (msg)**: String pointer (walks through message)
-- **R4 (ch)**: Current character (loaded from string)
-- **R5 (halt-addr)**: Address of halt instruction (for exit jump)
+- **R3 (eight)**: Contains 8 (for byte masking operations)
+- **R4 (halt-addr)**: Address of halt instruction (for exit jump)
+- **R5 (mask)**: Byte mask value (0xFF for single-byte operations)
+- **R6 (msg)**: String pointer (walks through message)
+- **R7 (ch)**: Current character (loaded from string)
 
-This allocation minimizes instruction count and memory accesses.
+This allocation demonstrates efficient use of registers for constants and working values, minimizing instruction count and memory accesses.
 
 ### Assembler Directives Explained
 
@@ -1238,15 +1401,15 @@ The `ldc,` assembler word handles immediate value encoding and register specific
 
 ### Performance Analysis
 
-This 35-byte program demonstrates remarkable efficiency:
+This 44-byte program demonstrates remarkable efficiency:
 
-- **Total instructions executed:** ~45 (for 13-character string)
-- **Instructions per character:** ~3.5 (load, test, output)
-- **Memory footprint:** 35 bytes total
-- **Startup overhead:** 4 instructions (register initialization)
-- **Loop overhead:** 3 instructions per character
+- **Total instructions executed:** ~65 (for 13-character string)
+- **Instructions per character:** ~5 (load, mask, test, output, jump)
+- **Memory footprint:** 44 bytes total
+- **Startup overhead:** 6 instructions (register initialization + mask setup)
+- **Loop overhead:** 5 instructions per character
 
-The tight encoding and register-based architecture provide excellent performance for such a minimal instruction set.
+The additional byte masking operation adds one instruction per character but ensures robust character handling, making the program more reliable at the cost of slightly increased execution time.
 
 ### Why This Approach Works
 
