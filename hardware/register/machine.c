@@ -54,18 +54,14 @@ int main(void)
             
             switch(i)
             {
-                case 2:
+                case 2: // LD+
                     reg[z] = mem[reg[y]] | (mem[reg[y] + 1] << 8); reg[y] += reg[x];
-                    if (z == 0 && y == 0 && x == 1) // jump?
-                    {
-                        //printf("JUMP: %i\n", reg[z]);
-                    }
-                    break; // LD+
-                case 3: 
+                    break;
+                case 3: // ST+
                     mem[reg[y]] = reg[z] & 0xFF;
                     mem[reg[y] + 1] = reg[z] >> 8;
                     reg[y] += reg[x]; 
-                    break; // ST+
+                    break;
                 case 4: if (reg[x] == 0) reg[z] = reg[y]; break; // CP?
                 case 5: reg[z] = (unsigned short)((int)(short)reg[y] + (int)(short)reg[x]); break; // ADD
                 case 6: reg[z] = (unsigned short)((int)(short)reg[y] - (int)(short)reg[x]); break; // SUB
