@@ -1,6 +1,6 @@
 require memory.fs
 
-false warnings !
+false warnings ! \ redefining gforth words
 
 : here h @ memory - ;
 : c, ( c -- ) h @ c! 1 h +! ;

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-gforth hello.fs
+gforth -e "require hello.fs write-boot-block bye"
 ./machine.sh
