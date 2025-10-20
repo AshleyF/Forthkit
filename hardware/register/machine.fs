@@ -17,22 +17,22 @@ registers 16 cells erase
 
 : step ( -- ) fetch-pc nybbles
   case
-     0 of reg @ (bye) endof
-     1 of fetch-pc dup $80 and if $ff00 or then swap reg ! endof
-     2 of xyz over @ s@ swap ! reg+! endof
-     3 of xyz @ over @ s! reg+! endof
-     4 of xyz rot @ 0= if swap @ swap ! else 2drop then endof
-     5 of ['] + binop endof
-     6 of ['] - binop endof
-     7 of ['] * binop endof
-     8 of ['] / binop endof
-     9 of ['] nand binop endof
-    10 of ['] lshift binop endof
-    11 of ['] shr binop endof
-    12 of stdin key-file swap reg ! endof
-    13 of reg @ emit endof
-    14 of xyz @ swap @ rot @ read-block endof
-    15 of xyz @ swap @ rot @ write-block endof
+     0 of reg @ (bye) endof                                      \ HALT
+     1 of fetch-pc dup $80 and if $ff00 or then swap reg ! endof \ LDC
+     2 of xyz over @ s@ swap ! reg+! endof                       \ LD+
+     3 of xyz @ over @ s! reg+! endof                            \ ST+
+     4 of xyz rot @ 0= if swap @ swap ! else 2drop then endof    \ CP?
+     5 of ['] + binop endof                                      \ ADD
+     6 of ['] - binop endof                                      \ SUB
+     7 of ['] * binop endof                                      \ MUL
+     8 of ['] / binop endof                                      \ DIV
+     9 of ['] nand binop endof                                   \ NAND
+    10 of ['] lshift binop endof                                 \ SHL
+    11 of ['] shr binop endof                                    \ SHR
+    12 of stdin key-file swap reg ! endof                        \ IN
+    13 of reg @ emit endof                                       \ OUT
+    14 of xyz @ swap @ rot @ read-block endof                    \ READ
+    15 of xyz @ swap @ rot @ write-block endof                   \ WRITE
     throw
   endcase ;
 : steps ( n -- ) 0 do step loop ;
