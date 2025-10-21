@@ -22,4 +22,3 @@ variable h  memory h !
   close-file throw ;
 
 : read-boot-block ( -- ) 0 0 memory-size read-block ;
-: write-boot-block ( -- ) 0 memory here write-block ;

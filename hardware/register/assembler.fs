@@ -46,3 +46,5 @@ true warnings !
 : label ( -- addr ) here constant ;
 : branch, ( -- dest ) 0 jump,  here 2 - ;
 : patch, ( orig -- ) here swap s! ;
+
+: write-boot-block ( -- ) 0 0 here write-block ; \ note: depends on redefined `here`
