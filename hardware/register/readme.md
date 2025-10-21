@@ -94,4 +94,4 @@ The book.md in the repository root contains the complete tutorial for building f
 
 - Seem to need to press Enter before interacting
 - Forth-based machine doesn't echo as keys entered and doesn't allow editing
-
+  - Mitigated by `cat - | gforth ...`

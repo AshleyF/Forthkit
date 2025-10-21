@@ -7,4 +7,4 @@ echo
 echo
 echo "-- FORTH MACHINE ---------------------------------------------------------------"
 echo
-gforth -e "require machine.fs reboot"
+cat - | gforth -e "require machine.fs reboot"
