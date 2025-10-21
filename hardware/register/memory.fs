@@ -1,5 +1,5 @@
 $10000 constant memory-size
-memory-size buffer: memory
+create memory memory-size allot \ memory-size buffer: memory (buffer: not in old gforth)
 memory memory-size erase
 variable h  memory h !
 
