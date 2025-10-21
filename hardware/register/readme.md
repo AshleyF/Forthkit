@@ -89,3 +89,9 @@ See the complete system in `../register_v2/` for:
 - Bootstrap process documentation
 
 The book.md in the repository root contains the complete tutorial for building from this minimal VM up to a full Forth system with graphics capabilities.
+
+# Bugs
+
+- Seem to need to press Enter before interacting
+- Forth-based machine doesn't echo as keys entered and doesn't allow editing
+
