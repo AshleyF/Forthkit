@@ -35,8 +35,9 @@ registers 16 cells erase
     15 of xyz @ swap @ rot @ write-block endof                   \ WRITE
     throw
   endcase ;
+
 : steps ( n -- ) 0 do step loop ;
-: run begin step again ;
+: run ( -- ) begin step again ;
 
 : soft-reset ( -- ) registers 16 cells erase ;
 : hard-reset ( -- ) soft-reset memory memory-size erase memory h ! ;
