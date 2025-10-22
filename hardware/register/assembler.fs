@@ -47,5 +47,4 @@ true warnings !
 : branch, ( -- dest ) 0 jump,  here 2 - ;
 : patch, ( orig -- ) here swap s! ;
 
-: block-file ( n -- c-addr u ) s" block" rot 0 <# #s #> s+ s" .bin" s+ ;
-: write-boot-block ( -- ) 0 memory here write-block ;
+: write-boot-block ( -- ) 0 0 here write-block ; \ note: depends on redefined `here`
