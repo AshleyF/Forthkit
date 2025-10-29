@@ -11,11 +11,11 @@ echo
 ./hello.sh
 
 echo
-echo "== RUN KERNEL (manually test, then `bye`) ======================================"
+echo "== RUN KERNEL (manually test, then bye) ========================================"
 echo
 ./kernel.sh
 
 echo
-echo "== RUN BOOTSTRAP (manually test, then `bye`) ==================================="
+echo "== RUN BOOTSTRAP (manually test, then bye) ====================================="
 echo
 ./bootstrap.sh

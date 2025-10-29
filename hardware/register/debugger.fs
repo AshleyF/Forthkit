@@ -12,3 +12,13 @@ require machine.fs
 
 : dump-memory ( -- ) memory here 1- dump ;
 : dump-all-memory ( -- ) memory memory-size dump ;
+
+require assembler.fs
+
+: run-word ( addr -- ) pc reg ! run ;
+
+require kernel.fs
+
+label 'test  ' (skipws) call,
+
+: test 'test run-word ;
