@@ -19,6 +19,5 @@ require assembler.fs
 
 require kernel.fs
 
-label 'test  ' (skipws) call,
-
-: test 'test run-word ;
+\ label 'test  ' (skipws) call,
+\ : test 'test run-word ;
