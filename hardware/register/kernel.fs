@@ -83,22 +83,7 @@ variable latest  $ffff latest !
 
 : ['] ' postpone literal ; immediate
 
-: def 
-  0 header,
-  begin
-    bl word dup count s>number? if
-      drop literal, drop \ compile literal number
-    else
-      2drop dup 1+ c@ [char] ; = if
-        drop ret, exit \ compile return
-      else
-        find-word call, \ compile call
-      then
-    then
-  again
-;
-
-true warnings ! \ intentionally redefining (latest, header, ')
+true warnings ! \ intentionally redefining (latest header, ' ['])
 
 ( --- primitives ------------------------------------------------------------- )
 
@@ -172,7 +157,7 @@ true warnings ! \ intentionally redefining (latest, header, ')
                  y popd,
              $ff z ldv, 
              y y z and,  \ mask to lower
-           z z not,  \ upper mask
+               z z not,  \ upper mask
                w x ld,   \ existing value
              w w z and,  \ mask to upper
              y y w or,   \ combine
@@ -659,77 +644,70 @@ true warnings ! \ intentionally redefining (latest, header, ')
 var, dp \ initialized after dictionary (below)
 
 \ here ( -- addr ) current dictionary pointer address (dp @)
-\ 0 header, here
-\               ' dp call,
-\                ' @ jump,
-def here dp @ ;
+0 header, here
+              ' dp call,
+               ' @ jump,
 
 \ unused ( -- remaining ) dictionary space remaining
 0 header, unused
-       memory-size literal, \ can't be done in def
+       memory-size literal,
             ' here call,
                ' - jump, \ TODO: consider stack space?
 
 \ allot ( n -- ) advance dictionary pointer (dp +!)
-\ 0 header, allot
-\               ' dp call,
-\               ' +! jump,
-def allot dp +! ;
+0 header, allot
+              ' dp call,
+              ' +! jump,
 
 \ , ( x -- ) append x in newly reserved cell (here ! 1 cells allot)
-\ 0 header, ,
-\             ' here call,
-\                ' ! call,
-\                  1 literal,
-\            ' cells call,
-\            ' allot jump,
-def , here ! 1 cells allot ;
+0 header, ,
+            ' here call,
+               ' ! call,
+                 1 literal,
+           ' cells call,
+           ' allot jump,
 
 \ c, ( x -- ) append x chars in newly reserved space (here c! 1 chars allot)
-\ 0 header, c,
-\             ' here call,
-\               ' c! call,
-\                  1 literal,
-\            ' chars call,
-\            ' allot jump,
-def c, here c! 1 chars allot ;
+0 header, c,
+            ' here call,
+              ' c! call,
+                 1 literal,
+           ' chars call,
+           ' allot jump,
 
 ( --- secondaries ------------------------------------------------------------ )
 
 \ 2! ( y x addr -- ) store x y at consecutive addresses (tuck ! cell+ !)
-\ 0 header, 2!
-\             ' tuck call,
-\                ' ! call,
-\            ' cell+ call,
-\                ' ! jump,
-def 2! tuck ! cell+ ! ;
+0 header, 2!
+            ' tuck call,
+               ' ! call,
+           ' cell+ call,
+               ' ! jump,
 
 \ 2@ ( addr -- y x ) fetch pair of consecutive addresses (dup cell+ @ swap @)
-\ 0 header, 2@
-\              ' dup call,
-\            ' cell+ call,
-\                ' @ call,
-\             ' swap call,
-\                ' @ jump,
-def 2@ dup cell+ @ swap @ ;
+0 header, 2@
+             ' dup call,
+           ' cell+ call,
+               ' @ call,
+            ' swap call,
+               ' @ jump,
 
 \ xor ( y x -- result ) logical/bitwise exclusive or (2dup or -rot and invert and)
-\ 0 header, xor
-\             ' 2dup call,
-\               ' or call,
-\             ' -rot call,
-\              ' and call,
-\           ' invert call,
-\              ' and jump,
-def xor 2dup or -rot and invert and ;
+0 header, xor
+            ' 2dup call,
+              ' or call,
+            ' -rot call,
+             ' and call,
+          ' invert call,
+             ' and jump,
 
 \ abs ( x -- |x| ) absolute value (dup 0< if negate then)
 0 header, abs
              ' dup call,
               ' 0< call,
-                   if, \ can't use in def
+                   if,
           ' negate call,
-                   then, \ can't use in def
+                   then,
                    ret,
 
 ( --- secondary control-flow ------------------------------------------------- )
@@ -777,61 +755,53 @@ def xor 2dup or -rot and invert and ;
                    +loop, ; \ end do-loop (immediate 1 +loop)
 
 \ i ( -- x ) ( R: x -- x ) copy innermost loop index (2r@ drop)
-\ 0 header, i
-\              ' 2r@ call, \ including return from here
-\             ' drop jump,
-def i 2r@ drop ;
+0 header, i
+             ' 2r@ call, \ including return from here
+            ' drop jump,
 
 \ j ( -- x ) ( R: x -- x ) copy next outer loop index (2r> 2r@ drop -rot 2>r) (x r twelve add, x x ld, x pushd, ret,)
-\ 0 header, j
-\              ' 2r> call, \ i this
-\              ' 2r@ call, \ i this j limit
-\             ' drop call, \ i this j
-\             ' -rot call, \ j i this
-\              ' 2>r call, \ tricky, don't jump here!
-\                    ret,
-def j 2r> 2r@ drop -rot 2>r ;
+0 header, j
+             ' 2r> call, \ i this
+             ' 2r@ call, \ i this j limit
+            ' drop call, \ i this j
+            ' -rot call, \ j i this
+             ' 2>r call, \ tricky, don't jump here!
+                   ret,
 
 \ unloop ( -- ) ( R: y x -- ) remove loop parameters (r> 2r> rot >r 2drop)
-\ 0 header, unloop
-\               ' r> call, \ this return address
-\              ' 2r> call, \ loop parameters
-\              ' rot call,
-\               ' >r call, \ replace this return address
-\            ' 2drop jump,
-def unloop r> 2r> rot >r 2drop ;
+0 header, unloop
+              ' r> call, \ this return address
+             ' 2r> call, \ loop parameters
+             ' rot call,
+              ' >r call, \ replace this return address
+           ' 2drop jump,
 
 ( --- interpreter ------------------------------------------------------------ )
 
 \ true ( -- true ) return true flag (-1 constant true)
-\ 0 header, true
-\                 -1 literal,
-\                    ret,
-def true -1 ;
+0 header, true
+                -1 literal,
+                   ret,
 
 \ false ( -- false ) return false flag (0 constant false)
-\ 0 header, false
-\                  0 literal,
-\                    ret,
-def false 0 ;
+0 header, false
+                 0 literal,
+                   ret,
 
 \ bl ( -- c ) space character value (32 constant bl)
-\ 0 header, bl
-\                 32 literal,
-\                    ret,
-def bl 32 ;
+0 header, bl
+                32 literal,
+                   ret,
 
 \ space ( -- ) emit space character (bl emit)
-\ 0 header, space
-\               ' bl call,
-\             ' emit jump,
-def space bl emit ;
+0 header, space
+              ' bl call,
+            ' emit jump,
 
 \ cr ( -- ) cause newline (10 emit)
-\ 0 header, cr
-\                 10 literal,
-\             ' emit jump,
-def cr 10 emit ;
+0 header, cr
+                10 literal,
+            ' emit jump,
 
 \ type ( addr len -- ) display the character string (0 max 0 ?do dup c@ emit char+ loop drop)
 0 header, type
@@ -842,47 +812,44 @@ def cr 10 emit ;
                  0 literal,
                    then,
                  0 literal,
-                   ?do, \ can't use in def
+                   ?do,
              ' dup call,
               ' c@ call,
             ' emit call,
            ' char+ call,
-                   loop, \ can't use in def
+                   loop,
             ' drop jump,
 
 \ pad ( -- addr ) address of transient region for intermediate processing
-\ 0 header, pad
-\             ' here call,
-\               1024 literal, \ arbitrary distance away
-\                ' + call,
-\          ' aligned jump,
-def pad here 1024 + aligned ;
+0 header, pad
+            ' here call,
+              1024 literal, \ arbitrary distance away
+               ' + call,
+         ' aligned jump,
 
 \ np ( -- addr ) return address of pictured numeric output pointer (non-standard)
 var, np \ initialized after dictionary (below)
 
 \ <# ( -- ) initialize pictured numeric output (pad 64 + np !)
-\ 0 header, <#
-\              ' pad call,
-\                 64 literal, \ arbitrary distance away
-\                ' + call,
-\               ' np call,
-\                ' ! jump,
-def <# pad 64 + np ! ;
+0 header, <#
+             ' pad call,
+                64 literal, \ arbitrary distance away
+               ' + call,
+              ' np call,
+               ' ! jump,
 
 \ hold ( char -- ) add char to beginning of pictured numeric output (np -1 over +! c!)
-\ 0 header, hold
-\               ' np call,
-\                 -1 literal,
-\             ' over call,
-\               ' +! call,
-\                ' @ call,
-\               ' c! jump,
-def hold np -1 over +! @ c! ;
+0 header, hold
+              ' np call,
+                -1 literal,
+            ' over call,
+              ' +! call,
+               ' @ call,
+              ' c! jump,
 
 \ holds ( addr len -- ) add string to beginning of pictured numeric output (begin dup while 1- 2dup + c@ hold repeat 2drop)
 0 header, holds
-                   begin, \ can't use in def
+                   begin,
              ' dup call,
                    while,
               ' 1- call,
@@ -890,144 +857,133 @@ def hold np -1 over +! @ c! ;
                ' + call,
               ' c@ call,
             ' hold call,
-                   repeat, \ can't use in def
+                   repeat,
            ' 2drop jump,
 
 \ base ( -- base ) address of current number-conversion radix (2..36, initially 10)
 var, base
 
 \ decimal ( -- ) set number-conversion radix to 10
-\ 0 header, decimal
-\                 10 literal,
-\             ' base call,
-\                ' ! jump,
-def decimal 10 base ! ;
+0 header, decimal
+                10 literal,
+            ' base call,
+               ' ! jump,
 
 \ hex ( -- ) set number-conversion radix to 16
-\ 0 header, hex
-\                 16 literal,
-\             ' base call,
-\                ' ! jump,
-def hex 16 base ! ;
+0 header, hex
+                16 literal,
+            ' base call,
+               ' ! jump,
 
 \ octal ( -- ) set number-conversion radix to 8 (non-standard)
-\ 0 header, octal
-\                  8 literal,
-\             ' base call,
-\                ' ! jump,
-def octal 8 base ! ;
+0 header, octal
+                 8 literal,
+            ' base call,
+               ' ! jump,
 
 \ binary ( -- ) set number-conversion radix to 2 (non-standard)
-\ 0 header, binary
-\                  2 literal,
-\             ' base call,
-\                ' ! jump,
-def binary 2 base ! ;
+0 header, binary
+                 2 literal,
+            ' base call,
+               ' ! jump,
 
 \ # ( ud -- ud ) prepend least significant digit to pictured numeric output, return ud/base
-\ 0 header, #
-\             ' swap call, \ TODO: support double numbers
-\             ' base call,
-\                ' @ call,
-\             ' 2dup call,
-\              ' mod call,
-\                 48 literal, \ '0'
-\                ' + call,
-\             ' hold call, \ 0 n b
-\                ' / call, \ 0 m
-\             ' swap jump, \ TODO: support double numbers
-def # swap base @ 2dup mod 48 + hold / swap ; \ TODO: doesn't work with negative values!
+0 header, #
+            ' swap call, \ TODO: support double numbers
+            ' base call,
+               ' @ call,
+            ' 2dup call,
+             ' mod call,
+                48 literal, \ '0'
+               ' + call,
+            ' hold call, \ 0 n b
+               ' / call, \ 0 m
+            ' swap jump, \ TODO: support double numbers
 \ base @ ud/mod rot dup #9 u> #7 and + #48 + hold ;
 
 \ #s ( ud -- ud ) convert all digits using # (appends at least 0)
 0 header, #s
             ' swap call, \ TODO: support double numbers
-                   begin, \ can't do in def
+                   begin,
             ' swap call, \ TODO: support double numbers
                ' # call, \ note: at least once even if zero
             ' swap call, \ TODO: support double numbers
              ' dup call,
              ' 0<> call,
-                   while, \ can't do in def
-                   repeat, \ can't do in def
+                   while,
+                   repeat,
             ' swap jump, \ TODO: support double numbers
 
 \ sign ( n -- ) if negative, prepend '-' to pictured numeric output
 0 header, sign
               ' 0< call,
-                   if, \ can't do in def
+                   if,
                 45 literal, \ '-'
             ' hold call,
-                   then, \ can't do in def
+                   then,
                    ret,
 
 \ #> ( xd -- addr len ) make pictured numeric output string available (np @ pad 64 + over -)
-\ 0 header, #>
-\            ' 2drop call,
-\               ' np call,
-\                ' @ call,
-\              ' pad call,
-\                 64 literal, \ arbitrary distance away
-\                ' + call,
-\             ' over call,
-\                ' - jump,
-def #> 2drop np @ pad 64 + over - ;
+0 header, #>
+           ' 2drop call,
+              ' np call,
+               ' @ call,
+             ' pad call,
+                64 literal, \ arbitrary distance away
+               ' + call,
+            ' over call,
+               ' - jump,
 
 \ s>d ( n -- d ) convert number to double-cell
-\ 0 header, s>d
-\              ' dup call,
-\               ' 0< jump,
-def s>d dup 0< ;
+0 header, s>d
+             ' dup call,
+              ' 0< jump,
 
 \ . ( n -- ) display value in free field format (dup abs s>d <# #s rot sign #> type space)
-\ 0 header, .
-\              ' dup call,
-\              ' abs call,
-\              ' s>d call,
-\               ' <# call,
-\               ' #s call,
-\              ' rot call,
-\             ' sign call,
-\               ' #> call,
-\            ' space call,
-\             ' type jump,
-def . dup abs s>d <# #s rot sign #> space type ;
+0 header, .
+             ' dup call,
+             ' abs call,
+             ' s>d call,
+              ' <# call,
+              ' #s call,
+             ' rot call,
+            ' sign call,
+              ' #> call,
+           ' space call,
+            ' type jump,
 
 \ d. ( u -- ) display unsigned value in free field format (from double word set)
-\ 0 header, d.
-\               ' <# call,
-\               ' #s call,
-\               ' #> call,
-\            ' space call,
-\             ' type jump,
-def d. <# #s #> space type ;
+0 header, d.
+              ' <# call,
+              ' #s call,
+              ' #> call,
+           ' space call,
+            ' type jump,
 
 \ u. ( u -- ) display unsigned value in free field format (0 <# #s #> type space)
-\ 0 header, u.
-\                  0 literal,
-\               ' d. jump,
-def u. 0 d. ;
+0 header, u.
+                 0 literal,
+              ' d. jump,
 
 \ .s ( -- ) display values on the stack non-destructively (depth dup 0 do dup i - pick . loop drop)
 0 header, .s
            ' depth call,
              ' dup call,
                  0 literal,
-                   do, \ TODO: ?do bug \ can't use in def
+                   do, \ TODO: ?do bug
              ' dup call,
                ' i call,
                ' - call,
             ' pick call,
                ' . call,
-                   loop, \ can't use in def
+                   loop,
             ' drop call,
                    ret,
 
 \ ? ( addr -- ) display value stored at address (@ .)
-\ 0 header, ?
-\                ' @ call,
-\                ' . jump,
-def ? @ . ;
+0 header, ?
+               ' @ call,
+               ' . jump,
 
 ( --- interpreter ------------------------------------------------------------ )
 
@@ -1038,29 +994,27 @@ var, source-addr
 var, source-len
 
 \ source ( -- c-addr u )
-\ 0 header, source
-\     ' source-addr call,
-\               ' @ call,
-\      ' source-len call,
-\               ' @ jump,
-def source source-addr @ source-len @ ;
+0 header, source
+    ' source-addr call,
+              ' @ call,
+     ' source-len call,
+              ' @ jump,
 
 \ fill ( c-addr u char -- ) if u is greater than zero, store char in each of u consecutive characters of memory beginning at c-addr.
 0 header, fill
             ' -rot call,
                  0 literal,
-                   ?do, \ can't use in def
+                   ?do,
             ' 2dup call,
               ' c! call,
               ' 1+ call,
-                   loop, \ can't use in def
+                   loop,
            ' 2drop jump,
 
 \ erase ( addr u -- ) if u is greater than zero, clear all bits in each of u consecutive address units of memory beginning at addr.
-\ 0 header, erase
-\                  0 literal,
-\             ' fill jump,
-def erase 0 fill ;
+0 header, erase
+                 0 literal,
+            ' fill jump,
 
 \ >in offset to parse area within input buffer
 var, >in
@@ -1072,11 +1026,11 @@ var, >in
               ' 1+ call,    \ c-addr n1 n2+                  increment n2
             ' 2dup call,    \ c-addr n1 n2+ n1 n2+
                ' < call,    \ c-addr n1 n2+ <
-                   if,      \ c-addr n1 n2+                  bounds check  \ can't use in def
+                   if,      \ c-addr n1 n2+                  bounds check
             ' drop call,    \ c-addr n1
              ' nip call,    \ n1
             ' exit call,    \ n1
-                   then,    \ c-addr n1 n2+   \ can't use in def
+                   then,    \ c-addr n1 n2+
              ' rot call,    \ n1 n2+ c-addr
              ' key call,    \ n1 n2+ c-addr key
             ' swap call,    \ n1 n2+ key c-addr
@@ -1091,9 +1045,9 @@ var, >in
                 10 literal, \ n1 n2+ c-addr+ <>13 key 10
               ' <> call,    \ n1 n2+ c-addr+ <>13 <>10
              ' and call,    \ n1 n2+ c-addr+ <>CRLF
-                   while,   \ n1 n2+ c-addr+   \ can't use in def
+                   while,   \ n1 n2+ c-addr+
             ' -rot call,    \ c-addr+ n1 n2+
-                   repeat,  \ c-addr+ n1 n2+   \ can't use in def
+                   repeat,  \ c-addr+ n1 n2+
             ' drop call,    \ n1 n2+
              ' nip jump,    \ n2+
 
@@ -1106,7 +1060,7 @@ var, source-id
                ' @ call,
               ' 0= call,
              ' dup call, \ return value
-                   if,   \ can't use in def
+                   if,
           ' source call,
             ' 2dup call, \ TODO REMOVE
            ' erase call, \ TODO REMOVE
@@ -1115,7 +1069,7 @@ var, source-id
                  0 literal,
              ' >in call,
                ' ! call,
-                   then, \ can't use in def
+                   then,
                    ret,
 
 \ parse ( char "ccc<char>" -- c-addr u ) parse ccc delimited by char
@@ -1129,20 +1083,20 @@ var, source-id
                ' @ call, \ char end c-addr in
                ' + call, \ char end start
             ' tuck call, \ char start end start
-                   ?do,  \ char start    \ can't use in def
+                   ?do,  \ char start
             ' over call, \ char start char
                ' i call, \ char start char i
               ' c@ call, \ char start char c
             ' over call, \ char start char c char
               ' bl call,
                ' = call, \ char start char c sp?
-                   if,   \ char start char c    \ can't use in def
+                   if,   \ char start char c
               ' 1- call,
                ' > call, \ char start c<=$20
-                   else,    \ can't use in def
+                   else,
                ' = call, \ char start =?
                    then,
-                   if,    \ can't use in def
+                   if,
              ' nip call, \ start
                ' i call, \ start i
             ' over call, \ start i start
@@ -1153,8 +1107,8 @@ var, source-id
               ' +! call, \ start len
           ' unloop call,
             ' exit call,
-                   then,    \ can't use in def
-                   loop,    \ can't use in def
+                   then,
+                   loop,
              ' nip call, \ start
           ' source call, \ start c-addr u
                ' + call, \ start end
@@ -1175,40 +1129,39 @@ var, source-id
             ' tuck call, \ char inaddr c-addr u
                ' + call, \ char inaddr end
             ' swap call, \ char end inaddr
-                   ?do,  \ char    \ can't use in def
+                   ?do,  \ char
              ' dup call, \ char char
                ' i call, \ char char addr
               ' c@ call, \ char char c
             ' over call, \ char char c char
               ' bl call, \ char char c char $20
                ' = call, \ char char c sp?
-                   if,   \ char char c    \ can't use in def
+                   if,   \ char char c
             ' swap call, \ char c char
                ' > call, \ char c>$20 (not delimiter)
                    else, \ char char c
               ' <> call, \ char <>? (not delimiter)
                    then,
-                   if,   \ char    \ can't use in def
+                   if,   \ char
                    leave,
-                   then,    \ can't use in def
+                   then,
                  1 literal, \ char 1
              ' >in call,    \ char 1 in
               ' +! call,    \ char 
-                   loop,    \ can't use in def
-            ' drop jump,    \ 
+                   loop,
+            ' drop jump,
 
 \ parse-name ( "<spaces>name<space>" -- c-addr u ) skip leading space and parse name delimited by space
-\ 0 header, parse-name
-\               ' bl call,
-\              ' dup call,
-\           ' (skip) call,
-\            ' parse jump,
-def parse-name bl dup (skip) parse ;
+0 header, parse-name
+              ' bl call,
+             ' dup call,
+          ' (skip) call,
+           ' parse jump,
 
 \ cmove ( c-addr1 c-addr2 u -- ) copy characters (from lower to higher addresses)
 0 header, cmove
                  0 literal,
-                   ?do,    \ can't use in def
+                   ?do,
             ' over call,
               ' c@ call,
             ' over call,
@@ -1217,46 +1170,43 @@ def parse-name bl dup (skip) parse ;
             ' swap call,
            ' char+ call,
             ' swap call,
-                   loop,    \ can't use in def
+                   loop,
            ' 2drop jump,
 
 \ >counted ( c-addr u -- c-addr ) string address and length to counted string address (non-standard)
-\ 0 header, >counted
-\              ' dup call, \ c-addr u u
-\              ' pad call, \ c-addr u u pad
-\               ' c! call, \ c-addr u -- length
-\              ' pad call, \ c-addr u pad
-\               ' 1+ call, \ c-addr u pad+
-\             ' swap call, \ c-addr pad+ u
-\            ' cmove call, \ 
-\              ' pad jump, \ pad
-def >counted dup pad c! pad 1+ swap cmove pad ;
+0 header, >counted
+             ' dup call, \ c-addr u u
+             ' pad call, \ c-addr u u pad
+              ' c! call, \ c-addr u -- length
+             ' pad call, \ c-addr u pad
+              ' 1+ call, \ c-addr u pad+
+            ' swap call, \ c-addr pad+ u
+           ' cmove call, \ 
+             ' pad jump, \ pad
 
 \ word ( char "<chars>ccc<char>" -- c-addr ) skip leading delimeters, parse ccc delimited by char, return transient counted string
-\ 0 header, word
-\              ' dup call,
-\           ' (skip) call,
-\            ' parse call,
-\         ' >counted jump,
-def word dup (skip) parse >counted ;
+0 header, word
+             ' dup call,
+          ' (skip) call,
+           ' parse call,
+        ' >counted jump,
 
 \ count ( c-addr1 -- c-addr2 u ) counted string to c-addr and length
-\ 0 header, count
-\              ' dup call,
-\               ' c@ call,
-\             ' swap call,
-\               ' 1+ call,
-\             ' swap jump,
-def count dup c@ swap 1+ swap ;
+0 header, count
+             ' dup call,
+              ' c@ call,
+            ' swap call,
+              ' 1+ call,
+            ' swap jump,
 
-var, latest \ common, but non-standard
+var, latest \ common, but non-standard (confusing name conflict)
 
 0 header, (tolower) \ non-standard
              ' dup call,
-         char A 1- literal,  \ can't use char A in def
+         char A 1- literal,
                ' > call,
             ' over call,
-         char Z 1+ literal,  \ can't use char Z in def
+         char Z 1+ literal,
                ' < call,
              ' and call,
                    if,
@@ -1272,14 +1222,14 @@ var, latest \ common, but non-standard
              ' rot call,
             ' over call,
               ' <> call, \ lengths unequal?
-                   if,   \ can't use in def
+                   if,
             ' drop call,
            ' 2drop call,
            ' false call,
             ' exit call,
-                   then,   \ can't use in def
+                   then,
                  0 literal,
-                   do,   \ can't use in def
+                   do,
             ' 2dup call,
                ' i call,
                ' + call,
@@ -1291,13 +1241,13 @@ var, latest \ common, but non-standard
               ' c@ call,
        ' (tolower) call,
               ' <> call,
-                   if,   \ can't use in def
+                   if,
            ' 2drop call,
            ' false call,
           ' unloop call,
             ' exit call,
-                   then,   \ can't use in def
-                   loop,   \ can't use in def
+                   then,
+                   loop,
            ' 2drop call,
             ' true jump,
 
@@ -1305,7 +1255,7 @@ var, latest \ common, but non-standard
 0 header, find
           ' latest call,
                ' @ call,    \ find link
-                   begin,   \ can't use in def
+                   begin,
             ' 2dup call,    \ find link find link
                  3 literal,
                ' + call,    \ find link find link+3
@@ -1318,7 +1268,7 @@ var, latest \ common, but non-standard
            ' count call,    \ find link link+3 len find len
            ' 2over call,    \ find link link+3 len find len link+3 len
          ' (equal) call,    \ find link link+3 len eq?
-                   if,      \ find link link+3 len    \ can't use in def
+                   if,      \ find link link+3 len
                ' + call,    \ find link xt
             ' -rot call,    \ xt find link
              ' nip call,    \ xt link
@@ -1328,11 +1278,11 @@ var, latest \ common, but non-standard
                $80 literal,
              ' and call,    \ xt flag
               ' 0= call,
-                   if,    \ can't use in def
+                   if,
                 -1 literal, \ xt -1 (non-immediate)
                    else,
                  1 literal, \ xt 1 (immediate)
-                   then,    \ can't use in def
+                   then,
             ' exit call,    \ xt (names match!)
                    then,    \ find link link+3 len
            ' 2drop call,    \ find link
@@ -1341,12 +1291,12 @@ var, latest \ common, but non-standard
 \            $ffff literal, \ want 0000 to be a valid link
 \              ' = call,
               ' 0= call,
-                   if,    \ can't use in def
+                   if,
             ' drop call,    \ find
                  0 literal, \ find 0  (not found)
             ' exit call,
-                   then,    \ can't use in def
-                   again,    \ can't use in def
+                   then,
+                   again,
                    ret,
 
 \ ' ( "<spaces>name" -- xt ) skip leading space, parse and find name
@@ -1355,10 +1305,10 @@ var, latest \ common, but non-standard
             ' word call, \ c-addr
             ' find call, \ c-addr 0 | xt 1 | xt -1
               ' 0= call, \ c-addr -1 | xt 0
-                   if,   \ c-addr    \ can't use in def
+                   if,   \ c-addr
             ' drop call, \
                  0 literal, \ 0 \ TODO: abort with message?
-                   then,    \ can't use in def
+                   then,
                    ret, \ 0 | xt
 
 \ >number ( ud1 c-addr1 u1 -- ud2 c-addr2 u2 ) ud2 is the unsigned result of converting the characters
@@ -1369,10 +1319,10 @@ var, latest \ common, but non-standard
 \         character past the end of the string if the string was entirely converted. u2 is the number of
 \         unconverted characters in the string. An ambiguous condition exists if ud2 overflows.
 0 header, >number \ TODO: support double ud1/ud2?
-                   begin,  \ n a c    \ can't use in def
+                   begin,  \ n a c
              ' dup call,   \ n a c c
               ' 0> call,   \ n a c c0>
-                   while,  \ n a c    \ can't use in def
+                   while,  \ n a c
             ' -rot call,   \ c n a
              ' dup call,   \ c n a a
               ' c@ call,   \ c n a d
@@ -1381,7 +1331,7 @@ var, latest \ common, but non-standard
              ' dup call,   \ c n a d d
                 10 literal, \ cn a d d 10
                ' < call,   \ c n a d <
-                   if,     \ c n a d  valid?    \ can't use in def
+                   if,     \ c n a d  valid?
              ' rot call,   \ c a d n
             ' base call,   \ c a d n b
                ' @ call,   \ c a d n b
@@ -1391,261 +1341,234 @@ var, latest \ common, but non-standard
               ' 1+ call,   \ c n a
              ' rot call,   \ n a c
               ' 1- call,   \ n a c
-                   else,   \ c n a d  invalid    \ can't use in def
+                   else,   \ c n a d  invalid
             ' drop call,   \ c n a
              ' rot call,   \ n a c
             ' exit call,
-                   then,   \ n a c    \ can't use in def
-                   repeat,    \ can't use in def
+                   then,   \ n a c
+                   repeat,
                    ret,
 
 ( --- assembler -------------------------------------------------------------- )
 
 \ pc ( -- pc )
 0 header, pc
-                pc literal,   \ can't use in def
+                pc literal,
                    ret,
 \ zero ( -- zero )
 0 header, zero
-              zero literal,   \ can't use in def
+              zero literal,
                    ret,
 
 \ one ( -- one )
 0 header, one
-               one literal,   \ can't use in def
+               one literal,
                    ret,
 
 \ two ( -- two )
 0 header, two
-               two literal,   \ can't use in def
+               two literal,
                    ret,
 
 \ four ( -- four )
 0 header, four
-              four literal,   \ can't use in def
+              four literal,
                    ret,
 
 \ eight ( -- eight )
 0 header, eight
-             eight literal,   \ can't use in def
+             eight literal,
                    ret,
 
 \ twelve ( -- twelve )
 0 header, twelve
-            twelve literal,   \ can't use in def
+            twelve literal,
                    ret,
 
 \ #t ( -- #t )
 0 header, #t
-                #t literal,   \ can't use in def
+                #t literal,
                    ret,
 
 \ #f ( -- #f )
 0 header, #f
-                #f literal,   \ can't use in def
+                #f literal,
                    ret,
 
 \ x ( -- x )
 0 header, x
-                 x literal,   \ can't use in def
+                 x literal,
                    ret,
 
 \ y ( -- y )
 0 header, y
-                 y literal,   \ can't use in def
+                 y literal,
                    ret,
 
 \ z ( -- z )
 0 header, z
-                 z literal,   \ can't use in def
+                 z literal,
                    ret,
 
 \ w ( -- w )
 0 header, w
-                 w literal,   \ can't use in def
+                 w literal,
                    ret,
 
 \ d ( -- d )
 0 header, d
-                 d literal,   \ can't use in def
+                 d literal,
                    ret,
 
 \ r ( -- r )
 0 header, r
-                 r literal,   \ can't use in def
+                 r literal,
                    ret,
 
 \ 2nybbles ( x i -- )
-\ 0 header, 2nybbles,
-\                  4 literal,
-\           ' lshift call,
-\               ' or call,
-\               ' c, jump,
-def 2nybbles, 4 lshift or c, ;
+0 header, 2nybbles,
+                 4 literal,
+          ' lshift call,
+              ' or call,
+              ' c, jump,
 
 \ 4nybbles, ( z y x i -- )
-\ 0 header, 4nybbles,
-\        ' 2nybbles, call,
-\        ' 2nybbles, jump,
-def 4nybbles, 2nybbles, 2nybbles, ;
+0 header, 4nybbles,
+       ' 2nybbles, call,
+       ' 2nybbles, jump,
     
 \ halt, ( x -- ) halt(x) (halt with exit code x)
-\ 0 header, halt,
-\                  0 literal,
-\        ' 2nybbles, jump,
-def halt, 0 2nybbles, ;
+0 header, halt,
+                 0 literal,
+       ' 2nybbles, jump,
 
 \ ldc, ( v x -- ) x=v (load constant signed v into x)
-\ 0 header, ldc,
-\                  1 literal,
-\        ' 2nybbles, call,
-\               ' c, jump,
-def ldc, 1 2nybbles, c, ;
+0 header, ldc,
+                 1 literal,
+       ' 2nybbles, call,
+              ' c, jump,
 
 \ ld+, ( z y x -- ) z<-[y] y+=x (load from memory and inc/dec pointer)
-\ 0 header, ld+,
-\                  2 literal,
-\        ' 4nybbles, jump,
-def ld+, 2 4nybbles, ;
+0 header, ld+,
+                 2 literal,
+       ' 4nybbles, jump,
 
 \ st+, ( z y x -- ) z->[y] y+=x (store to memory and inc/dec pointer)
-\ 0 header, st+,
-\                  3 literal,
-\        ' 4nybbles, jump,
-def st+, 3 4nybbles, ;
+0 header, st+,
+                 3 literal,
+       ' 4nybbles, jump,
 
 \ cp?, ( z y x -- ) z=y if x=0 (conditional copy)
-\ 0 header, cp?,
-\                  4 literal,
-\        ' 4nybbles, jump,
-def cp?, 4 4nybbles, ;
+0 header, cp?,
+                 4 literal,
+       ' 4nybbles, jump,
 
 \ add, ( z y x -- ) z=y+x (addition)
-\ 0 header, add,
-\                  5 literal,
-\        ' 4nybbles, jump,
-def add, 5 4nybbles, ;
+0 header, add,
+                 5 literal,
+       ' 4nybbles, jump,
 
 \ sub, ( z y x -- ) z=y-x (subtraction)
-\ 0 header, sub,
-\                  6 literal,
-\        ' 4nybbles, jump,
-def sub, 6 4nybbles, ;
+0 header, sub,
+                 6 literal,
+       ' 4nybbles, jump,
 
 \ mul, ( z y x -- ) z=y*x (multiplication)
-\ 0 header, mul,
-\                  7 literal,
-\        ' 4nybbles, jump,
-def mul, 7 4nybbles, ;
+0 header, mul,
+                 7 literal,
+       ' 4nybbles, jump,
 
 \ div, ( z y x -- ) z=y/x (division)
-\ 0 header, div,
-\                  8 literal,
-\        ' 4nybbles, jump,
-def div, 8 4nybbles, ;
+0 header, div,
+                 8 literal,
+       ' 4nybbles, jump,
 
 \ nand, ( z y x -- ) z=y nand x (not-and)
-\ 0 header, nand,
-\                  9 literal,
-\        ' 4nybbles, jump,
-def nand, 9 4nybbles, ;
+0 header, nand,
+                 9 literal,
+       ' 4nybbles, jump,
 
 \ shl, ( z y x -- ) z=y<<x (bitwise shift-left)
-\ 0 header, shl,
-\                 10 literal,
-\        ' 4nybbles, jump,
-def shl, 10 4nybbles, ;
+0 header, shl,
+                10 literal,
+       ' 4nybbles, jump,
 
 \ shr, ( z y x -- ) z=y>>x (bitwise shift-right)
-\ 0 header, shr,
-\                 11 literal,
-\        ' 4nybbles, jump,
-def shr, 11 4nybbles, ;
+0 header, shr,
+                11 literal,
+       ' 4nybbles, jump,
 
 \ in, ( y x -- ) x=getc() (read from console)
-\ 0 header, in,
-\                 12 literal,
-\        ' 2nybbles, jump,
-def in, 12 2nybbles, ;
+0 header, in,
+                12 literal,
+       ' 2nybbles, jump,
 
 \ out, ( y x -- ) putc(x) (write to console)
-\ 0 header, out,
-\                 13 literal,
-\        ' 2nybbles, jump,
-def out, 13 2nybbles, ;
+0 header, out,
+                13 literal,
+       ' 2nybbles, jump,
 
 \ read, ( z y x -- ) read(z,y,x) (file z of size y -> address x)
-\   0 header, read,
-\                   14 literal,
-\          ' 4nybbles, jump,
-def read, 14 4nybbles, ;
+0 header, read,
+                14 literal,
+       ' 4nybbles, jump,
 
 \ write, ( z y x -- ) write(z,y,x) (file z of size y <- address x)
-\   0 header, write,
-\                   15 literal,
-\          ' 4nybbles, jump,
-def write, 15 4nybbles, ;
+0 header, write,
+                15 literal,
+       ' 4nybbles, jump,
 
 \ cp, ( y x -- ) y=x (unconditional copy)
-\ 0 header, cp,
-\             ' zero call,
-\             ' cp?, jump,
-def cp, zero cp?, ;
+0 header, cp,
+            ' zero call,
+            ' cp?, jump,
 
 \ ld, ( y x -- ) y<-[x] (load from memory)
-\   0 header, ld,
-\               ' zero call,
-\               ' ld+, jump,
-def ld, zero ld+, ;
+0 header, ld,
+            ' zero call,
+            ' ld+, jump,
 
 \ st, ( y x -- ) y->[x] (store to memory)
-\   0 header, st,
-\               ' zero call,
-\               ' st+, jump,
-def st, zero st+, ;
+0 header, st,
+            ' zero call,
+            ' st+, jump,
 
 \ jump, ( addr -- ) unconditional jump to address (following cell)
-\ 0 header, jump,
-\               ' pc call,
-\               ' pc call,
-\              ' ld, call,
-\                ' , jump,
-def jump, pc pc ld, , ;
+0 header, jump,
+              ' pc call,
+              ' pc call,
+             ' ld, call,
+               ' , jump,
 
 \ ldv, ( val reg -- )
-\ 0 header, ldv,
-\               ' pc call,
-\              ' two call,
-\             ' ld+, call,
-\                ' , jump,
-def ldv, pc two ld+, , ;
+0 header, ldv,
+              ' pc call,
+             ' two call,
+            ' ld+, call,
+               ' , jump,
 
 \ push, ( reg ptr -- )
-\ 0 header, push,
-\              ' dup call,
-\              ' dup call,
-\             ' four call,
-\             ' sub, call,
-\              ' st, jump,
-def push, dup dup four sub, st, ;
+0 header, push,
+             ' dup call,
+             ' dup call,
+            ' four call,
+            ' sub, call,
+             ' st, jump,
 
 \ pop, ( reg ptr -- )
-\ 0 header, pop,
-\             ' four call,
-\             ' ld+, jump,
-def pop, four ld+, ;
+0 header, pop,
+            ' four call,
+            ' ld+, jump,
 
 \ pushd, ( reg -- )
-\   0 header, pushd,
-\                  ' d call,
-\              ' push, jump,
-def pushd, d push, ;
+0 header, pushd,
+               ' d call,
+           ' push, jump,
 
 \ popd, ( reg -- )
-\   0 header, popd,
-\                  ' d call,
-\               ' pop, jump,
-def popd, d pop, ;
+0 header, popd,
+               ' d call,
+            ' pop, jump,
 
 \ literal, \ TODO CONTINUE WIP
 0 header, literal,
@@ -1653,7 +1576,6 @@ def popd, d pop, ;
             ' ldv, call,
                ' x call,
           ' pushd, jump,
-\ def literal, x ldv, x pushd, ;
 
 \ pushr, ( reg -- )
 0 header, pushr,
@@ -1689,7 +1611,7 @@ def popd, d pop, ;
 var, state
 
 \ interpret ( c-addr u -- ) (implementation defined)
-0 header, interpret \ can't be def
+0 header, interpret
         ' >counted call,
             ' find call, \ c-addr 0 | xt 1 | xt -1
              ' dup call,
@@ -1754,7 +1676,7 @@ var, state
                    then,
                    ret,
 
-0 header, (evaluate) \ internal (non-standard) \ can't be def
+0 header, (evaluate) \ internal (non-standard)
                    begin,
       ' parse-name call, \ addr len
              ' dup call,
@@ -1769,7 +1691,7 @@ var, state
 \      Repeat the following: Accept a line from the input source into the input buffer, set >IN to zero,
 \      and interpret. Display the system prompt if in interpretation state, all processing has been
 \      completed, and no ambiguous condition exists.
-0 header, quit  \ can't be def
+0 header, quit
   ' (clear-return) call,
                  0 literal,
        ' source-id call,
@@ -1793,32 +1715,31 @@ var, state
                    \ TODO: failed to refill
                    ret,
 
-\ 0 header, abort
-\     ' (clear-data) call,
-\             ' quit jump,
-def abort (clear-data) quit ;
+\ abort ( -- ) clear the data stack, and enter interpretation state
+0 header, abort
+    ' (clear-data) call,
+            ' quit jump,
 
 \ [ ( -- ) enter interpretation state (immediate word)
-$80 header, [  \ can't be def (immediate)
+$80 header, [
            ' false call,
            ' state call,
                ' ! jump,
 
 \ ] ( -- ) enter compilation state
-\ 0 header, ]
-\             ' true call,
-\            ' state call,
-\                ' ! jump,
-def ] true state ! ;
+0 header, ]
+            ' true call,
+           ' state call,
+               ' ! jump,
 
 \ ; ( -- ) end current definition, make visible in dictionary and enter interpretation state
-$80 header, ;  \ can't be def (immediate)
+$80 header, ;
                ' [ call,
             ' ret, call,
                    ret,
 
 \ header, ( "<spaces>name -- ) append header to dictionary (non-standard, note: no flag)
-0 header, header,   \ can't be def
+0 header, header,
           ' latest call,
                ' @ call, \ link to current (soon to be previous) word
             ' here call,
@@ -1839,7 +1760,7 @@ $80 header, ;  \ can't be def (immediate)
                    ret,  ( addr len )
 
 \ postpone ( "<spaces>name" -- ) parse and find name, append compilation semantics
-$80 header, postpone  \ can't be def (immediate)
+$80 header, postpone
       ' parse-name call, \ addr len
         ' >counted call, \ caddr
             ' find call, \ c-addr 0 | xt 1 | xt -1
@@ -1851,7 +1772,7 @@ $80 header, postpone  \ can't be def (immediate)
                    ret,
 
 \ literal ( x -- ) append run-time semantics of pushing x
-$80 header, literal  \ can't be def (immediate)
+$80 header, literal
         ' literal, jump, \ TODO: simply replace literal, ?
 
 \ immediate ( -- ) make most recent definition immediate
@@ -1866,7 +1787,6 @@ $80 header, literal  \ can't be def (immediate)
               ' or call,  \ set immediate flag
             ' swap call,
                ' ! jump,
-\ TODO doesn't work as a def for some reason: def immediate latest @ 2 + dup @ 128 or swap ! ;
 
 ( --- end of dictionary ------------------------------------------------------ )
 
@@ -1879,12 +1799,6 @@ memory-size $500 - literal, \ $ff bytes above stacks
                $ff literal, \ size ($400 bytes for stacks/$ff elements each)
       ' source-len call,
                ' ! call,
-\             here literal, \ update dictionary pointer to compile-time position
-\             ' dp call,
-\              ' ! call,
-\         latest @ literal, \ update latest to compile-time
-\         ' latest call,
-\              ' ! call,
             ' quit jump,
 
 here     ' dp     16 + s! \ update dictionary pointer to compile-time position
