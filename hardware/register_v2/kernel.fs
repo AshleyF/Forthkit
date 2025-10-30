@@ -859,7 +859,7 @@ def cr 10 emit ;
 def pad here 1024 + aligned ;
 
 \ np ( -- addr ) return address of pictured numeric output pointer (non-standard)
-var, np \ initialized after dictionary (below)
+var, np
 
 \ <# ( -- ) initialize pictured numeric output (pad 64 + np !)
 \ 0 header, <#

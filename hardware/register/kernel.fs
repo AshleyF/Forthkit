@@ -41,15 +41,12 @@ require assembler.fs
 
 : 0branch, ( -- dest ) x popd,  0 y ldv,  here 2 -  pc y x cp?, ; \ dummy jump if 0 to address, push pointer to patch
 
-\ ... if ... then
-\ ... if ... else ... then
+\ ... if ... then | ... if ... else ... then
 : if, ( C: -- orig ) 0branch, ; \ dummy branch on 0, push pointer to address
 : then, ( orig -- ) patch, ; \ patch if/else to continue here
 : else, ( C: orig1 -- orig2 ) branch, swap then, ; \ patch previous branch to here, dummy unconditionally branch over false block
 
-\ begin ... again
-\ begin ... until
-\ begin ... while ... repeat  (note: not begin ... while ... again!)
+\ begin ... again | begin ... until | begin ... while ... repeat  (note: not begin ... while ... again!)
 : begin, ( C: -- dest ) here ; \ begin loop
 : again, ( C: dest -- ) jump, ; \ jump back to beginning
 \ UNUSED : until, ( C: dest -- ) 0branch, s! ; \ branch on 0 to address
@@ -89,9 +86,6 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 
                branch, \ skip dictionary
 
-\ leave empty space for new image
-\ memory $8000 + h !
-
 \ (clear-data) empty return stack (non-standard)
 0 header, (clear-data)
  memory-size 2 + d ldv,
@@ -108,18 +102,6 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 0 header, execute
                  x popd,
               pc x cp,
-
-\ UNUSED
-\ \ (bye) ( code -- ) halt machine with return code (non-standard)
-\ 0 header, (bye)
-\                  x popd,
-\                  x halt,
-
-\ UNUSED
-\ \ bye ( -- ) halt machine
-\ 0 header, bye
-\               zero pushd,
-\            ' (bye) jump,
 
 \ @ ( addr -- ) fetch 16-bit value
 0 header, @
@@ -204,64 +186,6 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
                  x pushd,
                    ret,
 
-\ UNUSED
-\ \ / ( y x -- quotient ) division
-\ 0 header, /
-\                  x popd,
-\                  y popd,
-\              x y x div,
-\                  x pushd,
-\                    ret,
-
-\ UNUSED
-\ \ mod ( y x -- remainder ) remainder of division
-\ 0 header, mod
-\                  x popd,
-\                  y popd,
-\              z y x div,
-\              z z x mul,
-\              z y z sub,
-\                  z pushd,
-\                    ret,
-
-\ UNUSED
-\ \ /mod ( y x -- remainder quotient ) remainder and quotient result of division
-\ 0 header, /mod
-\                  x popd,
-\                  y popd,
-\              z y x div,
-\              w z x mul,
-\              w y w sub,
-\                  w pushd,
-\                  z pushd,
-\                    ret,
-
-\ UNUSED
-\ \ nand ( y x -- not-and ) not and (non-standard)
-\ 0 header, nand
-\                  x popd,
-\                  y popd,
-\              x y x nand,
-\                  x pushd,
-\                    ret,
-
-\ UNUSED
-\ \ invert ( x -- result ) invert bits
-\ 0 header, invert
-\                 x d ld,
-\                 x x not,
-\                 x d st,
-\                     ret,
-
-\ UNUSED
-\ \ negate ( x -- result ) arithetic inverse (invert 1+) (0 swap -)
-\ 0 header, negate
-\                x d ld,
-\                x x not,
-\            x x one add,
-\                x d st,
-\                    ret,
-
 \ and ( y x -- result ) logical/bitwise and
 0 header, and
                  x popd,
@@ -278,40 +202,12 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
                  z pushd,
                    ret,
 
-\ lshift ( y x -- result ) left shift
-0 header, lshift
-                 x popd,
-                 y popd,
-             x y x shl,
-                 x pushd,
-                   ret,
-
 \ 2* ( x -- result ) multiply by 2 (1 lshift)
 0 header, 2*
                  x popd,
            x x one shl,
                  x pushd,
                    ret,
-
-\ UNUSED
-\ \ rshift ( y x -- result ) right shift
-\ 0 header, rshift
-\                  x popd,
-\                  y popd,
-\              x y x shr,
-\                  x pushd,
-\                    ret,
-
-\ UNUSED
-\ \ 2/ ( x -- result ) divide by 2 (1 rshift)
-\ 0 header, 2/
-\                  x popd,
-\      y one fifteen shl,
-\              y y x and, \ get sign bit
-\            x x one shr,
-\            x x y or, \ replace sign bit
-\                  x pushd,
-\                    ret,
 
 \ key ( -- char ) read from console
 0 header, key
@@ -324,24 +220,6 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
                  x popd,
                  x out,
                    ret,
-
-\ UNUSED
-\ \ read-block ( file addr size -- ) block file of size -> address
-\ 0 header, read-block
-\                  x popd,
-\                  y popd,
-\                  z popd,
-\              z y x read,
-\                    ret,
-
-\ UNUSED
-\ \ write-block ( file addr size -- ) block file of size -> address
-\ 0 header, write-block
-\                  x popd,
-\                  y popd,
-\                  z popd,
-\              z y x write,
-\                    ret,
 
 \ drop ( x -- ) remove top stack value
 0 header, drop
@@ -367,16 +245,6 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
                  y pushd,
                  x pushd,
                    ret,
-
-\ UNUSED
-\ \ ?dup ( x -- 0 | x x ) duplicate top stack value if non-zero
-\ 0 header, ?dup
-\                x d ld,
-\                  y popr,  \ return address
-\           y y four add,
-\             pc y x cp?,   \ return if x=0
-\                  x pushd, \ else dup
-\               pc y cp,    \ return
 
 \ nip ( y x -- x ) drop second stack value
 0 header, nip
@@ -410,22 +278,6 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
                x z st,
                    ret,
 
-\ UNUSED
-\ \ 2swap ( w z y x -- y x w z ) swap top two pairs of stack values
-\ 0 header, 2swap
-\                x d ld,
-\          y d eight add,
-\                z y ld,
-\                z d st, \ swap z<->x in-place
-\                x y st,
-\           x d four add,
-\                y x ld,
-\         z d twelve add,
-\                w z ld,
-\                w x st, \ swap w<->y in-place
-\                y z st,
-\                    ret,
-
 \ tuck ( y x -- x y x ) copy top stack value under second value
 0 header, tuck
                x d ld,
@@ -455,26 +307,6 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
                  z pushd,
                  y pushd,
                    ret,
-
-\ UNUSED
-\ \ pick ( n...x -- n...x n ) copy 0-based nth stack value to top
-\ 0 header, pick
-\                x d ld,
-\           x x four mul,
-\           x x four add,
-\              x x d add,
-\                x x ld,
-\                x d st,
-\                    ret,
-
-\ UNUSED
-\ \ depth ( -- depth ) data stack depth
-\ 0 header, depth
-\  memory-size 2 + x ldv,
-\              x x d sub,
-\           x x four div,
-\                  x pushd,
-\                    ret,
 
 \ >r ( x -- ) ( R: x -- ) move x to return stack
 0 header, >r
@@ -559,15 +391,6 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
                y d st,
                    ret,
 
-\ UNUSED
-\ \ 0<> ( y x -- b ) true if not equal to zero
-\ 0 header, 0<>
-\                x d ld,
-\               y #t cp,
-\             y #f x cp?,
-\                y d st,
-\                    ret,
-
 \ 0< ( x -- b ) true if x less than zero (15 rshift negate 1+)
 0 header, 0<
                x d ld,
@@ -623,37 +446,6 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 
 ( --- memory ----------------------------------------------------------------- )
 
-\ UNUSED
-\ \ align ( -- ) reserve space to align data space pointer (no-op on RM16)
-\ 0 header, align
-\                    ret, \ no-op
-
-\ UNUSED
-\ \ aligned ( addr -- addr ) align address (no-op on RM16)
-\ 0 header, aligned
-\                    ret, \ no-op
-
-\ UNUSED
-\ \ cells ( x -- n-cells ) size in address units of n-cells (2*)
-\ 0 header, cells
-\               ' 2* jump,
-
-\ UNUSED
-\ \ cell+ ( addr -- addr ) add size of cell to address (2 +)
-\ 0 header, cell+
-\                  2 literal,
-\                ' + jump,
-
-\ UNUSED
-\ \ chars ( x -- n-chars ) size in address units of n-chars (no-op)
-\ 0 header, chars
-\                    ret, \ no-op
-
-\ UNUSED
-\ \ char+ ( addr -- addr ) add size of char to address (1+)
-\ 0 header, char+
-\               ' 1+ jump,
-
 : var,
                  0 header,
               x pc cp,
@@ -670,13 +462,6 @@ var, dp \ initialized after dictionary (below)
 0 header, here
               ' dp call,
                ' @ jump,
-
-\ UNUSED
-\ \ unused ( -- remaining ) dictionary space remaining
-\ 0 header, unused
-\        memory-size literal,
-\             ' here call,
-\                ' - jump, \ TODO: consider stack space?
 
 \ allot ( n -- ) advance dictionary pointer (dp +!)
 0 header, allot
@@ -699,43 +484,6 @@ var, dp \ initialized after dictionary (below)
            ' allot jump,
 
 ( --- secondaries ------------------------------------------------------------ )
-
-\ UNUSED
-\ \ 2! ( y x addr -- ) store x y at consecutive addresses (tuck ! cell+ !)
-\ 0 header, 2!
-\             ' tuck call,
-\                ' ! call,
-\            ' cell+ call,
-\                ' ! jump,
-
-\ UNUSED
-\ \ 2@ ( addr -- y x ) fetch pair of consecutive addresses (dup cell+ @ swap @)
-\ 0 header, 2@
-\                ' dup call,
-\              ' cell+ call,
-\                  ' @ call,
-\               ' swap call,
-\                  ' @ jump,
-
-\ UNUSED
-\ \ xor ( y x -- result ) logical/bitwise exclusive or (2dup or -rot and invert and)
-\ 0 header, xor
-\             ' 2dup call,
-\               ' or call,
-\             ' -rot call,
-\              ' and call,
-\           ' invert call,
-\              ' and jump,
-
-\ UNUSED
-\ \ abs ( x -- |x| ) absolute value (dup 0< if negate then)
-\ 0 header, abs
-\              ' dup call,
-\               ' 0< call,
-\                    if,
-\           ' negate call,
-\                    then,
-\                    ret,
 
 ( --- secondary control-flow ------------------------------------------------- )
 
@@ -783,16 +531,6 @@ var, dp \ initialized after dictionary (below)
              ' 2r@ call, \ including return from here
             ' drop jump,
 
-\ UNUSED
-\ \ j ( -- x ) ( R: x -- x ) copy next outer loop index (2r> 2r@ drop -rot 2>r) (x r twelve add, x x ld, x pushd, ret,)
-\ 0 header, j
-\              ' 2r> call, \ i this
-\              ' 2r@ call, \ i this j limit
-\             ' drop call, \ i this j
-\             ' -rot call, \ j i this
-\              ' 2>r call, \ tricky, don't jump here!
-\                    ret,
-
 \ unloop ( -- ) ( R: y x -- ) remove loop parameters (r> 2r> rot >r 2drop)
 0 header, unloop
               ' r> call, \ this return address
@@ -817,12 +555,6 @@ var, dp \ initialized after dictionary (below)
 0 header, bl
                 32 literal,
                    ret,
-
-\ UNUSED
-\ \ space ( -- ) emit space character (bl emit)
-\ 0 header, space
-\               ' bl call,
-\             ' emit jump,
 
 \ cr ( -- ) cause newline (10 emit)
 0 header, cr
@@ -853,43 +585,6 @@ var, dp \ initialized after dictionary (below)
                ' + jump,
 \        ' aligned jump,
 
-\ UNUSED
-\ \ np ( -- addr ) return address of pictured numeric output pointer (non-standard)
-\ var, np \ initialized after dictionary (below)
-
-\ UNUSED
-\ \ <# ( -- ) initialize pictured numeric output (pad 64 + np !)
-\ 0 header, <#
-\              ' pad call,
-\                 64 literal, \ arbitrary distance away
-\                ' + call,
-\               ' np call,
-\                ' ! jump,
-
-\ UNUSED
-\ \ hold ( char -- ) add char to beginning of pictured numeric output (np -1 over +! c!)
-\ 0 header, hold
-\               ' np call,
-\                 -1 literal,
-\             ' over call,
-\               ' +! call,
-\                ' @ call,
-\               ' c! jump,
-
-\ UNUSED
-\ \ holds ( addr len -- ) add string to beginning of pictured numeric output (begin dup while 1- 2dup + c@ hold repeat 2drop)
-\ 0 header, holds
-\                    begin,
-\              ' dup call,
-\                    while,
-\               ' 1- call,
-\             ' 2dup call,
-\                ' + call,
-\               ' c@ call,
-\             ' hold call,
-\                    repeat,
-\            ' 2drop jump,
-
 \ base ( -- base ) address of current number-conversion radix (2..36, initially 10)
 var, base
 
@@ -898,135 +593,6 @@ var, base
                 10 literal,
             ' base call,
                ' ! jump,
-
-\ UNUSED
-\ \ hex ( -- ) set number-conversion radix to 16
-\ 0 header, hex
-\                 16 literal,
-\             ' base call,
-\                ' ! jump,
-
-\ UNUSED
-\ \ octal ( -- ) set number-conversion radix to 8 (non-standard)
-\ 0 header, octal
-\                  8 literal,
-\             ' base call,
-\                ' ! jump,
-
-\ UNUSED
-\ \ binary ( -- ) set number-conversion radix to 2 (non-standard)
-\ 0 header, binary
-\                  2 literal,
-\             ' base call,
-\                ' ! jump,
-
-\ UNUSED
-\ \ # ( ud -- ud ) prepend least significant digit to pictured numeric output, return ud/base
-\ 0 header, #
-\             ' swap call, \ TODO: support double numbers
-\             ' base call,
-\                ' @ call,
-\             ' 2dup call,
-\              ' mod call,
-\                 48 literal, \ '0'
-\                ' + call,
-\             ' hold call, \ 0 n b
-\                ' / call, \ 0 m
-\             ' swap jump, \ TODO: support double numbers
-\ \ base @ ud/mod rot dup #9 u> #7 and + #48 + hold ;
-
-\ UNUSED
-\ \ #s ( ud -- ud ) convert all digits using # (appends at least 0)
-\ 0 header, #s
-\             ' swap call, \ TODO: support double numbers
-\                    begin,
-\             ' swap call, \ TODO: support double numbers
-\                ' # call, \ note: at least once even if zero
-\             ' swap call, \ TODO: support double numbers
-\              ' dup call,
-\              ' 0<> call,
-\                    while,
-\                    repeat,
-\             ' swap jump, \ TODO: support double numbers
-
-\ UNUSED
-\ \ sign ( n -- ) if negative, prepend '-' to pictured numeric output
-\ 0 header, sign
-\               ' 0< call,
-\                    if,
-\                 45 literal, \ '-'
-\             ' hold call,
-\                    then,
-\                    ret,
-
-\ UNUSED
-\ \ #> ( xd -- addr len ) make pictured numeric output string available (np @ pad 64 + over -)
-\ 0 header, #>
-\            ' 2drop call,
-\               ' np call,
-\                ' @ call,
-\              ' pad call,
-\                 64 literal, \ arbitrary distance away
-\                ' + call,
-\             ' over call,
-\                ' - jump,
-
-\ UNUSED
-\ \ s>d ( n -- d ) convert number to double-cell
-\ 0 header, s>d
-\              ' dup call,
-\               ' 0< jump,
-
-\ UNUSED
-\ \ . ( n -- ) display value in free field format (dup abs s>d <# #s rot sign #> type space)
-\ 0 header, .
-\              ' dup call,
-\              ' abs call,
-\              ' s>d call,
-\               ' <# call,
-\               ' #s call,
-\              ' rot call,
-\             ' sign call,
-\               ' #> call,
-\            ' space call,
-\             ' type jump,
-
-\ UNUSED
-\ \ d. ( u -- ) display unsigned value in free field format (from double word set)
-\ 0 header, d.
-\               ' <# call,
-\               ' #s call,
-\               ' #> call,
-\            ' space call,
-\             ' type jump,
-
-\ UNUSED
-\ \ u. ( u -- ) display unsigned value in free field format (0 <# #s #> type space)
-\ 0 header, u.
-\                  0 literal,
-\               ' d. jump,
-
-\ UNUSED
-\ \ .s ( -- ) display values on the stack non-destructively (depth dup 0 do dup i - pick . loop drop)
-\ 0 header, .s
-\            ' depth call,
-\              ' dup call,
-\                  0 literal,
-\                    do, \ TODO: ?do bug
-\              ' dup call,
-\                ' i call,
-\                ' - call,
-\             ' pick call,
-\                ' . call,
-\                    loop,
-\             ' drop call,
-\                    ret,
-
-\ UNUSED
-\ \ ? ( addr -- ) display value stored at address (@ .)
-\ 0 header, ?
-\                ' @ call,
-\                ' . jump,
 
 ( --- interpreter ------------------------------------------------------------ )
 
@@ -1227,14 +793,6 @@ var, source-id
            ' cmove call, \ 
              ' pad jump, \ pad
 
-\ UNUSED
-\ \ word ( char "<chars>ccc<char>" -- c-addr ) skip leading delimeters, parse ccc delimited by char, return transient counted string
-\ 0 header, word
-\              ' dup call,
-\           ' (skip) call,
-\            ' parse call,
-\         ' >counted jump,
-
 \ count ( c-addr1 -- c-addr2 u ) counted string to c-addr and length
 0 header, count
              ' dup call,
@@ -1341,19 +899,6 @@ var, latest \ common, but non-standard (confusing name conflict)
                    again,
                    ret,
 
-\ UNUSED
-\ \ ' ( "<spaces>name" -- xt ) skip leading space, parse and find name
-\ 0 header, '
-\               ' bl call, \ $20
-\             ' word call, \ c-addr
-\             ' find call, \ c-addr 0 | xt 1 | xt -1
-\               ' 0= call, \ c-addr -1 | xt 0
-\                    if,   \ c-addr
-\             ' drop call, \
-\                  0 literal, \ 0 \ TODO: abort with message?
-\                    then,
-\                    ret, \ 0 | xt
-
 \ >number ( ud1 c-addr1 u1 -- ud2 c-addr2 u2 ) ud2 is the unsigned result of converting the characters
 \         within the string specified by c-addr1 u1 into digits, using the number in BASE, and adding
 \         each into ud1 after multiplying ud1 by the number in BASE. Conversion continues left-to-right
@@ -1394,281 +939,34 @@ var, latest \ common, but non-standard (confusing name conflict)
 
 ( --- assembler -------------------------------------------------------------- )
 
-\ pc ( -- pc )
-0 header, pc
-                pc literal,
-                   ret,
-
-\ zero ( -- zero )
-0 header, zero
-              zero literal,
-                   ret,
-
-\ UNUSED
-\ \ one ( -- one )
-\ 0 header, one
-\                one literal,
-\                    ret,
-
-\ two ( -- two )
-0 header, two
-               two literal,
-                   ret,
-
-\ four ( -- four )
-0 header, four
-              four literal,
-                   ret,
-
-\ UNUSED
-\ \ eight ( -- eight )
-\ 0 header, eight
-\              eight literal,
-\                    ret,
-
-\ UNUSED
-\ \ twelve ( -- twelve )
-\ 0 header, twelve
-\             twelve literal,
-\                    ret,
-
-\ UNUSED
-\ \ #t ( -- #t )
-\ 0 header, #t
-\                 #t literal,
-\                    ret,
-
-\ UNUSED
-\ \ #f ( -- #f )
-\ 0 header, #f
-\                 #f literal,
-\                    ret,
-
-\ x ( -- x )
-0 header, x
-                 x literal,
-                   ret,
-
-\ UNUSED
-\ \ y ( -- y )
-\ 0 header, y
-\                  y literal,
-\                    ret,
-
-\ UNUSED
-\ \ z ( -- z )
-\ 0 header, z
-\                  z literal,
-\                    ret,
-
-\ UNUSED
-\ \ w ( -- w )
-\ 0 header, w
-\                  w literal,
-\                    ret,
-
-\ d ( -- d )
-0 header, d
-                 d literal,
-                   ret,
-
-\ r ( -- r )
-0 header, r
-                 r literal,
-                   ret,
-
-\ 2nybbles ( x i -- )
-0 header, 2nybbles,
-                 4 literal,
-          ' lshift call,
-              ' or call,
-              ' c, jump,
-
-\ 4nybbles, ( z y x i -- )
-0 header, 4nybbles,
-       ' 2nybbles, call,
-       ' 2nybbles, jump,
-    
-\ UNUSED
-\ \ halt, ( x -- ) halt(x) (halt with exit code x)
-\ 0 header, halt,
-\                  0 literal,
-\        ' 2nybbles, jump,
-
-\ UNUSED
-\ \ ldc, ( v x -- ) x=v (load constant signed v into x)
-\ 0 header, ldc,
-\                  1 literal,
-\        ' 2nybbles, call,
-\               ' c, jump,
-
-\ ld+, ( z y x -- ) z<-[y] y+=x (load from memory and inc/dec pointer)
-0 header, ld+,
-                 2 literal,
-       ' 4nybbles, jump,
-
-\ st+, ( z y x -- ) z->[y] y+=x (store to memory and inc/dec pointer)
-0 header, st+,
-                 3 literal,
-       ' 4nybbles, jump,
-
-\ cp?, ( z y x -- ) z=y if x=0 (conditional copy)
-0 header, cp?,
-                 4 literal,
-       ' 4nybbles, jump,
-
-\ add, ( z y x -- ) z=y+x (addition)
-0 header, add,
-                 5 literal,
-       ' 4nybbles, jump,
-
-\ sub, ( z y x -- ) z=y-x (subtraction)
-0 header, sub,
-                 6 literal,
-       ' 4nybbles, jump,
-
-\ UNUSED
-\ \ mul, ( z y x -- ) z=y*x (multiplication)
-\ 0 header, mul,
-\                  7 literal,
-\        ' 4nybbles, jump,
-
-\ UNUSED
-\ \ div, ( z y x -- ) z=y/x (division)
-\ 0 header, div,
-\                  8 literal,
-\        ' 4nybbles, jump,
-
-\ UNUSED
-\ \ nand, ( z y x -- ) z=y nand x (not-and)
-\ 0 header, nand,
-\                  9 literal,
-\        ' 4nybbles, jump,
-
-\ UNUSED
-\ \ shl, ( z y x -- ) z=y<<x (bitwise shift-left)
-\ 0 header, shl,
-\                 10 literal,
-\        ' 4nybbles, jump,
-
-\ UNUSED
-\ \ shr, ( z y x -- ) z=y>>x (bitwise shift-right)
-\ 0 header, shr,
-\                 11 literal,
-\        ' 4nybbles, jump,
-
-\ UNUSED
-\ \ in, ( y x -- ) x=getc() (read from console)
-\ 0 header, in,
-\                 12 literal,
-\        ' 2nybbles, jump,
-
-\ UNUSED
-\ \ out, ( y x -- ) putc(x) (write to console)
-\ 0 header, out,
-\                 13 literal,
-\        ' 2nybbles, jump,
-
-\ UNUSED
-\ \ read, ( z y x -- ) read(z,y,x) (file z of size y -> address x)
-\ 0 header, read,
-\                 14 literal,
-\        ' 4nybbles, jump,
-
-\ UNUSED
-\ \ write, ( z y x -- ) write(z,y,x) (file z of size y <- address x)
-\ 0 header, write,
-\                 15 literal,
-\        ' 4nybbles, jump,
-
-\ cp, ( y x -- ) y=x (unconditional copy)
-0 header, cp,
-            ' zero call,
-            ' cp?, jump,
-
-\ ld, ( y x -- ) y<-[x] (load from memory)
-0 header, ld,
-            ' zero call,
-            ' ld+, jump,
-
-\ st, ( y x -- ) y->[x] (store to memory)
-0 header, st,
-            ' zero call,
-            ' st+, jump,
-
-\ jump, ( addr -- ) unconditional jump to address (following cell)
-0 header, jump,
-              ' pc call,
-              ' pc call,
-             ' ld, call,
+\ ret, ( -- )
+0 header, ret,
+             $E924 literal,
+               ' , call,
+             $9954 literal,
+               ' , call,
+             $9041 literal,
                ' , jump,
 
-\ ldv, ( val reg -- )
-0 header, ldv,
-              ' pc call,
-             ' two call,
-            ' ld+, call,
-               ' , jump,
-
-\ push, ( reg ptr -- )
-0 header, push,
-             ' dup call,
-             ' dup call,
-            ' four call,
-            ' sub, call,
-             ' st, jump,
-
-\ pop, ( reg ptr -- )
-0 header, pop,
-            ' four call,
-            ' ld+, jump,
-
-\ pushd, ( reg -- )
-0 header, pushd,
-               ' d call,
-           ' push, jump,
-
-\ UNUSED
-\ \ popd, ( reg -- )
-\ 0 header, popd,
-\                ' d call,
-\             ' pop, jump,
-
-\ literal, \ TODO CONTINUE WIP
+\ literal, ( val -- )
 0 header, literal,
-               ' x call,
-            ' ldv, call,
-               ' x call,
-          ' pushd, jump,
-
-\ pushr, ( reg -- )
-0 header, pushr,
-               ' r call,
-           ' push, jump,
-
-\ popr, ( reg -- )
-0 header, popr,
-               ' r call,
-            ' pop, jump,
+             $0923 literal,
+               ' , call,
+               ' , call, \ value
+             $DD64 literal,
+               ' , call,
+             $D931 literal,
+               ' , jump,
 
 \ call, ( addr -- )
 0 header, call,
-              ' pc call,
-          ' pushr, call,
-           ' jump, jump,
-
-\ UNUSED
-\ ret, ( -- )
-0 header, ret,
-               ' x call,
-           ' popr, call,
-               ' x call,
-               ' x call,
-            ' four call,
-            ' add, call,
-              ' pc call,
-               ' x call,
-             ' cp, jump,
+             $EE64 literal,
+               ' , call,
+             $E031 literal,
+               ' , call,
+             $0021 literal,
+               ' , call,
+               ' , jump, \ address
 
 ( --- interpreter ------------------------------------------------------------ )
 
@@ -1780,12 +1078,6 @@ var, state
                    \ TODO: failed to refill
                    ret,
 
-\ UNUSED
-\ \ abort ( -- ) clear the data stack, and enter interpretation state
-\ 0 header, abort
-\     ' (clear-data) call,
-\             ' quit jump,
-
 \ [ ( -- ) enter interpretation state (immediate word)
 $80 header, [
            ' false call,
@@ -1825,23 +1117,6 @@ $80 header, ;
                    loop,
                    ret,  ( addr len )
 
-\ UNUSED
-\ \ postpone ( "<spaces>name" -- ) parse and find name, append compilation semantics
-\ $80 header, postpone
-\       ' parse-name call, \ addr len
-\         ' >counted call, \ caddr
-\             ' find call, \ c-addr 0 | xt 1 | xt -1
-\                  1 literal,
-\                ' = call, \ only works for immediate words -- TODO: error for not found or non-immediate
-\                    if,
-\            ' call, call,
-\                    then,
-\                    ret,
-
-\ \ literal ( x -- ) append run-time semantics of pushing x
-\ $80 header, literal
-\         ' literal, jump, \ TODO: simply replace literal, ?
-
 \ immediate ( -- ) make most recent definition immediate
 0 header, immediate
           ' latest call,
@@ -1854,6 +1129,12 @@ $80 header, ;
               ' or call,  \ set immediate flag
             ' swap call,
                ' ! jump,
+
+( --- extra words for debugging ---------------------------------------------- )
+
+\ bye ( -- ) halt machine
+0 header, bye
+              zero halt,
 
 ( --- end of dictionary ------------------------------------------------------ )
 
@@ -1870,3 +1151,13 @@ memory-size $500 - literal, \ $ff bytes above stacks
 
 here     ' dp     16 + s! \ update dictionary pointer to compile-time position
 latest @ ' latest 16 + s! \ update latest to compile-time
+
+." Kernel size: " here . ." bytes" cr
+
+\ UNUSED abort postpone (bye) bye / mod /mod nand invert negate lshift rshift
+\        2/ read-block write-block ?dup 2swap pick depth 0<> align aligned cells
+\        cell+ chars char+ unused 2! 2@ xor abs j space np <# hold holds hex
+\        octal binary # #s sign #> s>d . d. u. .s ? word ' pc zero one two four
+\        eight twelve #t #f x y z w d r 2nybbles 4nybbles, halt, ldc, ld+, st+,
+\        cp?, add, sub, mul, div, nand, shl, shr, in, out, read, write, cp, ld,
+\        st, jump, ldv, push, pop, pushd, popd, literal, pushr, popr, call, ret,
