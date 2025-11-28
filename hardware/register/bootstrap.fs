@@ -48,8 +48,14 @@ header, : ] header, ] ;
 : cp, zero cp?, ; \ ( y x -- ) y=x (unconditional copy)
 : ld, zero ld+, ; \ ( y x -- ) y<-[x] (load from memory)
 : st, zero st+, ; \ ( y x -- ) y->[x] (store to memory)
+
 : jump, pc pc ld, , ; \ ( addr -- ) unconditional jump to address (following cell)
 : ldv, pc two ld+, , ; \ ( val reg -- )
+: not, dup nand, ; \ (   y x -- ) 
+
+: pick [ x d ld,  x x four mul,  x x four add,  x x d add,  x x ld, x d st, ] ; \ ( n...x -- n...x n ) copy 0-based nth stack value to top
+: and, 2 pick -rot nand, dup not, ;
+: or, dup dup not, over dup not, nand, ; \ ( z y x -- )
 
 : push, dup dup four sub, st, ; \ ( reg ptr -- )
 : pop, four ld+, ; \ ( reg ptr -- )
@@ -63,19 +69,35 @@ header, : ] header, ] ;
 : call, pc pushr, jump, ; \ call, ( addr -- )
 : ret, x popr, x x four add, pc x cp, ; \ ret, ( -- )
 
+: read-block [ x popd,  y popd,  z popd,  z y x read, ] ; \ ( file addr size -- ) block file of size -> address
+: write-block [ x popd,  y popd,  z popd,  z y x write, ] ; \ ( file addr size -- ) block file of size -> address
+
 \ -- ADD MISSING PRIMITIVES ----------------------------------------------------
 
-\ bye ( -- ) halt machine
-: bye [ zero halt, ] ;
+: nand [ x popd,  y popd,  x y x nand,  x pushd, ] ; \ ( y x -- not-and ) not and (non-standard)
+: invert [ x d ld,  x x not,  x d st, ] ; \ ( x -- result ) invert bits
+: negate [ x d ld,  x x not,  x x one add,  x d st, ] ; \ ( x -- result ) arithetic inverse (invert 1+) (0 swap -)
 
-\ (bye) ( code -- ) halt machine with return code (non-standard)
-: (bye) [ x popd,  x halt, ] ;
+: ?dup [ x d ld,  y popr,  y y four add,  pc y x cp?,  x pushd,  pc y cp, ] ; \ ( x -- 0 | x x ) duplicate top stack value if non-zero
+: 2swap [ x d ld,  y d eight add,  z y ld,  z d st,  x y st,  x d four add,  y x ld,  z d twelve add,  w z ld,  w x st,  y z st, ] ; \ ( w z y x -- y x w z ) swap top two pairs of stack values
+: 0<> [ x d ld,  y #t cp,  y #f x cp?,  y d st, ] ; \ ( y x -- b ) true if not equal to zero
 
-\ / ( y x -- quotient ) division
-: / [ x popd,  y popd,  x y x div,  x pushd, ] ;
+: bye [ zero halt, ] ; \ ( -- ) halt machine
+: (bye) [ x popd,  x halt, ] ; \ ( code -- ) halt machine with return code (non-standard)
+: / [ x popd,  y popd,  x y x div,  x pushd, ] ; \ ( y x -- quotient ) division
+: mod [ x popd,  y popd,  z y x div,  z z x mul,  z y z sub,  z pushd, ] ; \ ( y x -- remainder ) remainder of division
+: /mod [ x popd,  y popd,  z y x div,  w z x mul,  w y w sub,  w pushd,  z pushd, ] ; \ ( y x -- remainder quotient ) remainder and quotient result of division
 
-\ mod ( y x -- remainder ) remainder of division
-: mod [ x popd,  y popd,  z y x div,  z z x mul,  z y z sub,  z pushd, ] ;
+: hex 16 base ! ; \ ( -- ) set number-conversion radix to 16
+: octal 8 base ! ; \ ( -- ) set number-conversion radix to 8 (non-standard)
+: binary 2 base ! ; \ ( -- ) set number-conversion radix to 2 (non-standard)
+
+: 2* [ x popd,  x x one shl,  x pushd, ] ; \ ( x -- result ) multiply by 2 (1 lshift)
+: 2/ [ x popd,  y one fifteen shl,  y y x and,  x x one shr,  x x y or,  x pushd, ] ; \ ( x -- result ) divide by 2 (1 rshift)
+
+: depth [ 8 x ldc,  x x d sub,  x x four div,  x pushd, ] ; \ ( -- depth ) data stack depth \ TODO: why 8?
+
+: abort [ (clear-data) quit ] ;
 
 \ -- PRIMITIVE CONTROL FLOW ----------------------------------------------------
 
@@ -99,10 +121,26 @@ header, : ] header, ] ;
 
 \ -- CONTINUE BOOTSTRAPPING ----------------------------------------------------
 
+\ these are no-ops on RM16, but are standard and should be used for portability
+: align ; \ ( -- ) reserve space to align data space pointer (no-op on RM16)
+: aligned ; \ ( addr -- addr ) align address (no-op on RM16)
+: chars ; \ ( x -- n-chars ) size in address units of n-chars (no-op)
+
+: char+ 1+ ; \ ( addr -- addr ) add size of char to address (1+)
+: cells 2* ; \ ( x -- n-cells ) size in address units of n-cells (2*)
+: cell+ 2 + ; \ ( addr -- addr ) add size of cell to address (2 +)
+
+: 2! tuck ! cell+ ! ; \ ( y x addr -- ) store x y at consecutive addresses (tuck ! cell+ !)
+: 2@ dup cell+ @ swap @ ; \ ( addr -- y x ) fetch pair of consecutive addresses (dup cell+ @ swap @)
+
+: xor 2dup or -rot and invert and ; \ ( y x -- result ) logical/bitwise exclusive or (2dup or -rot and invert and)
+: abs dup 0< if negate then ; \ ( x -- |x| ) absolute value (dup 0< if negate then)
+: j 2r> 2r@ drop -rot 2>r ; \ ( -- x ) ( R: x -- x ) copy next outer loop index (2r> 2r@ drop -rot 2>r) (x r twelve add, x x ld, x pushd, ret,)
+
 : postpone parse-name >counted find 1 = if call, then ; immediate \ only works for immediate words -- TODO: error for not found or non-immediate
 
 : char parse-name drop c@ ;
-: [char] char postpone literal ; immediate
+: [char] char postpone literal, ; immediate
 
 : ( [char] ) parse 2drop ; immediate
 
@@ -122,11 +160,100 @@ header, : ] header, ] ;
 
 : buffer: create allot ; ( u "<name>" -- ; -- addr )
 
-\ poor man's . ( n -- ) print decimal number
-: . dup 10000 / dup 48 + emit 10000 * -
-    dup 1000  / dup 48 + emit  1000 * -
-    dup 100   / dup 48 + emit   100 * -
-    dup 10    / dup 48 + emit    10 * -
-                    48 + emit ;
+( patch return to jump to instance code address given )
+: (does)
+  latest @ 2 + \ to length/flag
+  dup c@ + 1+ \ to code
+  10 + \ to return
+  33 over ! \ 2100 -> ld+ zero pc pc  pc=[pc]  --  jump to following address  TODO: assemble?
+  2 + ! \ to address passed to us
+;
 
-3 4 + .
+\ ['] ( "<spaces>name" -- ) parse and find name
+: ['] ' postpone literal ; immediate
+
+\ does> ( C: colon-sys1 -- colon-sys2 ) append run-time and initialization semantics below to definition.
+\       ( -- ) ( R: nest-sys1 -- ) Runtime: replace execution semantics
+\       ( i * x -- i * x a-addr ) ( R: -- nest-sys2 ) Initiation: push data field address
+\       ( i * x -- j * x ) Execution: execute portion of definition beginning with initiation semantics
+: does>
+  here 12 + postpone literal \ compile push instance code address
+  ['] (does) jump,
+; immediate
+
+\ variable ( "<spaces>name" -- ) parse name, create definition, reserve cell of data space, runtime ( -- a-addr ) push address of data space (note: uninitialized)
+: variable create 1 cells allot ;
+
+\ constant ( x "<spaces>name" -- ) parse name, create definition to push x at runtime ( -- x )
+: constant create , does> @ ;
+
+\ TODO 32 constant bl \ ( -- c ) space character value (32 constant bl)
+: bl 32 ;
+
+: space bl emit ; \ ( -- ) emit space character (bl emit)
+: word dup (skip) parse >counted ; \ ( char "<chars>ccc<char>" -- c-addr ) skip leading delimeters, parse ccc delimited by char, return transient counted string
+: ' bl word find 0= if drop 0 then ; \ ( "<spaces>name" -- xt ) skip leading space, parse and find name
+
+\ -- SECONDARY CONTROL FLOW ----------------------------------------------------
+
+\ <limit> <start> do ... loop
+\ <limit> <start> do ... <n> +loop
+\ <limit> <start> do ... unloop exit ... loop
+\ <limit> <start> do ... if ... leave then ... loop
+: do \ ( limit start -- ) ( C: -- false addr ) \ begin do-loop (immediate 2>r begin false)
+           ['] 2>r call,
+                   false \ no addresses to patch (initially)
+                   begin ; immediate
+
+: ?do \ ( limit start -- ) ( C: -- false addr true addr )
+          ['] 2dup call,
+            ['] <> call,
+                   false \ terminator for patching
+                   if
+                   true  \ patch if to loop
+           ['] 2>r call,
+                   begin ; immediate
+
+: leave \ ( C: -- addr true )
+                   branch,
+                   -rot true -rot ; immediate \ patch to loop (swap under if address)
+
+: loop, \ ( C: addr -- )
+                 1 literal,
+            ['] r> call,
+             ['] + call,
+            ['] r@ call,
+          ['] over call,
+            ['] >r call,
+             ['] < call,
+                   [ if swap again then ]
+\                   if,
+\                   swap again,
+\                   then,
+                   begin while
+                   patch,
+                   repeat
+           ['] 2r> call,
+         ['] 2drop call, ; immediate
+
+\ -- FORMATTED NUMBERS ---------------------------------------------------------
+
+variable np \ ( -- addr ) return address of pictured numeric output pointer (non-standard)
+
+: <# pad 64 + np ! ; \ <# ( -- ) initialize pictured numeric output (pad 64 + np !)
+: hold np -1 over +! @ c! ; \ ( char -- ) add char to beginning of pictured numeric output (np -1 over +! c!)
+: # swap base @ 2dup mod 48 + hold / swap ; \ ( ud -- ud ) prepend least significant digit to pictured numeric output, return ud/base \ TODO: doesn't work with negative values!
+: #s swap begin swap # swap dup 0<> while repeat swap ; \ ( ud -- ud ) convert all digits using # (appends at least 0) \ TODO: support double numbers
+: sign 0< if 45 hold then ; \ ( n -- ) if negative, prepend '-' to pictured numeric output
+: #> 2drop np @ pad 64 + over - ; \ ( xd -- addr len ) make pictured numeric output string available (np @ pad 64 + over -)
+: holds begin dup while 1- 2dup + c@ hold repeat 2drop ; \ ( addr len -- ) add string to beginning of pictured numeric output (begin dup while 1- 2dup + c@ hold repeat 2drop)
+: s>d dup 0< ; \ ( n -- d ) convert number to double-cell
+: . dup abs s>d <# #s rot sign #> space type ; \ ( n -- ) display value in free field format (dup abs s>d <# #s rot sign #> type space)
+: d. <# #s #> space type ; \ ( u -- ) display unsigned value in free field format (from double word set)
+: u. 0 d. ; \ ( u -- ) display unsigned value in free field format (0 <# #s #> type space)
+\ TODO: do/loop : .s depth dup 0 do dup i - pick . loop drop ; \ ( -- ) display values on the stack non-destructively (depth dup 0 do dup i - pick . loop drop) \ TODO: ?do bug
+
+: ? @ . ; \ ( addr -- ) display value stored at address (@ .)
+: unused 65535 here - ; \ ( -- remaining ) dictionary space remaining \ TODO: consider stack space?
+
+here .

@@ -1142,12 +1142,4 @@ latest @ ' latest 16 + s! \ update latest to compile-time
 
 ." Kernel size: " here . ." bytes" cr
 
-\ UNUSED abort /mod nand invert negate 
-\        2/ read-block write-block ?dup 2swap pick depth 0<> align aligned cells
-\        cell+ chars char+ unused 2! 2@ xor abs j space np <# hold holds hex
-\        octal binary # #s sign #> s>d . d. u. .s ? word ' pc zero one two four
-\        eight twelve #t #f x y z w d r 2nybbles 4nybbles, halt, ldc, ld+, st+,
-\        cp?, add, sub, mul, div, nand, shl, shr, in, out, read, write, cp, ld,
-\        st, jump, ldv, push, pop, pushd, popd, literal, pushr, popr, call, ret,
-
-\ PORTED TO BOOTSTRAP: (bye) bye / mod postpone 
+\ UNUSED unused ?
