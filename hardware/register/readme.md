@@ -95,3 +95,16 @@ The book.md in the repository root contains the complete tutorial for building f
 - Seem to need to press Enter before interacting
 - Forth-based machine doesn't echo as keys entered and doesn't allow editing
   - Mitigated by `cat - | gforth ...`
+- d. and u. don't work with negative numbers
+- Some words (e.g. `+foo` not flagged as unable to find)
+
+# Fragments
+
+```forth
+\ poor man's . ( n -- ) print decimal number
+: . dup 10000 / dup 48 + emit 10000 * -
+    dup 1000  / dup 48 + emit  1000 * -
+    dup 100   / dup 48 + emit   100 * -
+    dup 10    / dup 48 + emit    10 * -
+                    48 + emit ;
+```
