@@ -2,12 +2,24 @@
 
 ## Instruction Set
 
+\ HALT
+\ ADD
+\ SUB
+\ MUL
+\ DIV
+\ NAND
+\ SHL
+\ SHR
+\ IN
+\ OUT
+\ READ
+\ WRITE
+\ LDC
+\ LD+
+\ ST+
+\ CP?
+
 0. `HALT` - Halt execution
-1. `LIT` - Fetch next cell
-2. `FETCH` - Fetch cell at address
-3. `STORE` - Store value at address
-4. `IF` - Jump to address in next cell if T >= 0
-5. `-IF` - Jump to address in next cell if T < 0
 6. `ADD` - Addition
 7. `SUB` - Subtraction
 8. `MUL` - Multiplication
@@ -22,6 +34,12 @@
 17. `OUT` - Output character
 18. `READ` - Read block
 19. `WRITE` - Write block
+2. `FETCH` - Fetch cell at address
+3. `STORE` - Store value at address
+1. `LIT` - Fetch next cell
+4. `IF` - Jump to address in next cell if T >= 0
+5. `-IF` - Jump to address in next cell if T < 0
+29. `NEXT` - If R <= 0, drop R and continue, otherwise R-- and loop to address in next cell
 20. `DROP` - Drop top of stack
 21. `DUP` - Duplicate top of stack
 22. `OVER` - yx -> yxy
@@ -31,7 +49,6 @@
 26. `PUSH` - Push top of data stack to return stack
 27. `POP` - Pop top of return stack to data stack
 28. `PEEK` - Copy top of return stack to data stack
-29. `NEXT` - If R <= 0, drop R and continue, otherwise R-- and loop to address in next cell
 30. `EX` - Swap R <-> PC
 31. `RET` - Return from call
 

@@ -930,30 +930,30 @@ var, latest \ common, but non-standard (confusing name conflict)
 
 \ ret, ( -- )
 0 header, ret,
-             $E924 literal,
+             $E9C4 literal,
                ' , call,
-             $9954 literal,
+             $9914 literal,
                ' , call,
-             $9041 literal,
+             $90F1 literal,
                ' , jump,
 
 \ literal, ( val -- )
 0 header, literal,
-             $0923 literal,
+             $09C3 literal,
                ' , call,
                ' , call, \ value
-             $DD64 literal,
+             $DD24 literal,
                ' , call,
-             $D931 literal,
+             $D9D1 literal,
                ' , jump,
 
 \ call, ( addr -- )
 0 header, call,
-             $EE64 literal,
+             $EE24 literal,
                ' , call,
-             $E031 literal,
+             $E0D1 literal,
                ' , call,
-             $0021 literal,
+             $00C1 literal,
                ' , call,
                ' , jump, \ address
 

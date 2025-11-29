@@ -14,21 +14,21 @@ true warnings !
 : 4nybbles, ( z y x i -- ) 2nybbles, 2nybbles, ;
 
 : halt,  (     x -- )  0 2nybbles, ;
-: ldc,   (   v x -- )  1 2nybbles, c, ;
-: ld+,   ( z y x -- )  2 4nybbles, ;
-: st+,   ( z y x -- )  3 4nybbles, ;
-: cp?,   ( z y x -- )  4 4nybbles, ;
-: add,   ( z y x -- )  5 4nybbles, ;
-: sub,   ( z y x -- )  6 4nybbles, ;
-: mul,   ( z y x -- )  7 4nybbles, ;
-: div,   ( z y x -- )  8 4nybbles, ;
-: nand,  ( z y x -- )  9 4nybbles, ;
-: shl,   ( z y x -- ) 10 4nybbles, ;
-: shr,   ( z y x -- ) 11 4nybbles, ;
-: in,    (   y x -- ) 12 2nybbles, ;
-: out,   (   y x -- ) 13 2nybbles, ;
-: read,  ( z y x -- ) 14 4nybbles, ;
-: write, ( z y x -- ) 15 4nybbles, ;
+: add,   ( z y x -- )  1 4nybbles, ;
+: sub,   ( z y x -- )  2 4nybbles, ;
+: mul,   ( z y x -- )  3 4nybbles, ;
+: div,   ( z y x -- )  4 4nybbles, ;
+: nand,  ( z y x -- )  5 4nybbles, ;
+: shl,   ( z y x -- )  6 4nybbles, ;
+: shr,   ( z y x -- )  7 4nybbles, ;
+: in,    (   y x -- )  8 2nybbles, ;
+: out,   (   y x -- )  9 2nybbles, ;
+: read,  ( z y x -- ) 10 4nybbles, ;
+: write, ( z y x -- ) 11 4nybbles, ;
+: ld+,   ( z y x -- ) 12 4nybbles, ;
+: st+,   ( z y x -- ) 13 4nybbles, ;
+: ldc,   (   v x -- ) 14 2nybbles, c, ;
+: cp?,   ( z y x -- ) 15 4nybbles, ;
 
 0 constant pc
 1 constant zero

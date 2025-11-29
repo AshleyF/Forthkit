@@ -18,21 +18,21 @@ registers 16 cells erase
 : step ( -- ) fetch-pc nybbles
   case
      0 of reg @ (bye) endof                                      \ HALT
-     1 of fetch-pc dup $80 and if $ff00 or then swap reg ! endof \ LDC
-     2 of xyz over @ s@ swap ! reg+! endof                       \ LD+
-     3 of xyz @ over @ s! reg+! endof                            \ ST+
-     4 of xyz rot @ 0= if swap @ swap ! else 2drop then endof    \ CP?
-     5 of ['] + binop endof                                      \ ADD
-     6 of ['] - binop endof                                      \ SUB
-     7 of ['] * binop endof                                      \ MUL
-     8 of ['] / binop endof                                      \ DIV
-     9 of ['] nand binop endof                                   \ NAND
-    10 of ['] lshift binop endof                                 \ SHL
-    11 of ['] shr binop endof                                    \ SHR
-    12 of stdin key-file swap reg ! endof                        \ IN
-    13 of reg @ emit endof                                       \ OUT
-    14 of xyz @ swap @ rot @ read-block endof                    \ READ
-    15 of xyz @ swap @ rot @ write-block endof                   \ WRITE
+     1 of ['] + binop endof                                      \ ADD
+     2 of ['] - binop endof                                      \ SUB
+     3 of ['] * binop endof                                      \ MUL
+     4 of ['] / binop endof                                      \ DIV
+     5 of ['] nand binop endof                                   \ NAND
+     6 of ['] lshift binop endof                                 \ SHL
+     7 of ['] shr binop endof                                    \ SHR
+     8 of stdin key-file swap reg ! endof                        \ IN
+     9 of reg @ emit endof                                       \ OUT
+    10 of xyz @ swap @ rot @ read-block endof                    \ READ
+    11 of xyz @ swap @ rot @ write-block endof                   \ WRITE
+    12 of xyz over @ s@ swap ! reg+! endof                       \ LD+
+    13 of xyz @ over @ s! reg+! endof                            \ ST+
+    14 of fetch-pc dup $80 and if $ff00 or then swap reg ! endof \ LDC
+    15 of xyz rot @ 0= if swap @ swap ! else 2drop then endof    \ CP?
     throw
   endcase ;
 
