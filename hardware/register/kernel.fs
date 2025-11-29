@@ -1124,6 +1124,10 @@ $80 header, ;
                    loop,
                    ret,  ( addr len )
 
+\ bye ( -- ) halt machine TODO: not needed once bootstrapped
+0 header, bye
+              zero halt,
+
 ( --- end of dictionary ------------------------------------------------------ )
 
                    patch,

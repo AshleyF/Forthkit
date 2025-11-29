@@ -2,20 +2,19 @@
 
 Inspired by [Lispkit](https://github.com/AshleyF/Lispkit), build your own Forth from scratch.
 
-0) ~~~Write an interpreter (in Python). Similar to Chuck Moore's first punch card interpreter.~~~ Scratch that! We'll use gforth.
-1) Play with it!
-    * Write a [console Pixel library](./library/pixels/) (in Forth) using Unicode Braille characters
-    * Use this to do [turtle graphics](./library/turtle/) (in Forth)!
-2) Make [register-based "hardware"](./hardware/register/) (VM in ~~~C~~~ Forth) and [assembler](./hardware/register/assembler.f) (in Forth)
-3) Use the assembler to [build a kernel](./hardware/register/kernel.f) (a bytecode image using Forth)
-4) Abandon ~~~the Python interpreter~~~ gforth and [bootstrap](./hardware/register/bootstrap.f) Forth to the new "hardware"
-    * [Port pixel library](./hardware/register/pixels-adapter.f) to this
-    * [Port turtle graphics](./hardware/register/turtle-fixed-point.f) to this (using fixed point)
-    * [Port kernel itself](./hardware/register/kernel-adapter.f) to this
-    * [Achieve meta-circularity!](./hardware/register/meta.sh) That is, build the kernel using ~~~Python~~~ gforth, then use that kernel to build a new (identical for now) kernel. Iterate.
-    * TODO: re-write kernel in more natural Forth syntax
-    * TODO: Fill out the vocabulary to support the [standard core words](./core-words.md)
-5) TODO: Build an inner interpreter and take away `call`/`ret` from the "hardware"
+0) Learn what Forth is by building a pixel library and turtle graphics in gforth
+    * Write a [console Pixel library](./library/pixels/) using Unicode Braille characters
+    * Use this to do [turtle graphics](./library/turtle/)
+2) Make [register-based "hardware"](./hardware/register/) (VM in Forth) and [assembler](./hardware/register/assembler.fs)
+3) Use the assembler to [build a kernel](./hardware/register/kernel.fs) (and boot image)
+4) Rewrite the VM in C and abandon gforth
+5) TODO: [Bootstrap](./hardware/register/bootstrap.fs) the rest of the language
+    * TODO: [Port pixel library](./hardware/register/pixels-adapter.fs)
+    * TODO: [Port turtle graphics](./hardware/register/turtle-fixed-point.fs) (using fixed point)
+    * TODO: [Port kernel itself](./hardware/register/kernel-adapter.fs)
+    * TODO: Achieve meta-circularity! That is, build the kernel using gforth, then use that kernel to build a new (identical for now) kernel. Iterate.
+    * TODO: Re-write kernel in more natural Forth syntax
+5) TODO: Build an inner interpreter and replace calls
     * TODO: Experiment with direct/indirect threading
     * TODO: Experiment with using the return stack for locals and loop counters
     * TODO: Implement remaining Forth control structures
