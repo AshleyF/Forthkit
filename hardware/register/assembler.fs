@@ -1,4 +1,4 @@
-require memory.fs
+require ../shared/memory.fs
 
 false warnings ! \ redefining gforth words
 
@@ -25,19 +25,19 @@ true warnings !
 : out,   (   y x -- )  9 2nybbles, ;
 : read,  ( z y x -- ) 10 4nybbles, ;
 : write, ( z y x -- ) 11 4nybbles, ;
-: ld+,   ( z y x -- ) 12 4nybbles, ;
-: st+,   ( z y x -- ) 13 4nybbles, ;
-: ldc,   (   v x -- ) 14 2nybbles, c, ;
+: ld16+, ( z y x -- ) 12 4nybbles, ;
+: st16+, ( z y x -- ) 13 4nybbles, ;
+: lit8,  (   v x -- ) 14 2nybbles, c, ;
 : cp?,   ( z y x -- ) 15 4nybbles, ;
 
 0 constant pc
 1 constant zero
 
 : cp, ( y x -- ) zero cp?, ;
-: ld, ( y x -- ) zero ld+, ;
-: st, ( y x -- ) zero st+, ;
+: ld16, ( y x -- ) zero ld16+, ;
+: st16, ( y x -- ) zero st16+, ;
 
-: jump, ( addr -- ) pc pc ld, , ;
+: jump, ( addr -- ) pc pc ld16, , ;
 
 : not, (   y x -- ) dup nand, ;
 : and, 2 pick -rot nand, dup not, ;

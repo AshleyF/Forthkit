@@ -1,3 +1,5 @@
+TODO: instruction set has changed
+
 # Register Virtual Machine (Minimal)
 
 This is a minimal version of the register-based virtual machine with just the core components needed to start fresh development.

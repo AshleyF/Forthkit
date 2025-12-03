@@ -1,63 +1,27 @@
-#include <stdio.h>
+#include "../shared/memory.c"
 
 unsigned short reg[0x10];
-unsigned char mem[0x10000];
-
-FILE* openBlock(unsigned short block, const char * mode)
-{
-    char filename[0xf];
-    snprintf(filename, sizeof(filename), "block%d.bin", block);
-    return fopen(filename, mode);
-}
-
-void readBlock(unsigned short block, unsigned short address, long maxsize)
-{
-    FILE *file = openBlock(block, "r");
-    fseek(file, 0, SEEK_END);
-    long size = ftell(file);
-    fseek(file, 0, SEEK_SET);
-    if (!file || !fread(mem + address, maxsize < size ? maxsize : size, 1, file)) // assumes size+address <= sizeof(mem)
-    {
-        printf("Could not open block file.\n");
-    }
-    fclose(file);
-}
-
-void writeBlock(unsigned short block, unsigned short address, long size)
-{
-    FILE *file = openBlock(block, "w");
-    if (!file || !fwrite(mem + address, 1, size, file))
-    {
-        printf("Could not write block file.\n");
-    }
-    fclose(file);
-}
 
 #define NEXT mem[reg[0]++]
 #define LOW(b) b & 0x0F
-#define HIGH(b) LOW(b >> 4);
+#define HIGH(b) LOW(b >> 4)
 
-int main(void)
-{
+int main(void) {
     readBlock(0, 0, sizeof(mem));
-    while (1)
-    {
+    while (1) {
         unsigned char c = NEXT;
         unsigned char i = HIGH(c);
         unsigned char x = LOW(c);
-        
-        switch(i)
-        {
+        switch(i) {
             case 0: return reg[x]; // HALT
             case 8: reg[x] = getc(stdin); break; // IN
             case 9: putc(reg[x], stdout); break; // OUT
-            case 14: reg[x] = (signed char)NEXT; break; // LDC
+            case 14: reg[x] = (signed char)NEXT; break; // LIT8
             default: // instructions that need a second byte
                 unsigned char j = NEXT;
                 unsigned char y = HIGH(j);
                 unsigned char z = LOW(j);
-                switch(i)
-                {
+                switch(i) {
                     case 1: reg[z] = reg[y] + reg[x]; break; // ADD
                     case 2: reg[z] = reg[y] - reg[x]; break; // SUB
                     case 3: reg[z] = reg[y] * reg[x]; break; // MUL
@@ -67,8 +31,8 @@ int main(void)
                     case 7: reg[z] = (unsigned short)reg[y] >> reg[x]; break; // SHR (logical)
                     case 10: readBlock(reg[z], reg[y], reg[x]); break; // READ
                     case 11: writeBlock(reg[z], reg[y], reg[x]); break; // WRITE
-                    case 12: reg[z] = mem[reg[y]] | (mem[reg[y] + 1] << 8); reg[y] += reg[x]; break; // LD+
-                    case 13: // ST+
+                    case 12: reg[z] = mem[reg[y]] | (mem[reg[y] + 1] << 8); reg[y] += reg[x]; break; // LD16+
+                    case 13: // ST16+
                         mem[reg[y]] = reg[z] & 0xFF;
                         mem[reg[y] + 1] = reg[z] >> 8;
                         reg[y] += reg[x]; 

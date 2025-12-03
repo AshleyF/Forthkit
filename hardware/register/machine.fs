@@ -1,4 +1,4 @@
-require memory.fs
+require ../shared/memory.fs
 
 create registers 16 cells allot
 registers 16 cells erase

@@ -1,13 +1,13 @@
 require assembler.fs
 
-    2 constant one       1     one ldc, \ literal 1
-    3 constant two       2     two ldc, \ literal 2
-    4 constant four      4    four ldc, \ literal 4
-    5 constant eight     8   eight ldc, \ literal 8
-    6 constant twelve   12  twelve ldc, \ literal 12
-    7 constant fifteen  15 fifteen ldc, \ literal 15
+    2 constant one       1     one lit8, \ literal 1
+    3 constant two       2     two lit8, \ literal 2
+    4 constant four      4    four lit8, \ literal 4
+    5 constant eight     8   eight lit8, \ literal 8
+    6 constant twelve   12  twelve lit8, \ literal 12
+    7 constant fifteen  15 fifteen lit8, \ literal 15
     
-    8 constant #t       -1     #t ldc, \ literal true (-1)
+    8 constant #t       -1     #t lit8, \ literal true (-1)
  zero constant #f                      \ literal false (0)
  
     9 constant x
@@ -15,21 +15,21 @@ require assembler.fs
    11 constant z
    12 constant w
 
-: ldv, ( val reg -- ) pc two ld+, , ;
+: lit16, ( val reg -- ) pc two ld16+, , ;
 
 ( --- stacks ----------------------------------------------------------------- )
 
-: push, ( reg ptr -- ) dup dup four sub,  st, ;
-: pop,  ( reg ptr -- ) four ld+, ;
+: push, ( reg ptr -- ) dup dup four sub,  st16, ;
+: pop,  ( reg ptr -- ) four ld16+, ;
 
 13 constant d \ data stack pointer (initialized after dictionary below)
 
 : pushd, ( reg -- ) d push, ;
 : popd,  ( reg -- ) d pop, ;
 
-: literal, x ldv,  x pushd, ; \ 8 bytes
+: literal, x lit16,  x pushd, ; \ 8 bytes
 
-14 constant r  memory-size r ldv, \ return stack pointer
+14 constant r  memory-size r lit16, \ return stack pointer
 
 : pushr, ( reg -- ) r push, ;
 : popr,  ( reg -- ) r pop, ;
@@ -39,7 +39,7 @@ require assembler.fs
 
 ( --- primitive control-flow ------------------------------------------------- )
 
-: 0branch, ( -- dest ) x popd,  0 y ldv,  here 2 -  pc y x cp?, ; \ dummy jump if 0 to address, push pointer to patch
+: 0branch, ( -- dest ) x popd,  0 y lit16,  here 2 -  pc y x cp?, ; \ dummy jump if 0 to address, push pointer to patch
 
 \ ... if ... then | ... if ... else ... then
 : if, ( C: -- orig ) 0branch, ; \ dummy branch on 0, push pointer to address
@@ -88,13 +88,13 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 
 \ (clear-data) empty return stack (non-standard)
 0 header, (clear-data)
- memory-size 2 + d ldv,
+ memory-size 2 + d lit16,
                    ret,
 
 \ (clear-return) empty return stack (non-standard)
 0 header, (clear-return)
                  x popr,
-     memory-size r ldv,
+     memory-size r lit16,
           x x four add, \ ret,
               pc x cp,
 
@@ -106,7 +106,7 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 \ @ ( addr -- ) fetch 16-bit value
 0 header, @
                  x popd,
-               x x ld,
+               x x ld16,
                  x pushd,
                    ret,
 
@@ -114,23 +114,23 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 0 header, !
                  x popd,
                  y popd,
-               y x st,
+               y x st16,
                    ret,
 
 \ +! ( val addr -- ) store 16-bit value (dup @ rot + swap !)
 0 header, +!
                  x popd,
                  y popd,
-               z x ld,
+               z x ld16,
              z z y add,
-               z x st,
+               z x st16,
                    ret,
 
 \ c@ ( addr -- ) fetch 8-bit value
 0 header, c@
                  x popd,
-               x x ld,
-             $ff y ldv, 
+               x x ld16,
+             $ff y lit16, 
              x x y and,
                  x pushd,
                    ret,
@@ -139,13 +139,13 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 0 header, c!
                  x popd,
                  y popd,
-             $ff z ldv, 
+             $ff z lit16, 
              y y z and,  \ mask to lower
                z z not,  \ upper mask
-               w x ld,   \ existing value
+               w x ld16, \ existing value
              w w z and,  \ mask to upper
              y y w or,   \ combine
-               y x st,
+               y x st16,
                    ret,
 
 \ + ( y x -- sum ) addition
@@ -226,15 +226,15 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 
 \ dup ( x -- x x ) duplicate top stack value
 0 header, dup
-               x d ld,
+               x d ld16,
                  x pushd,
                    ret,
 
 \ 2dup ( y x -- y x y x ) duplicate top two stack values
 0 header, 2dup
-               x d ld,
+               x d ld16,
           y d four add,
-               y y ld,
+               y y ld16,
                  y pushd,
                  x pushd,
                    ret,
@@ -242,42 +242,42 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 \ nip ( y x -- x ) drop second stack value
 0 header, nip
                  x popd,
-               x d st,
+               x d st16,
                    ret,
 
 \ over ( y x -- y x y ) copy second stack value to top
 0 header, over
           x d four add,
-               x x ld,
+               x x ld16,
                  x pushd,
                    ret,
 
 \ 2over ( w z y x -- w z y x w z ) copy second pair of stack values to top
 0 header, 2over
         x d twelve add,
-               x x ld,
+               x x ld16,
                  x pushd,
         x d twelve add,
-               x x ld,
+               x x ld16,
                  x pushd,
                    ret,
 
 \ swap ( y x -- x y ) swap top two stack values
 0 header, swap
-               x d ld,
+               x d ld16,
           z d four add,
-               y z ld,
-               y d st, \ swap in-place
-               x z st,
+               y z ld16,
+               y d st16, \ swap in-place
+               x z st16,
                    ret,
 
 \ tuck ( y x -- x y x ) copy top stack value under second value
 0 header, tuck
-               x d ld,
+               x d ld16,
           z d four add,
-               y z ld,
-               y d st, \ swap in-place
-               x z st,
+               y z ld16,
+               y d st16, \ swap in-place
+               x z st16,
                  x pushd,
                    ret,
 
@@ -304,19 +304,19 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 \ >r ( x -- ) ( R: x -- ) move x to return stack
 0 header, >r
                  x popd,
-               y r ld,  \ this return address
-               x r st,  \ replace
-          y y four add, \ ret,
+               y r ld16, \ this return address
+               x r st16, \ replace
+          y y four add,  \ ret,
               pc y cp,
 
 \ 2>r ( y x -- ) ( R: -- y x ) move y x pair to return stack
 0 header, 2>r
                  x popd,
                  y popd,
-               z r ld,  \ this return address
-               y r st,  \ push y in-place
+               z r ld16, \ this return address
+               y r st16, \ push y in-place
                  x pushr,
-          z z four add, \ ret,
+          z z four add,  \ ret,
               pc z cp,
 
 \ r> ( -- x ) ( R: x -- ) move x from return stack
@@ -340,7 +340,7 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 \ r@ ( -- x ) ( R: x -- x ) copy x from return stack
 0 header, r@
                  z popr, \ this return address
-               x r ld,   \ top value before call
+               x r ld16, \ top value before call
                  x pushd,
           z z four add,  \ ret,
               pc z cp,
@@ -348,9 +348,9 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 \ 2r@ ( -- y x ) ( R: y x -- y x ) copy y x pair from return stack
 0 header, 2r@
                  z popr, \ this return address
-               x r ld,   \ top value before call
+               x r ld16, \ top value before call
           y r four add,
-               y y ld,
+               y y ld16,
                  y pushd,
                  x pushd,
           z z four add,  \ ret,
@@ -359,69 +359,69 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 \ = ( y x -- b ) true if equal
 0 header, =
                  x popd,
-               y d ld,
+               y d ld16,
              z y x sub, \ zero if equal
               y #f cp,
             y #t z cp?,
-               y d st,
+               y d st16,
                    ret,
 
 \ <> ( y x -- b ) true if not equal
 0 header, <>
                  x popd,
-               y d ld,
+               y d ld16,
              z y x sub, \ zero if equal
               y #t cp,
             y #f z cp?,
-               y d st,
+               y d st16,
                    ret,
 
 \ 0= ( y x -- b ) true if equal to zero
 0 header, 0=
-               x d ld,
+               x d ld16,
               y #f cp,
             y #t x cp?,
-               y d st,
+               y d st16,
                    ret,
 
 \ 0< ( x -- b ) true if x less than zero (15 rshift negate 1+)
 0 header, 0<
-               x d ld,
+               x d ld16,
        x x fifteen shr, \ sign bit to 1s place
            x x one and,
                x x not, \ negate
            x x one add,
-               x d st,
+               x d st16,
                    ret,
 
 \ < ( y x -- b ) true if y less than x (- 0<) TODO: handle overflow (see bootstrap)!
 0 header, <
                  x popd,
-               y d ld,
+               y d ld16,
              z y x sub, \ negative if y less than x
        z z fifteen shr, \ sign bit to 1s place
            z z one and,
                z z not, \ negate
            z z one add,
-               z d st,
+               z d st16,
                    ret,
 
 \ 0> ( x -- b ) true if x greater than zero (1- 15 rshift 1-)
 0 header, 0>
-               x d ld,
+               x d ld16,
            x x one sub, \ negative if not greater than zero
        x x fifteen shr, \ sign bit to 1s place
            x x one and,
                x x not, \ negate
            x x one add,
                x x not, \ invert
-               x d st,
+               x d st16,
                    ret,
 
 \ > ( y x -- b ) true if y greater than x (- 0>) TODO: handle overflow (see bootstrap)!
 0 header, >
                  x popd,
-               y d ld,
+               y d ld16,
              x y x sub, \ negative if y less than x
            x x one sub, \ negative if y is equal to x
        x x fifteen shr, \ sign bit to 1s place
@@ -429,7 +429,7 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
                x x not, \ negate
            x x one add,
                x x not, \ invert
-               x d st,
+               x d st16,
                    ret,
 
 \ exit ( -- ) ( R: addr -- ) return from call
@@ -442,7 +442,7 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 : var,
                  0 header,
               x pc cp,
-              14 y ldc,     \ count this and following instructions
+              14 y lit8,    \ count this and following instructions
              x x y add,     \ point just beyond this code -- data field
                  x pushd,   \ 4 bytes
                    ret,     \ 6 bytes
