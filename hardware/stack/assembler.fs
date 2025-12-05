@@ -67,6 +67,8 @@ variable h'
 : nip, swap, drop, ; \ ( y x -- x ) drop second stack value
 : tuck, swap, over, ; \ ( y x -- x y x ) copy top stack value under second value
 
+: literal, dup -129 128 within if lit8, else lit16, then ;
+
 : label ( -- addr ) here constant ;
 : branch, ( -- dest ) 0 jump,  here 4 - ;
 : patch, ( orig -- ) align, here swap s! ;

@@ -23,12 +23,13 @@ variable latest  $ffff latest !
   3 swap - 0 ?do 0 c, loop ; \ pad
 
 : find-word ( addr -- )
+  \ ." FIND: " dup count type cr
   latest @ \ ( find link -- )
   begin
     2dup memory + 3 + dup 1- c@ $7f and \ get name/len ( find link find name len -- )
     rot count 2over ( find link name len find len name len -- )
-    rot over = if 3 min rot over str= else 2drop 2drop 0 then ( find link name eq? -- )
-    if drop 3 + memory - -rot 2drop exit then \ return xt if names match
+    rot over = if 3 min rot over str= nip else 2drop 2drop 0 then ( find link name eq? -- )
+    if 3 + memory - -rot 2drop exit then \ return xt if names match
     drop s@ dup 0= if ." Word not found: " drop count type cr exit then \ follow link, until end
   again ;
 
@@ -62,10 +63,50 @@ var, base
 
 \ decimal ( -- ) set number-conversion radix to 10
 0 header, decimal
-    10 lit8,
-' base call,
-' !    call,
-       ret,
+      10 lit8,
+  ' base call,
+  ' !    call,
+         ret,
+
+\ source-id ( -- 0 | -1 ) Identifies the input source (-1=string [evaluate], 0=input device)
+var, source-id
+
+\ false ( -- false ) return false flag (0 constant false)
+0 header, false
+  0 literal,
+    ret,
+
+\ state ( -- a-addr ) compilation-state flag (true=compiling)
+var, state
+
+\ quit ( -- ) ( R: i * x -- ) Empty the return stack, store zero in SOURCE-ID if it is present, make
+\      the user input device the input source, and enter interpretation state. Do not display a message.
+\      Repeat the following: Accept a line from the input source into the input buffer, set >IN to zero,
+\      and interpret. Display the system prompt if in interpretation state, all processing has been
+\      completed, and no ambiguous condition exists.
+0 header, quit
+\  ' (clear-return) call, TODO: no such thing
+                 0 literal,
+       ' source-id call,
+               ' ! call,
+           ' false call,
+           ' state call,
+               ' ! call,
+\                  begin,
+\         ' refill call,
+\                  while,
+\     ' (evaluate) call,
+\          ' 2drop call,
+\             ' bl call,
+\           ' emit call,
+           char o literal,
+\           ' emit call,
+           char k literal,
+\           ' emit call,
+\             ' cr call,
+\                  repeat,
+\                  \ TODO: failed to refill
+                   ret,
 
 ( --- end of dictionary ------------------------------------------------------ )
 

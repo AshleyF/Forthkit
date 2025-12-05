@@ -57,6 +57,8 @@ Code is aligned on 2-byte cells.
 
 - `LD` and `ST` do not increment
 - Calls must be even-numbered addresses, otherwise no alignment enforced
+- `literal,` goes away (becomes `lit16,`) [`: literal, x lit16,  x pushd, ;`]
+  - Actually, becomes "smart" compiling `lit8` or `lit16`
 
 ## Ideas
 
@@ -70,3 +72,7 @@ Code is aligned on 2-byte cells.
 
 - Stack pointers not exposed, so no `(clear-data)` or `(clear-return)`
 - No `source-addr`, `source-len`, `source` words
+
+## TODO
+
+- `find-word` finds the *current* word (no smudge bit, recursion allowed, but not simple redefinition, not classic Forth)
