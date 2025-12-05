@@ -65,3 +65,8 @@ Code is aligned on 2-byte cells.
   `swap ld+ rot st+` instead of `over @ over ! 1+ swap 1+ swap`
   - Plain fetch/store becomes: `ld+ nip`/`st+ nip`
 - Jump instruction? Otherwise [CALL] followed by [RET NOP NOP]
+
+## Simplifications
+
+- Stack pointers not exposed, so no `(clear-data)` or `(clear-return)`
+- No `source-addr`, `source-len`, `source` words

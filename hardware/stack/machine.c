@@ -19,18 +19,19 @@ unsigned short next() {
 
 int main(void) {
     readBlock(0, 0, sizeof(mem));
-    while (1) {
+    int count = 0;
+    while (count++ < 100) {
         unsigned short c = next();
         if ((c & 1) == 0) { // call?
             STACK(r, 1);
             R = p;
             p = c;
-            // printf("CALL: %i\n", p);
+            printf("%x CALL: %x\n", R - 2, p);
             // TODO: TCO
         } else { // instructions
             for (short slot = 0; slot < 15; slot += 5) {
                 short i = (c >> (11 - slot)) & 0x1F;
-                // printf("INSTRUCTION: %i\n", i);
+                printf("%x[%x] INSTRUCTION: %i\n", p - 2, slot / 5, i);
                 switch (i) {
                     case  0: return dat[d]; // HALT - Halt execution
                     case  1: BINOP(+); break; // ADD - Addition
@@ -49,8 +50,8 @@ int main(void) {
                     case 14: writeBlock(Z, Y, X); STACK(d, -3); break; // WRITE - Write block
                     case 15: STACK(d, 1); X = mem[Y] | (mem[Y + 1] << 8); Y += 2; break; // LD16+ - Fetch cell at address, and increment over
                     case 16: STACK(d, 1); X = mem[Y]; Y++; break; // LD8+ - Fetch byte at address, and increment over
-                    case 18: mem[X] = Y & 0xFF; mem[X + 1] = Y >> 8; STACK(d, -1); X += 2; break; // ST16+ - Store cell at address, and increment over
-                    case 17: mem[X] = Y & 0xFF; STACK(d, -1); X++; break; // ST8+ - Store byte at address, and increment over
+                    case 18: mem[Y] = X & 0xFF; mem[Y + 1] = X >> 8; STACK(d, -1); X += 2; break; // ST16+ - Store cell at address, and increment over
+                    case 17: mem[Y] = X & 0xFF; STACK(d, -1); X++; break; // ST8+ - Store byte at address, and increment over
                     case 19: STACK(d, 1); X = next(); break; // LIT16 - Fetch literal next cell
                     case 20: STACK(d, 1); X = mem[p++]; break; // LIT8 - Fetch literal next byte
                     case 21: unsigned short t = next(); if (X == 0) { p = t; slot = 15; } break; // IF - Jump to address in next cell if T >= 0

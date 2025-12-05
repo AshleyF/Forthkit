@@ -55,9 +55,11 @@ require assembler.fs
 
 ( --- dictionary ------------------------------------------------------------- )
 
-false warnings ! \ intentionally redefining (latest header, ')
+false warnings ! \ intentionally redefining (latest header, ' ['])
 
 variable latest  $ffff latest !
+
+\ [LINK][FLAG/LEN]NAME
 
 : header, ( flag "<spaces>name" -- )
   latest @          \ link to current (soon to be previous) word
@@ -530,6 +532,55 @@ var, dp \ initialized after dictionary (below)
               ' >r call, \ replace this return address
            ' 2drop jump,
 
+( --- assembler -------------------------------------------------------------- )
+
+\ ret, ( -- )
+0 header, ret,
+             $E9C4 literal,
+               ' , call,
+             $9914 literal,
+               ' , call,
+             $90F1 literal,
+               ' , jump,
+
+\ literal, ( val -- )
+0 header, literal,
+             $09C3 literal,
+               ' , call,
+               ' , call, \ value
+             $DD24 literal,
+               ' , call,
+             $D9D1 literal,
+               ' , jump,
+
+\ call, ( addr -- )
+0 header, call,
+             $EE24 literal,
+               ' , call,
+             $E0D1 literal,
+               ' , call,
+             $00C1 literal,
+               ' , call,
+               ' , jump, \ address
+
+\ lshift ( y x -- result ) left shift
+\ needed to bootstrap assembler
+0 header, lshift
+                 x popd,
+                 y popd,
+             x y x shl,
+                 x pushd,
+                   ret,
+
+\ rshift ( y x -- result ) right shift
+\ needed to bootstrap assembler
+0 header, rshift
+                 x popd,
+                 y popd,
+             x y x shr,
+                 x pushd,
+                   ret,
+
 ( --- interpreter ------------------------------------------------------------ )
 
 \ true ( -- true ) return true flag (-1 constant true)
@@ -584,8 +635,6 @@ var, base
                 10 literal,
             ' base call,
                ' ! jump,
-
-( --- interpreter ------------------------------------------------------------ )
 
 \ source-id ( -- addr ) source buffer address (initialized below)
 var, source-addr
@@ -925,57 +974,6 @@ var, latest \ common, but non-standard (confusing name conflict)
                    then,   \ n a c
                    repeat,
                    ret,
-
-( --- assembler -------------------------------------------------------------- )
-
-\ ret, ( -- )
-0 header, ret,
-             $E9C4 literal,
-               ' , call,
-             $9914 literal,
-               ' , call,
-             $90F1 literal,
-               ' , jump,
-
-\ literal, ( val -- )
-0 header, literal,
-             $09C3 literal,
-               ' , call,
-               ' , call, \ value
-             $DD24 literal,
-               ' , call,
-             $D9D1 literal,
-               ' , jump,
-
-\ call, ( addr -- )
-0 header, call,
-             $EE24 literal,
-               ' , call,
-             $E0D1 literal,
-               ' , call,
-             $00C1 literal,
-               ' , call,
-               ' , jump, \ address
-
-\ lshift ( y x -- result ) left shift
-\ needed to bootstrap assembler
-0 header, lshift
-                 x popd,
-                 y popd,
-             x y x shl,
-                 x pushd,
-                   ret,
-
-\ rshift ( y x -- result ) right shift
-\ needed to bootstrap assembler
-0 header, rshift
-                 x popd,
-                 y popd,
-             x y x shr,
-                 x pushd,
-                   ret,
-
-( --- interpreter ------------------------------------------------------------ )
 
 \ state ( -- a-addr ) compilation-state flag (true=compiling)
 var, state

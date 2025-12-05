@@ -2,9 +2,6 @@ require ../shared/memory.fs
 
 false warnings ! \ redefining gforth words
 
-\ TODO: same as in register assembler
-\ TODO: all needed? (only using: here , s!)
-
 : here h @ memory - ;
 : c, ( c -- ) h @ c! 1 h +! ;
 : , ( cc -- ) dup c, 8 rshift c, ;
@@ -13,20 +10,20 @@ false warnings ! \ redefining gforth words
 
 true warnings !
 
-variable shiftbits  11 shiftbits !
+variable shiftbits
+: initslot 11 shiftbits ! ;
+initslot
+
 variable h'
-: here' h' @ memory - ;
 : slot, ( i -- )
-  shiftbits @ 11 = if
-    h @ h' !
-    2 h +!
+  shiftbits @ 11 = if \ first slot?
+    $ffff h @ dup h' ! ! 2 h +! \ h'=h, initialize no-ops, h+=2
   then
   shiftbits @ lshift \ shift instruction to slot
-  0x1f shiftbits @ lshift invert here' s@ and \ fetch and mask off slot
-  or 0x1 or here' s! \ place instruction (and ensure low bit set)
+  0x1f shiftbits @ lshift invert h' @ @ and \ fetch and mask off slot
+  or h' @ ! \ place instruction
   -5 shiftbits +!
-  shiftbits @ 0<= if 11 shiftbits ! then
-;
+  shiftbits @ 0<= if 11 shiftbits ! then ;
 
 : halt,   0 slot,    ; \ halt execution
 : add,    1 slot,    ; \ addition
@@ -61,15 +58,17 @@ variable h'
 : ret,   30 slot,    ; \ return from call
 : nop,   31 slot,    ; \ no-op
 
-: finish, begin shiftbits @ 11 <> while nop, repeat ; \ finish slot, padding with no-ops
-: align, here 2 mod 0<> if 1 h +! then ; \ align here on even address boundary
-: for, push, finish, here ; \ start for/next loop
+: for, initslot push, here ; \ start for/next loop
+: align, initslot here 2 mod 0<> if 1 h +! then ; \ align here on even address boundary
 
-: call, ( addr -- ) finish, 1 invert and , ; \ TODO: error if low bit set
-: jump, ( addr -- ) call, ret, finish, ;
+: call, ( addr -- ) initslot dup 2 mod 0= if , else ." Expected even-aligned address" throw then ; \ TODO: proper error?
+: jump, ( addr -- ) call, ret, ;
+
+: nip, swap, drop, ; \ ( y x -- x ) drop second stack value
+: tuck, swap, over, ; \ ( y x -- x y x ) copy top stack value under second value
 
 : label ( -- addr ) here constant ;
 : branch, ( -- dest ) 0 jump,  here 4 - ;
-: patch, ( orig -- ) finish, align, here swap s! ;
+: patch, ( orig -- ) align, here swap s! ;
 
 : write-boot-block ( -- ) 0 0 here write-block ; \ note: depends on redefined `here`
