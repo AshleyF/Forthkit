@@ -43,8 +43,8 @@ require assembler.fs
 
 \ ... if ... then | ... if ... else ... then
 : if, ( C: -- orig ) 0branch, ; \ dummy branch on 0, push pointer to address
+: else, ( C: orig1 -- orig2 ) branch, swap patch, ; \ patch previous branch to here, dummy unconditionally branch over false block
 : then, ( orig -- ) patch, ; \ patch if/else to continue here
-: else, ( C: orig1 -- orig2 ) branch, swap then, ; \ patch previous branch to here, dummy unconditionally branch over false block
 
 \ begin ... again | begin ... until | begin ... while ... repeat  (note: not begin ... while ... again!)
 : begin, ( C: -- dest ) here ; \ begin loop
@@ -493,8 +493,8 @@ var, dp \ initialized after dictionary (below)
           ['] 2dup call,
             ['] <> call,
                    false \ terminator for patching
-                   if,
-                   true  \ patch if to loop
+                   0branch,
+                   true  \ patch branch to loop
            ['] 2>r call,
                    begin, ;
 
@@ -636,7 +636,7 @@ var, base
             ' base call,
                ' ! jump,
 
-\ source-id ( -- addr ) source buffer address (initialized below)
+\ source-addr ( -- addr ) source buffer address (initialized below)
 var, source-addr
 
 \ source-len ( -- len ) source buffer length (initialized below)
@@ -1137,7 +1137,8 @@ memory-size $500 - literal, \ $ff bytes above stacks
                $ff literal, \ size ($400 bytes for stacks/$ff elements each)
       ' source-len call,
                ' ! call,
-            ' quit jump,
+            ' quit call,
+                 0 halt,
 
 here     ' dp     16 + s! \ update dictionary pointer to compile-time position
 latest @ ' latest 16 + s! \ update latest to compile-time

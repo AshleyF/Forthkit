@@ -30,23 +30,23 @@ variable h'
 : sub,    2 slot,    ; \ subtraction
 : mul,    3 slot,    ; \ multiplication
 : div,    4 slot,    ; \ division
-: not,    5 slot,    ; \ bitwise not
-: and,    6 slot,    ; \ bitwise and
-: or,     7 slot,    ; \ bitwise or
-: xor,    8 slot,    ; \ bitwise xor
-: shl,    9 slot,    ; \ shift left
-: shr,   10 slot,    ; \ shift right
-: in,    11 slot,    ; \ input character
-: out,   12 slot,    ; \ output character
-: read,  13 slot,    ; \ read block
-: write, 14 slot,    ; \ write block
-: ld16+, 15 slot,    ; \ fetch cell at address, and increment over
-: ld8+,  16 slot,    ; \ fetch byte at address, and increment over
-: st16+, 17 slot,    ; \ store cell at address, and increment over
-: st8+,  18 slot,    ; \ store byte at address, and increment over
-: lit16, 19 slot,  , ; \ fetch literal next cell
-: lit8,  20 slot, c, ; \ fetch literal next byte (signed)
-: if,    21 slot,  , ; \ jump to address in next cell if T >= 0
+: mod,    5 slot,    ; \ modulus
+: not,    6 slot,    ; \ bitwise not
+: and,    7 slot,    ; \ bitwise and
+: or,     8 slot,    ; \ bitwise or
+: xor,    9 slot,    ; \ bitwise xor
+: shl,   10 slot,    ; \ shift left
+: shr,   11 slot,    ; \ shift right
+: in,    12 slot,    ; \ input character
+: out,   13 slot,    ; \ output character
+: read,  14 slot,    ; \ read block
+: write, 15 slot,    ; \ write block
+: ld16+, 16 slot,    ; \ fetch cell at address, and increment over
+: ld8+,  17 slot,    ; \ fetch byte at address, and increment over
+: st16+, 18 slot,    ; \ store cell at address, and increment over
+: st8+,  19 slot,    ; \ store byte at address, and increment over
+: lit16, 20 slot,  , ; \ fetch literal next cell
+: 0jump, 21 slot,  , ; \ jump to address in next cell if T >= 0
 : next,  22 slot,  , ; \ if R <= 0, drop R and continue, otherwise R-- and loop to address in next cell
 : drop,  23 slot,    ; \ drop top of stack
 : dup,   24 slot,    ; \ duplicate top of stack
@@ -58,16 +58,25 @@ variable h'
 : ret,   30 slot,    ; \ return from call
 : nop,   31 slot,    ; \ no-op
 
-: for, initslot push, here ; \ start for/next loop
 : align, initslot here 2 mod 0<> if 1 h +! then ; \ align here on even address boundary
+: for, push, align, here ; \ start for/next loop
 
 : call, ( addr -- ) initslot dup 2 mod 0= if , else ." Expected even-aligned address" throw then ; \ TODO: proper error?
 : jump, ( addr -- ) call, ret, ;
 
+: >r, push, ; \ ( x -- ) ( R: x -- ) move x to return stack [synonym]
+: r>, pop, ; \ ( -- x ) ( R: x -- ) move x from return stack [synonym]
+: r@, peek, ; \ ( -- x ) ( R: x -- x ) copy x from return stack [synonym]
+: emit, out, ; \ emit ( char -- ) write to console [synonym]
+: key, in, ; \ key ( -- char ) read from console [synonym]
+: literal, lit16, ; \ synonym
+
+: 2>r, push, push, ; \ ( y x -- ) ( R: -- y x ) move y x pair to return stack
+: 2r>, pop, pop, ; \ ( -- y x ) ( R: y x -- ) move x from return stack
 : nip, swap, drop, ; \ ( y x -- x ) drop second stack value
 : tuck, swap, over, ; \ ( y x -- x y x ) copy top stack value under second value
-
-: literal, dup -129 128 within if lit8, else lit16, then ;
+: 2dup, over, over, ; \ ( y x -- y x y x ) duplicate top two stack values
+: 2drop, drop, drop, ; \ ( y x -- ) remove top two stack values
 
 : label ( -- addr ) here constant ;
 : branch, ( -- dest ) 0 jump,  here 4 - ;
