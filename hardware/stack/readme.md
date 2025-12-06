@@ -22,7 +22,8 @@
 17. `LD8+` - Fetch byte at address, and increment over
 18. `ST16+` - Store cell at address, and increment over
 19. `ST8+` - Store byte at address, and increment over
-20. `LIT` - Fetch literal next cell
+20. `LIT16` - Fetch literal next cell
+20. `LIT8` - Fetch literal next signed byte
 21. `0JUMP` - Jump to address in next cell if T = 0
 22. `NEXT` - If R > 0, R-- and loop to next cell address, otherwise drop R and continue
 23. `DROP` - Drop top of stack

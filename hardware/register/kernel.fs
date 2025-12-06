@@ -40,6 +40,8 @@ require assembler.fs
 ( --- primitive control-flow ------------------------------------------------- )
 
 : 0branch, ( -- dest ) x popd,  0 y lit16,  here 2 -  pc y x cp?, ; \ dummy jump if 0 to address, push pointer to patch
+: branch, skip, ;
+: patch, start, ;
 
 \ ... if ... then | ... if ... else ... then
 : if, ( C: -- orig ) 0branch, ; \ dummy branch on 0, push pointer to address
@@ -86,7 +88,7 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 
 ( --- primitives ------------------------------------------------------------- )
 
-               branch, \ skip dictionary
+               skip, \ skip dictionary
 
 \ (clear-data) empty return stack (non-standard)
 0 header, (clear-data)
@@ -1128,7 +1130,8 @@ $80 header, ;
 
 ( --- end of dictionary ------------------------------------------------------ )
 
-                   patch,
+                   start,
+
     ' (clear-data) call,
          ' decimal call, \ default base
 memory-size $500 - literal, \ $ff bytes above stacks

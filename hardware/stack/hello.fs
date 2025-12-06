@@ -1,6 +1,6 @@
 require assembler.fs
 
-branch,
+skip,
 
 label 'message
 12 c,
@@ -18,9 +18,9 @@ char l c,
 char d c,
 char ! c,
 
-patch,
+start,
 
-'message lit16,
+'message literal,
 ld8+, \ get length
 for,
   ld8+, out, \ output character

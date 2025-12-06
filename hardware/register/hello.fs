@@ -1,6 +1,6 @@
 require assembler.fs
 
-branch,
+skip,
 
 label 'message
 char H c,
@@ -21,7 +21,7 @@ char ! c,
 label 'halt
 zero halt,
 
-patch,
+start,
 
 2 constant one    1 one   lit8, \ literal 1
 3 constant eight  8 eight lit8, \ literal 8

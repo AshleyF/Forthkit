@@ -2,7 +2,9 @@ require assembler.fs
 
 ( --- primitive control-flow ------------------------------------------------- )
 
-: 0branch, ( -- dest ) 0 0jump, here 2 - ; \ dummy jump if 0 to address, push pointer to patch
+: 0branch, ( -- dest ) 0 0jump, here 2 - ; \ dummy relative jump if 0 to address, push pointer to patch
+: branch, ( -- dest ) 0, 0branch, ; \ dummy unconditional relative jump, push pointer to patch
+: patch, ( orig -- ) dup here - swap s! ; \ patch relative branch to here
 
 \ ... if ... then | ... if ... else ... then
 : if, ( C: -- orig ) 0branch, ; \ dummy branch on 0, push pointer to address
@@ -54,7 +56,7 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 
 ( --- primitives ------------------------------------------------------------- )
 
-branch, \ skip dictionary
+skip, \ skip dictionary
 
 \ @ ( addr -- ) fetch 16-bit value
 0 header, @
@@ -291,7 +293,8 @@ var, >in
 
 ( --- end of dictionary ------------------------------------------------------ )
 
-patch,
+start,
+
 ' decimal call, \ default base
    ' quit call,
           halt,

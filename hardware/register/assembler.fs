@@ -44,7 +44,7 @@ true warnings !
 : or,  ( z y x -- ) dup dup not, over dup not, nand, ;
 
 : label ( -- addr ) here constant ;
-: branch, ( -- dest ) 0 jump,  here 2 - ;
-: patch, ( orig -- ) here swap s! ;
+: skip, ( -- dest ) 0 jump,  here 2 - ;
+: start, ( orig -- ) here swap s! ;
 
 : write-boot-block ( -- ) 0 0 here write-block ; \ note: depends on redefined `here`
