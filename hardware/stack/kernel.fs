@@ -2,9 +2,9 @@ require assembler.fs
 
 ( --- primitive control-flow ------------------------------------------------- )
 
-: 0branch, ( -- dest ) 0 0jump, here 2 - ; \ dummy relative jump if 0 to address, push pointer to patch
+: 0branch, ( -- dest ) here 0jump, here 1- ; \ dummy relative jump if 0 to address, push pointer to patch
 : branch, ( -- dest ) zero, 0branch, ; \ dummy unconditional relative jump, push pointer to patch
-: patch, ( orig -- ) initslot here over - 2 - swap s! ; \ patch relative branch to here \ TODO: why 2 - ?!
+: patch, ( orig -- ) initslot here over - verify-sbyte swap memory + c!  ; \ patch relative branch to here \ TODO: why 2 - ?!
 
 \ ... if ... then | ... if ... else ... then
 : if, ( C: -- orig ) 0branch, ; \ dummy branch on 0, push pointer to address
@@ -72,21 +72,7 @@ skip, \ skip dictionary
 
 \ 0= ( y x -- b ) true if equal to zero
 0 header, 0=
-char m literal, emit, char 0 literal, emit,
--1 literal,
-." TEST: " .s cr
-  if,
-." IF: " .s cr
-char m literal, emit, char 1 literal, emit,
-\    false literal,
-  else,
-." ELSE: " .s cr
-char m literal, emit, char 2 literal, emit,
-\    true literal,
-  then,
-." THEN: " .s cr
-char m literal, emit, char 3 literal, emit, halt,
-  ret, \ TODO: seems "brute force"
+  if, false literal, else, true literal, then, ret, \ TODO: seems "brute force"
 
 \ <> ( y x -- b ) true if not equal
 0 header, <>
