@@ -39,7 +39,7 @@ require assembler.fs
 
 ( --- primitive control-flow ------------------------------------------------- )
 
-: 0branch, ( -- dest ) x popd,  0 y lit16,  here 2 -  pc y x cp?, ; \ dummy jump if 0 to address, push pointer to patch
+: 0branch, ( addr -- dest ) x popd,  0 y lit16,  here 2 -  pc y x cp?, ; \ dummy jump if 0 to address, push pointer to patch
 : branch, skip, ;
 : patch, start, ;
 
@@ -53,7 +53,7 @@ require assembler.fs
 : again, ( C: dest -- ) jump, ; \ jump back to beginning
 \ UNUSED : until, ( C: dest -- ) 0branch, s! ; \ branch on 0 to address
 : while, ( C: dest -- orig dest ) 0branch, swap ; \ continue while condition met (0= if), 
-: repeat, ( C: orig dest -- ) again, here swap s! ; \ jump back to beginning, patch while to here
+: repeat, ( C: orig dest -- ) again, patch, ; \ jump back to beginning, patch while to here
 
 ( --- dictionary ------------------------------------------------------------- )
 

@@ -3,8 +3,8 @@ require assembler.fs
 ( --- primitive control-flow ------------------------------------------------- )
 
 : 0branch, ( -- dest ) 0 0jump, here 2 - ; \ dummy relative jump if 0 to address, push pointer to patch
-: branch, ( -- dest ) 0, 0branch, ; \ dummy unconditional relative jump, push pointer to patch
-: patch, ( orig -- ) dup here - swap s! ; \ patch relative branch to here
+: branch, ( -- dest ) zero, 0branch, ; \ dummy unconditional relative jump, push pointer to patch
+: patch, ( orig -- ) initslot here over - 2 - swap s! ; \ patch relative branch to here \ TODO: why 2 - ?!
 
 \ ... if ... then | ... if ... else ... then
 : if, ( C: -- orig ) 0branch, ; \ dummy branch on 0, push pointer to address
@@ -12,10 +12,10 @@ require assembler.fs
 : then, ( orig -- ) patch, ; \ patch if/else to continue here
 
 \ begin ... again | begin ... until | begin ... while ... repeat  (note: not begin ... while ... again!)
-: begin, ( C: -- dest ) here ; \ begin loop
-: again, ( C: dest -- ) jump, ; \ jump back to beginning
+: begin, ( C: -- dest ) initslot here ; \ begin loop
+: again, ( C: dest -- ) zero, 0jump, ; \ jump back to beginning
 : while, ( C: dest -- orig dest ) 0branch, swap ; \ continue while condition met (0= if), 
-: repeat, ( C: orig dest -- ) again, here swap s! ; \ jump back to beginning, patch while to here
+: repeat, ( C: orig dest -- ) again, patch, ; \ jump back to beginning, patch while to here
 
 ( --- dictionary ------------------------------------------------------------- )
 
@@ -72,7 +72,21 @@ skip, \ skip dictionary
 
 \ 0= ( y x -- b ) true if equal to zero
 0 header, 0=
-  if, false literal, else, true literal, then, ret, \ TODO: seems "brute force"
+char m literal, emit, char 0 literal, emit,
+-1 literal,
+." TEST: " .s cr
+  if,
+." IF: " .s cr
+char m literal, emit, char 1 literal, emit,
+\    false literal,
+  else,
+." ELSE: " .s cr
+char m literal, emit, char 2 literal, emit,
+\    true literal,
+  then,
+." THEN: " .s cr
+char m literal, emit, char 3 literal, emit, halt,
+  ret, \ TODO: seems "brute force"
 
 \ <> ( y x -- b ) true if not equal
 0 header, <>
@@ -186,7 +200,7 @@ var, source-len
 0 header, fill
   ' -rot call,
        0 literal,
-         ?do,
+          ?do,
          2dup,
     ' c! call,
     ' 1+ call,
@@ -297,6 +311,7 @@ start,
 
 ' decimal call, \ default base
    ' quit call,
+          zero,
           halt,
 
 \ here     ' dp     16 + s! \ update dictionary pointer to compile-time position

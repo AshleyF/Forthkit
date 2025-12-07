@@ -25,7 +25,7 @@
 20. `LIT16` - Fetch literal next cell
 20. `LIT8` - Fetch literal next signed byte
 21. `0JUMP` - Jump to address in next cell if T = 0
-22. `NEXT` - If R > 0, R-- and loop to next cell address, otherwise drop R and continue
+22. `NEXT` - If R > 0, R-- and loop to next byte negative offset, otherwise drop R and continue
 23. `DROP` - Drop top of stack
 24. `DUP` - Duplicate top of stack
 25. `OVER` - yx -> yxy
