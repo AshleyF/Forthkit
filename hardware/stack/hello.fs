@@ -25,4 +25,4 @@ ld8+, \ get length
 for,
   ld8+, out, \ output character
 next,
-drop, halt,
+drop, zero, halt,

@@ -58,6 +58,14 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 
 skip, \ skip dictionary
 
+\ poor man's . ( n -- ) print decimal number
+0 header, .
+    dup, 10000 literal, div, dup, 48 literal, add, emit, 10000 literal, mul, sub,
+    dup, 1000  literal, div, dup, 48 literal, add, emit,  1000 literal, mul, sub,
+    dup, 100   literal, div, dup, 48 literal, add, emit,   100 literal, mul, sub,
+    dup, 10    literal, div, dup, 48 literal, add, emit,    10 literal, mul, sub,
+                                  48 literal, add, emit, ret,
+
 \ @ ( addr -- ) fetch 16-bit value
 0 header, @
   ld16+, nip, ret,
@@ -81,6 +89,10 @@ skip, \ skip dictionary
 \ < ( y x -- b ) true if y less than x (- 0<) TODO: handle overflow (see bootstrap)!
 0 header, <
   sub, ( negative if y < x ) 15 literal, shr, ( sign bit to 1s place ) 1 literal, and, not, 1 literal, add, ret,
+
+\ u< ( y x -- b ) true if y less than x (- 0<) TODO: handle overflow (see bootstrap)!
+0 header, u<
+  over, 15 literal, shr, over, 15 literal, shr, sub, if, nip, 15 literal, shr, 1 literal, sub, not, else, ' < call, then, ret,
 
 \ 1+ ( x -- inc ) increment (1 +)
 0 header, 1+
@@ -112,29 +124,29 @@ skip, \ skip dictionary
 
 : ?do, ( limit start -- ) ( C: -- false addr true addr )
          2dup,
+         2>r,
   ['] <> call,
          false \ terminator for patching
          0branch,
          true  \ patch branch to loop
-         2>r,
          begin, ;
 
 : loop, ( C: addr -- )
-    1 literal,
-      r>,
-      add,
-      r@,
-      over,
-      >r,
-['] < call,
-      if,
-      swap again,
-      then,
-      begin while
-      patch,
-      repeat
-      2r>,
-      2drop, ;
+     1 literal,
+       r>,
+       add,
+       r@,
+       over,
+       >r,
+['] u< call,
+       if,
+       swap again,
+       then,
+       begin while
+       patch,
+       repeat
+       2r>,
+       2drop, ;
 
 ( --- assembler -------------------------------------------------------------- )
 
@@ -186,12 +198,13 @@ var, source-len
 0 header, fill
   ' -rot call,
        0 literal,
-          ?do,
+         ?do,
          2dup,
     ' c! call,
     ' 1+ call,
          loop,
          2drop,
+         ret,
 
 \ erase ( addr u -- ) if u is greater than zero, clear all bits in each of u consecutive address units of memory beginning at addr.
 0 header, erase
@@ -204,7 +217,7 @@ var, source-len
          begin,   \ c-addr n1 n2
     ' 1+ call,    \ c-addr n1 n2+                  increment n2
          2dup,    \ c-addr n1 n2+ n1 n2+
-     ' < call,    \ c-addr n1 n2+ <
+    ' u< call,    \ c-addr n1 n2+ <
          if,      \ c-addr n1 n2+                  bounds check
          drop,    \ c-addr n1
          nip,     \ n1
@@ -295,10 +308,17 @@ var, >in
 
 start,
 
-' decimal call, \ default base
-   ' quit call,
-          zero,
-          halt,
+\    ' (clear-data) call, \ TODO: no such thing
+         ' decimal call, \ default base
+memory-size $500 - literal, \ $ff bytes above stacks
+     ' source-addr call,
+               ' ! call,
+               $ff literal, \ size ($400 bytes for stacks/$ff elements each)
+      ' source-len call,
+               ' ! call,
+            ' quit call,
+                   zero,
+                   halt,
 
 \ here     ' dp     16 + s! \ update dictionary pointer to compile-time position
 \ latest @ ' latest 16 + s! \ update latest to compile-time

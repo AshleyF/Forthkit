@@ -76,8 +76,8 @@ variable h'
 : emit, out, ; \ emit ( char -- ) write to console [synonym]
 : key, in, ; \ key ( -- char ) read from console [synonym]
 
-: 2>r, push, push, ; \ ( y x -- ) ( R: -- y x ) move y x pair to return stack
-: 2r>, pop, pop, ; \ ( -- y x ) ( R: y x -- ) move x from return stack
+: 2>r, swap, push, push, ; \ ( y x -- ) ( R: -- y x ) move y x pair to return stack
+: 2r>, pop, pop, swap, ; \ ( -- y x ) ( R: y x -- ) move y x pair from return stack
 : nip, swap, drop, ; \ ( y x -- x ) drop second stack value
 : tuck, swap, over, ; \ ( y x -- x y x ) copy top stack value under second value
 : 2dup, over, over, ; \ ( y x -- y x y x ) duplicate top two stack values

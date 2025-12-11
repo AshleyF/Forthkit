@@ -54,7 +54,7 @@ int main(void) {
                     case 18: mem[Y] = X & 0xFF; STACK(d, -1); X++; break; // ST8+ - Store byte at address, and increment over
                     case 19: STACK(d, 1); X = next(); break; // LIT16 - Fetch literal next cell
                     case 20: STACK(d, 1); X = (signed char)mem[p++]; break; // LIT8 - Fetch literal next signed byte
-                    case 21: if (X == 0) { p += (signed char)mem[p]; slot = 15; } else { p++; } break; // 0JUMP - Jump to relative to offset in next byte if T = 0
+                    case 21: if (X == 0) { p += (signed char)mem[p]; slot = 15; } else { p++; } STACK(d, -1); break; // 0JUMP - Jump to relative to offset in next byte if T = 0
                     case 22: if (R > 0) { R--; p -= mem[p]; slot = 15; } else { STACK(R, -1); p++; } break; // NEXT - If R > 0, R-- and loop back to next byte negative offset, otherwise drop R and continue
                     case 23: STACK(d, -1); break; // DROP - Drop top of stack
                     case 24: STACK(d, 1); X = Y; break; // DUP - Duplicate top of stack

@@ -39,7 +39,7 @@ require assembler.fs
 
 ( --- primitive control-flow ------------------------------------------------- )
 
-: 0branch, ( addr -- dest ) x popd,  0 y lit16,  here 2 -  pc y x cp?, ; \ dummy jump if 0 to address, push pointer to patch
+: 0branch, ( -- dest ) x popd,  0 y lit16,  here 2 -  pc y x cp?, ; \ dummy jump if 0 to address, push pointer to patch
 : branch, skip, ;
 : patch, start, ;
 
@@ -493,11 +493,11 @@ var, dp \ initialized after dictionary (below)
 
 : ?do, ( limit start -- ) ( C: -- false addr true addr )
           ['] 2dup call,
+           ['] 2>r call,
             ['] <> call,
                    false \ terminator for patching
                    0branch,
                    true  \ patch branch to loop
-           ['] 2>r call,
                    begin, ;
 
 : leave, ( C: -- addr true )
