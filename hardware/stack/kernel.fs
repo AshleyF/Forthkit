@@ -58,7 +58,7 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
 
 skip, \ skip dictionary
 
-\ poor man's . ( n -- ) print decimal number
+\ poor man's . ( n -- ) print decimal number \ TODO: remove
 0 header, .
     dup, 10000 literal, div, dup, 48 literal, add, emit, 10000 literal, mul, sub,
     dup, 1000  literal, div, dup, 48 literal, add, emit,  1000 literal, mul, sub,
@@ -86,13 +86,16 @@ skip, \ skip dictionary
 0 header, <>
   sub, ( zero if equal ) if, true literal, else, false literal, then, ret, \ TODO: seems "brute force"
 
+0 header, sign-bit \ sign bit of top of stack to 1s place (non-standard)
+  15 literal, shr, ret,
+
 \ < ( y x -- b ) true if y less than x (- 0<) TODO: handle overflow (see bootstrap)!
 0 header, <
-  sub, ( negative if y < x ) 15 literal, shr, ( sign bit to 1s place ) 1 literal, and, not, 1 literal, add, ret,
+  sub, ( negative if y < x ) ' sign-bit call, 1 literal, and, not, 1 literal, add, ret,
 
-\ u< ( y x -- b ) true if y less than x (- 0<) TODO: handle overflow (see bootstrap)!
+\ u< ( y x -- b ) true if y less than x (- 0<)
 0 header, u<
-  over, 15 literal, shr, over, 15 literal, shr, sub, if, nip, 15 literal, shr, 1 literal, sub, not, else, ' < call, then, ret,
+  over, ' sign-bit call, over, ' sign-bit call, sub, if, nip, ' sign-bit call, 1 literal, sub, not, else, ' < call, then, ret,
 
 \ 1+ ( x -- inc ) increment (1 +)
 0 header, 1+
@@ -217,7 +220,7 @@ var, source-len
          begin,   \ c-addr n1 n2
     ' 1+ call,    \ c-addr n1 n2+                  increment n2
          2dup,    \ c-addr n1 n2+ n1 n2+
-    ' u< call,    \ c-addr n1 n2+ <
+    ' u< call,    \ c-addr n1 n2+ u<
          if,      \ c-addr n1 n2+                  bounds check
          drop,    \ c-addr n1
          nip,     \ n1
@@ -310,7 +313,7 @@ start,
 
 \    ' (clear-data) call, \ TODO: no such thing
          ' decimal call, \ default base
-memory-size $500 - literal, \ $ff bytes above stacks
+memory-size $100 - literal, \ $ff bytes from end of memory
      ' source-addr call,
                ' ! call,
                $ff literal, \ size ($400 bytes for stacks/$ff elements each)

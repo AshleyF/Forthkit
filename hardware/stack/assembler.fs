@@ -68,7 +68,7 @@ variable h'
 : jump, ( addr -- ) call, ret, ;
 
 : literal, dup -128 127 within if lit8, else lit16, then ;
-: zero, dup, xor, ; \ trick to push a zero
+: zero, dup, dup, xor, ; \ trick to push a zero
 
 : >r, push, ; \ ( x -- ) ( R: x -- ) move x to return stack [synonym]
 : r>, pop, ; \ ( -- x ) ( R: x -- ) move x from return stack [synonym]
