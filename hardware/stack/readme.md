@@ -84,3 +84,7 @@ Code is aligned on 2-byte cells.
 ## TODO
 
 - `find-word` finds the *current* word (no smudge bit, recursion allowed, but not simple redefinition, not classic Forth)
+- `u<`
+  \ u< ( y x -- b ) true if y less than x (- 0<)
+  0 header, u<
+    over, ' sign-bit call, over, ' sign-bit call, sub, if, nip, ' sign-bit call, 1 literal, sub, not, else, ' < call, then, ret,

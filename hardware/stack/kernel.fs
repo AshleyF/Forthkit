@@ -93,10 +93,6 @@ skip, \ skip dictionary
 0 header, <
   sub, ( negative if y < x ) ' sign-bit call, 1 literal, and, not, 1 literal, add, ret,
 
-\ u< ( y x -- b ) true if y less than x (- 0<)
-0 header, u<
-  over, ' sign-bit call, over, ' sign-bit call, sub, if, nip, ' sign-bit call, 1 literal, sub, not, else, ' < call, then, ret,
-
 \ 1+ ( x -- inc ) increment (1 +)
 0 header, 1+
   1 literal, add, ret,
@@ -141,7 +137,7 @@ skip, \ skip dictionary
        r@,
        over,
        >r,
-['] u< call,
+ ['] < call,
        if,
        swap again,
        then,
@@ -220,7 +216,7 @@ var, source-len
          begin,   \ c-addr n1 n2
     ' 1+ call,    \ c-addr n1 n2+                  increment n2
          2dup,    \ c-addr n1 n2+ n1 n2+
-    ' u< call,    \ c-addr n1 n2+ u<
+     ' < call,    \ c-addr n1 n2+ <
          if,      \ c-addr n1 n2+                  bounds check
          drop,    \ c-addr n1
          nip,     \ n1

@@ -410,11 +410,6 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
                z d st16,
                    ret,
 
-\ u< ( y x -- b ) true if y less than x (- 0<) TODO: handle overflow (see bootstrap)!
-\ 0 header, u<
-\ TODO
-\  over, 15 literal, shr, over, 15 literal, shr, sub, if, nip, 15 literal, shr, 1 literal, sub, not, else, ' < call, then, ret,
-
 \ 0> ( x -- b ) true if x greater than zero (1- 15 rshift 1-)
 0 header, 0>
                x d ld16,
