@@ -70,9 +70,17 @@ skip, \ skip dictionary
 0 header, @
   ld16+, nip, ret,
 
+\ c@ ( addr -- ) fetch 8-bit value
+0 header, c@
+  ld8+, nip, ret,
+
 \ ! ( val addr -- ) store 16-bit value
 0 header, !
   swap, st16+, drop, ret,
+
+\ +! ( val addr -- ) store 16-bit value (dup @ rot + swap !)
+0 header, +!
+  swap, over, ld16+, nip, add, st16+, drop, ret,
 
 \ c! ( val addr -- ) store 8-bit value
 0 header, c!
@@ -93,9 +101,27 @@ skip, \ skip dictionary
 0 header, <
   sub, ( negative if y < x ) ' sign-bit call, 1 literal, and, not, 1 literal, add, ret,
 
+\ > ( y x -- b ) true if y greater than x (- 0>) TODO: handle overflow (see bootstrap)!
+0 header, >
+  sub, ( negative if y < x ) 1 literal, sub, ' sign-bit call, 1 literal, and, not, 1 literal, add, not, ret,
+
+\ 0> ( x -- b ) true if x greater than zero (1- 15 rshift 1-)
+0 header, 0>
+  1 literal, sub, \ negative if not greater than zero
+  ' sign-bit call,
+  1 literal, and, not, 1 literal, add, not, ret,
+
+\ = ( y x -- b ) true if equal
+0 header, =
+  sub, ( zero if equal ) if, false literal, else, true literal, then, ret, \ TODO: seems "brute force"
+
 \ 1+ ( x -- inc ) increment (1 +)
 0 header, 1+
   1 literal, add, ret,
+
+\ 1- ( x -- dec ) decrement (1 -)
+0 header, 1-
+  1 literal, sub, ret,
 
 \ exit ( -- ) ( R: addr -- ) return from call
 0 header, exit
@@ -129,6 +155,9 @@ skip, \ skip dictionary
          0branch,
          true  \ patch branch to loop
          begin, ;
+
+: leave, ( C: -- addr true )
+  branch, -rot true -rot ; \ patch to loop (swap under if address)
 
 : loop, ( C: addr -- )
      1 literal,
@@ -192,6 +221,10 @@ var, source-len
 \ -rot ( z y x -- x z y ) reverse rotate top three stack values (non-standard - rot rot)
 0 header, -rot
   swap, push, swap, push, pop, pop, ret,
+
+\ 2r@ ( -- y x ) ( R: y x -- y x ) copy y x pair from return stack
+0 header, 2r@
+  pop, pop, peek, swap, dup, push, ' rot call, push, ret,
 
 \ fill ( c-addr u char -- ) if u is greater than zero, store char in each of u consecutive characters of memory beginning at c-addr.
 0 header, fill
@@ -264,11 +297,114 @@ var, >in
               then,
               ret,
 
+\ i ( -- x ) ( R: x -- x ) copy innermost loop index (2r@ drop)
+0 header, i
+            ' 2r@ call, \ including return from here
+                  drop,
+                  ret,
+
+\ unloop ( -- ) ( R: y x -- ) remove loop parameters (r> 2r> rot >r 2drop)
+0 header, unloop
+        r>,  \ this return address
+        2r>, \ loop parameters
+  ' rot call,
+        >r,  \ replace this return address
+        2drop,
+        ret,
+
+\ (skip) ( char "<chars>..." -- "..." ) skip leading delimeter chars
+0 header, (skip)
+          ' source call, \ char c-addr u
+             ' >in call, \ char c-addr u in
+               ' @ call, \ char c-addr u in
+             ' rot call, \ char c-addr u in c-addr
+                   add,  \ char c-addr u inaddr
+                   tuck, \ char inaddr c-addr u
+                   add,  \ char inaddr end
+                   swap, \ char end inaddr
+                   ?do,  \ char
+                   dup,  \ char char
+               ' i call, \ char char addr
+              ' c@ call, \ char char c
+                   over, \ char char c char
+              ' bl call, \ char char c char $20
+               ' = call, \ char char c sp?
+                   if,   \ char char c
+                   swap, \ char c char
+               ' > call, \ char c>$20 (not delimiter)
+                   else, \ char char c
+              ' <> call, \ char <>? (not delimiter)
+                   then,
+                   if,   \ char
+                   leave,
+                   then,
+                 1 literal, \ char 1
+             ' >in call,    \ char 1 in
+              ' +! call,    \ char 
+                   loop,
+                   drop,
+                   ret,
+
+\ parse ( char "ccc<char>" -- c-addr u ) parse ccc delimited by char
+0 header, parse
+          ' source call, \ char c-addr u
+                   over, \ char c-addr u c-addr
+                   add,  \ char c-addr end
+              ' 1+ call, \ char c-addr end+
+                   swap, \ char end c-addr
+             ' >in call, \ char end c-addr in-addr
+               ' @ call, \ char end c-addr in
+                   add,  \ char end start
+                   tuck, \ char start end start
+                   ?do,  \ char start
+                   over, \ char start char
+               ' i call, \ char start char i
+              ' c@ call, \ char start char c
+                   over, \ char start char c char
+              ' bl call,
+               ' = call, \ char start char c sp?
+                   if,   \ char start char c
+              ' 1- call,
+               ' > call, \ char start c<=$20
+                   else,
+               ' = call, \ char start =?
+                   then,
+                   if,
+                   nip,  \ start
+               ' i call, \ start i
+                   over, \ start i start
+                   sub,  \ start len
+                   dup,  \ start len len
+              ' 1+ call, \ start len len+
+             ' >in call, \ start len in
+              ' +! call, \ start len
+          ' unloop call,
+            ' exit call,
+                   then,
+                   loop,
+                   nip,  \ start
+          ' source call, \ start c-addr u
+                   add,  \ start end
+                   over, \ start end start
+                   sub,  \ start len
+                   dup,  \ start len len
+              ' 1+ call, \ start len len+
+             ' >in call, \ start len in
+              ' +! jump, \ start len
+
+\ parse-name ( "<spaces>name<space>" -- c-addr u ) skip leading space and parse name delimited by space
+0 header, parse-name
+              ' bl call,
+                   dup,
+          ' (skip) call,
+           ' parse jump,
+
 0 header, (evaluate) \ internal (non-standard)
                begin,
-\ ' parse-name call, \ addr len
+  ' parse-name call, \ addr len
+42 literal, emit, halt,
                dup,
-\         ' 0> call,
+          ' 0> call,
                while,
 \  ' interpret call,
                repeat,
@@ -309,10 +445,10 @@ start,
 
 \    ' (clear-data) call, \ TODO: no such thing
          ' decimal call, \ default base
-memory-size $100 - literal, \ $ff bytes from end of memory
+memory-size $101 - literal, \ $101 bytes from end of memory (extra byte so that end+1 doesn't overflow)
      ' source-addr call,
                ' ! call,
-               $ff literal, \ size ($400 bytes for stacks/$ff elements each)
+               $ff literal, \ size
       ' source-len call,
                ' ! call,
             ' quit call,

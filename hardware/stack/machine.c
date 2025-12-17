@@ -55,9 +55,9 @@ int main(void) {
                         //printf("Test 18: %i\n", (d - 18) & 15);
                         //printf("Test 19: %i\n", (d - 19) & 15);
                         //printf("Test 20: %i\n", (d - 20) & 15);
-                        printf("STACK: %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i\n", dat[(d - 15) & 15], dat[(d - 14) & 15], dat[(d - 13) & 15], dat[(d - 12) & 15], dat[(d - 11) & 15], dat[(d - 10) & 15], dat[(d - 9) & 15], dat[(d - 8) & 15], dat[(d - 7) & 15], dat[(d - 6) & 15], dat[(d - 5) & 15], dat[(d - 4) & 15], dat[(d - 3) & 15], Z, Y, X);
-                        break;
-                        //return X; // HALT - Halt execution
+                        printf("STACK: %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i   RETURN: %i %i %i\n", dat[(d - 15) & 15], dat[(d - 14) & 15], dat[(d - 13) & 15], dat[(d - 12) & 15], dat[(d - 11) & 15], dat[(d - 10) & 15], dat[(d - 9) & 15], dat[(d - 8) & 15], dat[(d - 7) & 15], dat[(d - 6) & 15], dat[(d - 5) & 15], dat[(d - 4) & 15], dat[(d - 3) & 15], Z, Y, X, R, ret[(r - 1) & 15], ret[(r - 2) & 15]);
+                        //break;
+                        return X; // HALT - Halt execution
                     case  1: BINOP(+); break; // ADD - Addition
                     case  2: BINOP(-); break; // SUB - Subtraction
                     case  3: BINOP(*); break; // MUL - Multiplication
