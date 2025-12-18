@@ -25,8 +25,8 @@ variable h'
   -5 shiftbits +!
   shiftbits @ 0<= if 11 shiftbits ! then ;
 
-: verify-sbyte dup -128 127 within invert if ." Signed byte out of range" throw then ;
-: verify-ubyte dup    0 255 within invert if ." Unsigned byte out of range" throw then ;
+: verify-sbyte dup -128 127 within invert if ." Signed byte out of range: " . throw then ; \ TODO: does within handle negatives?
+: verify-ubyte dup    0 255 within invert if ." Unsigned byte out of range: " . throw then ; \ TODO: does within handle negatives?
 
 : halt,   0 slot,                             ; \ halt execution
 : add,    1 slot,                             ; \ addition
@@ -61,13 +61,13 @@ variable h'
 : ret,   30 slot,                             ; \ return from call
 : nop,   31 slot,                             ; \ no-op
 
-: align, initslot here 2 mod 0<> if 1 h +! then ; \ align here on even address boundary
+: align, initslot here 1 and 0<> if 1 h +! then ; \ align here on even address boundary
 : for, push, initslot here ; \ start for/next loop
 
-: call, ( addr -- ) initslot dup 2 mod 0= if , else ." Expected even-aligned address" throw then ; \ TODO: proper error?
+: call, ( addr -- ) initslot dup 1 and 0= if , else ." Expected even-aligned address" throw then ;
 : jump, ( addr -- ) call, ret, ;
 
-: literal, dup -128 127 within if lit8, else lit16, then ;
+: literal, dup -128 127 within if lit8, else lit16, then ; \ TODO: does within handle negatives?
 : zero, dup, dup, xor, ; \ trick to push a zero
 
 : >r, push, ; \ ( x -- ) ( R: x -- ) move x to return stack [synonym]

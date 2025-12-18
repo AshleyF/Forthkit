@@ -452,17 +452,17 @@ true warnings ! \ intentionally redefining (latest header, ' ['])
                    ret,     \ 6 bytes
                    2 h +! ; \ 2 allot
 
-\ dp ( -- addr ) return address of dictionary pointer (variable h) (non-standard, common internal)
-var, dp \ initialized after dictionary (below)
+\ h ( -- addr ) return address of dictionary pointer (variable h) (non-standard, common internal)
+var, h \ initialized after dictionary (below)
 
-\ here ( -- addr ) current dictionary pointer address (dp @)
+\ here ( -- addr ) current dictionary pointer address (h @)
 0 header, here
-              ' dp call,
+               ' h call,
                ' @ jump,
 
-\ allot ( n -- ) advance dictionary pointer (dp +!)
+\ allot ( n -- ) advance dictionary pointer (h +!)
 0 header, allot
-              ' dp call,
+               ' h call,
               ' +! jump,
 
 \ , ( x -- ) append x in newly reserved cell (here ! 1 cells allot)
@@ -832,7 +832,7 @@ var, source-id
              ' pad call, \ c-addr u pad
               ' 1+ call, \ c-addr u pad+
             ' swap call, \ c-addr pad+ u
-           ' cmove call, \ 
+           ' cmove call,
              ' pad jump, \ pad
 
 \ count ( c-addr1 -- c-addr2 u ) counted string to c-addr and length
@@ -1143,7 +1143,7 @@ memory-size $500 - literal, \ $ff bytes above stacks
             ' quit call,
                  0 halt,
 
-here     ' dp     16 + s! \ update dictionary pointer to compile-time position
+here     ' h      16 + s! \ update dictionary pointer to compile-time position
 latest @ ' latest 16 + s! \ update latest to compile-time
 
 ." Kernel size: " here . ." bytes" cr

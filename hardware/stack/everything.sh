@@ -15,7 +15,7 @@ echo "== RUN KERNEL (manually test, then bye) ==================================
 echo
 ./kernel.sh
 
-# echo
-# echo "== RUN BOOTSTRAP (manually test, then bye) ====================================="
-# echo
-# ./bootstrap.sh
+echo
+echo "== RUN BOOTSTRAP (manually test, then bye) ====================================="
+echo
+./bootstrap.sh

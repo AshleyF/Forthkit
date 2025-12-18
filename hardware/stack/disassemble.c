@@ -48,6 +48,6 @@ void disassemble(short c) {
 }
 
 int main(void) {
-    disassemble(0x11BE);
-    disassemble(0x3FA8);
+    disassemble(0x3DA5);
+    disassemble(0x001E);
 }

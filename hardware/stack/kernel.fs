@@ -43,7 +43,7 @@ variable latest  $ffff latest !
   begin
     2dup memory + 3 + dup 1- c@ $7f and \ get name/len ( find link find name len -- )
     rot count 2over ( find link name len find len name len -- )
-    rot over = if 3 min rot over str= nip else 2drop 2drop 0 then ( find link name eq? -- )
+    rot over = if 3 min rot over str= nip else 2drop 2drop false then ( find link name eq? -- )
     if 3 + memory - -rot 2drop exit then \ return xt if names match
     drop s@ dup 0= if ." Word not found: " drop count type cr exit then \ follow link, until end
   again ;
@@ -111,6 +111,11 @@ skip, \ skip dictionary
   ' sign-bit call,
   1 literal, and, not, 1 literal, add, not, ret,
 
+\ 0< ( x -- b ) true if x less than zero (15 rshift negate 1+)
+0 header, 0<
+  ' sign-bit call,
+  1 literal, and, not, 1 literal, add, ret,
+
 \ = ( y x -- b ) true if equal
 0 header, =
   sub, ( zero if equal ) if, false literal, else, true literal, then, ret, \ TODO: seems "brute force"
@@ -146,6 +151,10 @@ skip, \ skip dictionary
 \ <limit> <start> do ... <n> +loop
 \ <limit> <start> do ... unloop exit ... loop
 \ <limit> <start> do ... if ... leave then ... loop
+: do, ( limit start -- ) ( C: -- false addr ) \ begin do-loop (immediate 2>r begin false)
+  2>r,
+  false \ no addresses to patch (initially)
+  begin, ;
 
 : ?do, ( limit start -- ) ( C: -- false addr true addr )
          2dup,
@@ -193,10 +202,13 @@ var, base
 \ source-id ( -- 0 | -1 ) Identifies the input source (-1=string [evaluate], 0=input device)
 var, source-id
 
+\ true ( -- true ) return true flag (-1 constant true)
+0 header, true
+  -1 literal, ret,
+
 \ false ( -- false ) return false flag (0 constant false)
 0 header, false
-  0 literal,
-    ret,
+  0 literal, ret,
 
 \ state ( -- a-addr ) compilation-state flag (true=compiling)
 var, state
@@ -221,10 +233,6 @@ var, source-len
 \ -rot ( z y x -- x z y ) reverse rotate top three stack values (non-standard - rot rot)
 0 header, -rot
   swap, push, swap, push, pop, pop, ret,
-
-\ 2r@ ( -- y x ) ( R: y x -- y x ) copy y x pair from return stack
-0 header, 2r@
-  pop, pop, peek, swap, dup, push, ' rot call, push, ret,
 
 \ fill ( c-addr u char -- ) if u is greater than zero, store char in each of u consecutive characters of memory beginning at c-addr.
 0 header, fill
@@ -299,8 +307,10 @@ var, >in
 
 \ i ( -- x ) ( R: x -- x ) copy innermost loop index (2r@ drop)
 0 header, i
-            ' 2r@ call, \ including return from here
-                  drop,
+                  pop,  \ return from here
+                  peek, \ count
+                  swap,
+                  push, \ restore return address
                   ret,
 
 \ unloop ( -- ) ( R: y x -- ) remove loop parameters (r> 2r> rot >r 2drop)
@@ -399,14 +409,406 @@ var, >in
           ' (skip) call,
            ' parse jump,
 
+\ h ( -- addr ) return address of dictionary pointer (variable h) (non-standard, common internal)
+var, h \ initialized after dictionary (below)
+
+\ here ( -- addr ) current dictionary pointer address (h @)
+0 header, here
+  ' h call, ' @ jump,
+
+\ pad ( -- addr ) address of transient region for intermediate processing
+0 header, pad
+            ' here call,
+              1024 literal, \ arbitrary distance away
+                   add,
+\        ' aligned jump,
+                   ret,
+
+\ cmove ( c-addr1 c-addr2 u -- ) copy characters (from lower to higher addresses)
+0 header, cmove \ TODO: rethink, using ld8+ and st8+
+                 0 literal,
+                   ?do,
+                   over,
+              ' c@ call,
+                   over,
+              ' c! call,
+              ' 1+ call, \ TODO: char+
+                   swap,
+              ' 1+ call, \ TODO: char+
+                   swap,
+                   loop,
+                   2drop,
+                   ret,
+
+\ >counted ( c-addr u -- c-addr ) string address and length to counted string address (non-standard)
+0 header, >counted
+                   dup,  \ c-addr u u
+             ' pad call, \ c-addr u u pad
+              ' c! call, \ c-addr u -- length
+             ' pad call, \ c-addr u pad
+              ' 1+ call, \ c-addr u pad+
+                   swap, \ c-addr pad+ u
+           ' cmove call,
+             ' pad jump, \ pad
+
+var, latest \ common, but non-standard (confusing name conflict)
+
+\ count ( c-addr1 -- c-addr2 u ) counted string to c-addr and length
+0 header, count
+                   dup,
+              ' c@ call,
+                   swap,
+              ' 1+ call,
+                   swap,
+                   ret,
+
+\ 2over ( w z y x -- w z y x w z ) copy second pair of stack values to top
+0 header, 2over
+  push, push, 2dup,
+  pop, ' -rot call,
+  pop, ' -rot jump,
+
+0 header, (tolower) \ non-standard
+                   dup,
+         char A 1- literal,
+               ' > call,
+                   over,
+         char Z 1+ literal,
+               ' < call,
+                   and,
+                   if,
+                32 literal,
+                   add,
+                   then,
+                   ret,
+
+\ (equal) ( c-addr1 u1 c-addr2 u2 -- flag ) compare strings for equality (non-standard)
+0 header, (equal)
+             ' rot call,
+                   over,
+              ' <> call, \ lengths unequal?
+                   if,
+                   drop,
+                   2drop,
+           ' false call,
+            ' exit call,
+                   then,
+                 0 literal,
+                   do,
+                   2dup,
+               ' i call,
+                   add,
+              ' c@ call,
+       ' (tolower) call,
+                   swap,
+               ' i call,
+                   add,
+              ' c@ call,
+       ' (tolower) call,
+              ' <> call,
+                   if,
+                   2drop,
+           ' false call,
+          ' unloop call,
+            ' exit call,
+                   then,
+                   loop,
+                   2drop,
+            ' true jump,
+
+\ min ( y x -- min ) return minimum of y and x
+0 header, min
+  2dup, ' < call, if, drop, else, nip, then, ret,
+
+\ find ( c-addr -- c-addr 0 | xt 1 | xt -1 ) find named definition (0=not found, 1=immediate, -1=non-immediate)
+0 header, find
+          ' latest call,
+               ' @ call,    \ find link
+  begin,
+                   2dup,    \ find link find link
+                 3 literal,
+                   add,     \ find link find link+3
+                   dup,
+              ' 1- call,    \ find link find link+3 link+2
+              ' c@ call,    \ find link find link+3 len/flag
+               $7f literal,
+                   and,     \ find link find link+3 len
+             ' rot call,    \ find link link+3 len find
+           ' count call,    \ find link link+3 len find len
+           ' 2over call,    \ find link link+3 len find len link+3 len
+             ' rot call,    \ find link link+3 len find link+3 len len
+                   over,    \ find link link+3 len find link+3 len len len
+               ' = call,    \ find link link+3 len find link+3 len =
+    if,                     \ find link link+3 len find link+3 len
+                 3 literal, \ find link link+3 len find link+3 len 3
+             ' min call,    \ find link link+3 len find link+3 minlen
+             ' rot call,    \ find link link+3 len link+3 minlen find
+                   over,    \ find link link+3 len link+3 minlen find minlen
+         ' (equal) call,    \ find link link+3 len =?
+                   nip,     \ find link link+3 =?
+    else,                   \ find link link+3 len find link+3 len
+                   2drop,   \ find link link+3 len find
+                   2drop,   \ find link link+3
+           ' false call,    \ find link link+3 !=
+    then,                   \ find link link+3 =?
+
+    if,                     \ find link link+3
+                 3 literal, \ find link link+3 3
+                   add,     \ find link xt
+            ' -rot call,    \ xt find link
+                   nip,     \ xt link
+                 2 literal, \ xt link 2
+                   add,     \ xt link+2
+               ' @ call,    \ xt len/flag
+               $80 literal, \ xt len/flag $80
+                   and,     \ xt flag
+              ' 0= call,    \ xt flag=0?
+      if,                   \ xt
+                -1 literal, \ xt -1 (non-immediate)
+      else,
+                 1 literal, \ xt 1 (immediate)
+      then,
+            ' exit call,    \ xt (names match!)
+    then,                   \ find link link+3
+                   drop,    \ find link
+               ' @ call,    \ find link@
+                   dup,     \ find link@ link@
+              ' 0= call,    \ find link@ 0=?
+    if,                     \ find link@
+                   drop,    \ find
+                 0 literal, \ find 0  (not found)
+            ' exit call,
+    then,
+  again,
+                   ret,
+
+\ type ( addr len -- ) display the character string (0 max 0 ?do dup c@ emit char+ loop drop)
+0 header, type
+                   dup, \ essentially 0 max, but we don't have max yet
+              ' 0< call,
+                   if,
+                   drop,
+                 0 literal,
+                   then,
+                 0 literal,
+                   ?do,
+                   dup,
+              ' c@ call,
+                   emit,
+              ' 1+ call, \ TODO: char+;
+                   loop,
+                   drop,
+                   ret,
+
+\ >number ( ud1 c-addr1 u1 -- ud2 c-addr2 u2 ) ud2 is the unsigned result of converting the characters
+\         within the string specified by c-addr1 u1 into digits, using the number in BASE, and adding
+\         each into ud1 after multiplying ud1 by the number in BASE. Conversion continues left-to-right
+\         until a character that is not convertible, including any "+" or "-", is encountered or the string
+\         is entirely converted. c-addr2 is the location of the first unconverted character or the first
+\         character past the end of the string if the string was entirely converted. u2 is the number of
+\         unconverted characters in the string. An ambiguous condition exists if ud2 overflows.
+0 header, >number \ TODO: support double ud1/ud2?
+                   begin,  \ n a c
+                   dup,    \ n a c c
+              ' 0> call,   \ n a c c0>
+                   while,  \ n a c
+            ' -rot call,   \ c n a
+                   dup,    \ c n a a
+              ' c@ call,   \ c n a d
+               '0' literal,
+                   sub,    \ c n a d
+                   dup,   \ c n a d d
+                10 literal, \ cn a d d 10
+               ' < call,   \ c n a d <
+                   if,     \ c n a d  valid?
+             ' rot call,   \ c a d n
+            ' base call,   \ c a d n b
+               ' @ call,   \ c a d n b
+                   mul,    \ c a d n
+                   add,    \ c a n
+                   swap,   \ c n a
+              ' 1+ call,   \ c n a
+             ' rot call,   \ n a c
+              ' 1- call,   \ n a c
+                   else,   \ c n a d  invalid
+                   drop,   \ c n a
+             ' rot call,   \ n a c
+            ' exit call,
+                   then,   \ n a c
+                   repeat,
+                   ret,
+
+\ execute ( i * x xt -- j * x ) perform the semantics identified by xt
+0 header, execute
+  pop, drop, \ discard return address from this call
+  push, ret, \ instead, "return" to xt
+
+( --- partial assembler ------------------------------------------------------ )
+
+var, shiftbits
+11 ' shiftbits 4 + s! \ initialize shiftbits
+0 header, initslot \ word to initialize shiftbits
+  11 literal, ' shiftbits call, ' ! jump,
+
+0 header, c, \ ( c -- ) append byte to instruction slot
+  ' h call, ' @ call, ' c! call, 1 literal, ' h call, ' +! jump,
+
+0 header, , \ ( cc -- ) append 16-bit value to instruction slot
+  dup, ' c, call, 8 literal, shr, ' c, jump,
+
+0 header, call, \ ( addr -- ) call address (even-aligned)
+  ' initslot call, ' , jump, \ TODO: verify even-aligned
+
+var, h'
+0 header, slot, ( i -- )
+  ' shiftbits call,
+          ' @ call,
+           11 literal,
+          ' = call, \ first slot?
+              if,
+        $ffff literal,
+          ' h call,
+          ' @ call,
+              dup,
+         ' h' call,
+          ' ! call,
+          ' ! call,
+            2 literal,
+          ' h call,
+         ' +! call, \ h'=h, initialize no-ops, h+=2
+              then,
+  ' shiftbits call,
+          ' @ call,
+              shl, \ shift instruction to slot
+         0x1f literal,
+  ' shiftbits call,
+          ' @ call,
+              shl,
+              not,
+         ' h' call,
+          ' @ call,
+          ' @ call,
+              and, \ fetch and mask off slot
+              or,
+         ' h' call,
+          ' @ call,
+          ' ! call, \ place instruction
+           -5 literal,
+  ' shiftbits call,
+         ' +! call,
+  ' shiftbits call,
+          ' @ call,
+         ' 0> call,
+              not, \ TODO: really 0<= but not defined
+              if,
+           11 literal,
+  ' shiftbits call,
+          ' ! call,
+              then,
+              ret,
+
+0 header, lit16, \ ( n -- ) fetch literal next cell
+           19 literal,
+      ' slot, call,
+          ' , jump,
+
+0 header, lit8, \ ( n -- ) fetch literal next byte
+           20 literal,
+      ' slot, call,
+         ' c, jump, \ TODO: verify-sbyte
+
+0 header, ret,
+           30 literal,
+      ' slot, jump,
+
+0 header, literal,
+              dup,
+         -129 literal,
+          ' > call,
+              over,
+          128 literal,
+          ' < call,
+              and,
+              if,
+      ' lit8, call,
+              else,
+     ' lit16, call,
+              then,
+              ret,
+
+\ interpret ( c-addr u -- ) (implementation defined)
+0 header, interpret
+        ' >counted call,
+            ' find call, \ c-addr 0 | xt 1 | xt -1
+                   dup,
+              ' 0= call,
+  if, \ not found?
+                   drop,
+           ' count call,
+                   over, \ determine whether prefixed with -
+              ' c@ call,
+            char - literal,
+               ' = call,
+    if,
+              ' 1- call, \ decrement length
+                   swap,
+              ' 1+ call, \ increment address
+                   swap,
+                -1 literal, \ multiplier
+    else,
+                 1 literal, \ multiplier
+    then,
+            ' -rot call,
+                   2dup,
+                 0 literal,
+            ' -rot call,
+         ' >number call,
+                   dup,
+              ' 0= call,
+    if, \ proper number
+                   2drop,
+            ' -rot call,
+                   2drop,
+                   mul,
+           ' state call,
+               ' @ call,
+      if,   \ compile?
+        ' literal, call,
+      then,
+    else, \ error
+                   2drop,
+                   drop,
+              ' cr call,
+            ' type call,
+            char ? literal,
+                   emit,
+\    ' (clear-data) call, \ TODO: no such thing
+            ' exit call,
+    then,
+  else, \ found
+                 1 literal,
+               ' = call,
+    if,   \ immediate?
+         ' execute call,
+    else, \ non-immediate
+           ' state call,
+               ' @ call,
+      if,   \ compile?
+           ' call, call,
+      else, \ interactive
+         ' execute call,
+      then,
+    then,
+  then,
+                   ret,
+
 0 header, (evaluate) \ internal (non-standard)
                begin,
   ' parse-name call, \ addr len
-42 literal, emit, halt,
                dup,
           ' 0> call,
                while,
-\  ' interpret call,
+   ' interpret call,
                repeat,
                ret,
 
@@ -439,6 +841,78 @@ var, >in
                    \ TODO: failed to refill
                    ret,
 
+0 header, align, \ ( -- ) align here on even address boundary
+  ' initslot call,
+      ' here call,
+           1 literal,
+             and,
+        ' 0= call,
+             not, \ really 0<> but not defined
+             if,
+           1 literal,
+         ' h call,
+        ' +! call,
+             then,
+             ret,
+
+\ header, ( "<spaces>name -- ) append header to dictionary (non-standard, note: no flag)
+0 header, header,
+          ' align, call, \ aligned header + 6 bytes, code is even-aligned
+          ' latest call,
+               ' @ call, \ link to current (soon to be previous) word
+            ' here call,
+          ' latest call,
+               ' ! call, \ update latest to this word
+               ' , call, \ append link
+      ' parse-name call, ( addr len -- )
+             ' rot call,
+                   over,
+                   or,
+              ' c, call, \ append flag/len ( addr len -- )
+                 3 literal,
+             ' min call,
+                   swap,
+                   over, \ first 3 letters only ( len addr len -- )
+                   over,
+                   add,
+                   swap, ( end start -- )
+                   do,   \ append name
+               ' i call,
+              ' c@ call,
+              ' c, call,
+                   loop,
+                 3 literal,
+                   swap,
+                   sub,
+                 0 literal,
+                   ?do, \ pad
+                 0 literal,
+              ' c, call,
+                   loop,
+                   ret,  ( addr len )
+
+\ [ ( -- ) enter interpretation state (immediate word)
+$80 header, [
+           ' false call,
+           ' state call,
+               ' ! jump,
+
+\ ] ( -- ) enter compilation state
+0 header, ]
+            ' true call,
+           ' state call,
+               ' ! jump,
+
+\ ; ( -- ) end current definition, make visible in dictionary and enter interpretation state
+$80 header, ;
+               ' [ call,
+            ' ret, call,
+                   ret,
+
+\ bye ( -- ) halt machine TODO: not needed once bootstrapped
+0 header, bye
+  zero, halt,
+
 ( --- end of dictionary ------------------------------------------------------ )
 
 start,
@@ -455,7 +929,7 @@ memory-size $101 - literal, \ $101 bytes from end of memory (extra byte so that 
                    zero,
                    halt,
 
-\ here     ' dp     16 + s! \ update dictionary pointer to compile-time position
-\ latest @ ' latest 16 + s! \ update latest to compile-time
+here     ' h      4 + s! \ update dictionary pointer to compile-time position
+latest @ ' latest 4 + s! \ update latest to compile-time
 
 ." Kernel size: " here . ." bytes" cr
