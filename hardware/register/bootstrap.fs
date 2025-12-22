@@ -101,11 +101,9 @@ header, : ] header, ] ;
 
 \ -- PRIMITIVE CONTROL FLOW ----------------------------------------------------
 
-: s! over 8 rshift over 1+ c! c! ; \ ( val addr -- ) \ note: no memory +
-
 : 0branch, x popd,  0 y lit16,  here 2 -  pc y x cp?, ; \ ( -- dest ) dummy jump if 0 to address, push pointer to patch
 : branch, 0 jump,  here 2 - ; \ ( -- dest ) 
-: patch, here swap s! ; \ ( orig -- ) 
+: patch, here swap ! ; \ ( orig -- ) 
 
 \ ... if ... then | ... if ... else ... then
 : if 0branch, ; immediate \ ( C: -- orig ) dummy branch on 0, push pointer to address
@@ -115,9 +113,9 @@ header, : ] header, ] ;
 \ \ begin ... again | begin ... until | begin ... while ... repeat  (note: not begin ... while ... again!)
 : begin here ; immediate \ ( C: -- dest ) begin loop
 : again jump, ; immediate \ ( C: dest -- ) jump back to beginning
-: until 0branch, s! ; immediate \ ( C: dest -- ) branch on 0 to address \ NEW: not in kernel;
+: until 0branch, ! ; immediate \ ( C: dest -- ) branch on 0 to address \ NEW: not in kernel;
 : while 0branch, swap ; immediate \ ( C: dest -- orig dest ) continue while condition met (0= if), 
-: repeat jump, here swap s! ; immediate \ ( C: orig dest -- ) jump back to beginning, patch while to here
+: repeat jump, here swap ! ; immediate \ ( C: orig dest -- ) jump back to beginning, patch while to here
 
 \ -- CONTINUE BOOTSTRAPPING ----------------------------------------------------
 

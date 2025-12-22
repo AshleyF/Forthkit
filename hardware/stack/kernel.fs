@@ -4,7 +4,7 @@ require assembler.fs
 
 : 0branch, ( -- dest ) here 0jump, here 1- ; \ dummy relative jump if 0 to address, push pointer to patch
 : branch, ( -- dest ) zero, 0branch, ; \ dummy unconditional relative jump, push pointer to patch
-: patch, ( orig -- ) initslot here over - verify-sbyte swap memory + c!  ; \ patch relative branch to here \ TODO: why 2 - ?!
+: patch, ( orig -- ) initslot here over - verify-sbyte swap memory + c! ; \ patch relative branch to here \ TODO: why 2 - ?!
 
 \ ... if ... then | ... if ... else ... then
 : if, ( C: -- orig ) 0branch, ; \ dummy branch on 0, push pointer to address
@@ -184,8 +184,6 @@ skip, \ skip dictionary
        repeat
        2r>,
        2drop, ;
-
-( --- assembler -------------------------------------------------------------- )
 
 ( --- interpreter ------------------------------------------------------------ )
 
@@ -707,21 +705,21 @@ var, h'
               then,
               ret,
 
-0 header, lit16, \ ( n -- ) fetch literal next cell
+$80 header, lit16, \ ( n -- ) fetch literal next cell (used by interpreter)
            19 literal,
       ' slot, call,
           ' , jump,
 
-0 header, lit8, \ ( n -- ) fetch literal next byte
+$80 header, lit8, \ ( n -- ) fetch literal next byte (used by interpreter)
            20 literal,
       ' slot, call,
          ' c, jump, \ TODO: verify-sbyte
 
-0 header, ret,
+$80 header, ret, \ (used by interpreter)
            30 literal,
       ' slot, jump,
 
-0 header, literal,
+$80 header, literal, \ (used by interpreter)
               dup,
          -129 literal,
           ' > call,
@@ -909,9 +907,15 @@ $80 header, ;
             ' ret, call,
                    ret,
 
-\ bye ( -- ) halt machine TODO: not needed once bootstrapped
-0 header, bye
-  zero, halt,
+0 header, swap \ (used by bootstrap)
+  swap, ret,
+
+0 header, - \ (used by bootstrap)
+  sub, ret,
+
+\ \ bye ( -- ) halt machine TODO: not needed once bootstrapped
+\ 0 header, bye
+\   zero, halt,
 
 ( --- end of dictionary ------------------------------------------------------ )
 

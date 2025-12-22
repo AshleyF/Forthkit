@@ -34,8 +34,8 @@ int main(void) {
                 //printf("%x[%x] INSTRUCTION: %i\n", p - 2, slot / 5, i);
                 switch (i) {
                     case  0:
-                        printf("STACK (%i): %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i   RETURN: %i %i %i\n", d, dat[(d - 15) & 0xf], dat[(d - 14) & 0xf], dat[(d - 13) & 0xf], dat[(d - 12) & 0xf], dat[(d - 11) & 0xf], dat[(d - 10) & 0xf], dat[(d - 9) & 0xf], dat[(d - 8) & 0xf], dat[(d - 7) & 0xf], dat[(d - 6) & 0xf], dat[(d - 5) & 0xf], dat[(d - 4) & 0xf], dat[(d - 3) & 0xf], Z, Y, R, ret[(r - 1) & 0xf], ret[(r - 2) & 0xf]);
-                        writeBlock(1, 0, sizeof(mem));
+                        printf("STACK (%i): %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i %i   RETURN: %i %i %i\n", d, dat[(d - 15) & 0xf], dat[(d - 14) & 0xf], dat[(d - 13) & 0xf], dat[(d - 12) & 0xf], dat[(d - 11) & 0xf], dat[(d - 10) & 0xf], dat[(d - 9) & 0xf], dat[(d - 8) & 0xf], dat[(d - 7) & 0xf], dat[(d - 6) & 0xf], dat[(d - 5) & 0xf], dat[(d - 4) & 0xf], dat[(d - 3) & 0xf], X, Z, Y, R, ret[(r - 1) & 0xf], ret[(r - 2) & 0xf]);
+                        //writeBlock(1, 0, sizeof(mem));
                         //break;
                         return X; // HALT - Halt execution
                     case  1: BINOP(+); break; // ADD - Addition
