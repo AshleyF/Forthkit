@@ -107,15 +107,15 @@ header, : ] header, ] ;
 
 \ ... if ... then | ... if ... else ... then
 : if 0branch, ; immediate \ ( C: -- orig ) dummy branch on 0, push pointer to address
-: then patch, ; immediate \ ( orig -- ) patch if/else to continue here
 : else branch, swap patch, ; immediate \ ( C: orig1 -- orig2 ) patch previous branch to here, dummy unconditionally branch over false block
+: then patch, ; immediate \ ( orig -- ) patch if/else to continue here
  
-\ \ begin ... again | begin ... until | begin ... while ... repeat  (note: not begin ... while ... again!)
+\ begin ... again | begin ... until | begin ... while ... repeat  (note: not begin ... while ... again!)
 : begin here ; immediate \ ( C: -- dest ) begin loop
 : again jump, ; immediate \ ( C: dest -- ) jump back to beginning
 : until 0branch, ! ; immediate \ ( C: dest -- ) branch on 0 to address \ NEW: not in kernel;
 : while 0branch, swap ; immediate \ ( C: dest -- orig dest ) continue while condition met (0= if), 
-: repeat jump, here swap ! ; immediate \ ( C: orig dest -- ) jump back to beginning, patch while to here
+: repeat jump, patch, ; immediate \ ( C: orig dest -- ) jump back to beginning, patch while to here
 
 \ -- CONTINUE BOOTSTRAPPING ----------------------------------------------------
 
@@ -133,7 +133,7 @@ header, : ] header, ] ;
 
 : xor 2dup or -rot and invert and ; \ ( y x -- result ) logical/bitwise exclusive or (2dup or -rot and invert and)
 : abs dup 0< if negate then ; \ ( x -- |x| ) absolute value (dup 0< if negate then)
-: j 2r> 2r@ drop -rot 2>r ; \ ( -- x ) ( R: x -- x ) copy next outer loop index (2r> 2r@ drop -rot 2>r) (x r twelve add, x x ld16, x pushd, ret,)
+: j 2r> 2r@ drop -rot 2>r ; \ ( -- x ) ( R: x -- x ) copy next outer loop index (2r> 2r@ drop -rot 2>r) (x r twelve add, x x ld16, x pushd, ret,) \ TODO: weird to have this before defining do/loop
 
 : postpone parse-name >counted find 1 = if call, then ; immediate \ only works for immediate words -- TODO: error for not found or non-immediate
 
