@@ -20,6 +20,7 @@ unsigned short next() {
 int main(void) {
     readBlock(0, 0, sizeof(mem));
     //int count = 0; while (count++ < 1000) {
+    short t;
     while (1) {
         unsigned short c = next();
         if ((c & 1) == 0) { // call?
@@ -63,7 +64,7 @@ int main(void) {
                     case 23: STACK(d, -1); break; // DROP - Drop top of stack
                     case 24: STACK(d, 1); X = Y; break; // DUP - Duplicate top of stack
                     case 25: STACK(d, 1); X = Z; break; // OVER - yx -> yxy
-                    case 26: short t = X; X = Y; Y = t; break; // SWAP - yx -> xy
+                    case 26: t = X; X = Y; Y = t; break; // SWAP - yx -> xy
                     case 27: STACK(r, 1); R = X; STACK(d, -1); break; // PUSH - Push top of data stack to return stack
                     case 28: STACK(d, 1); X = R; STACK(r, -1); break; // POP - Pop top of return stack to data stack
                     case 29: STACK(d, 1); X = R; break; // PEEK - Copy top of return stack to data stack
