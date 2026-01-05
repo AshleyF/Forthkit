@@ -124,7 +124,7 @@ header, : ] header, ] ;
 
 \ some of these are no-ops for us, but are standard and should be used for portability
 : align ; \ ( -- ) reserve space to align data space pointer (no-op on SM16) \ TODO: implement?;
-: aligned ; \ ( addr -- addr ) align address (no-op on SM16) \ TODO: implement?;
+: aligned ; \ ( addr -- addr ) align address (no-op on SM16) \ TODO: implement?
 : chars ; \ ( x -- n-chars ) size in address units of n-chars (no-op)
 
 : char+ 1+ ; \ ( addr -- addr ) add size of char to address (1+)

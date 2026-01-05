@@ -74,6 +74,8 @@ header, : ] header, ] ;
 
 \ -- ADD MISSING PRIMITIVES ----------------------------------------------------
 
+: rshift [ x popd,  y popd,  x y x shr,  x pushd, ] ; \ ( y x -- result ) right shift
+
 : nand [ x popd,  y popd,  x y x nand,  x pushd, ] ; \ ( y x -- not-and ) not and (non-standard)
 : invert [ x d ld16,  x x not,  x d st16, ] ; \ ( x -- result ) invert bits
 : negate [ x d ld16,  x x not,  x x one add,  x d st16, ] ; \ ( x -- result ) arithetic inverse (invert 1+) (0 swap -)
@@ -201,7 +203,7 @@ header, : ] header, ] ;
 : do \ ( limit start -- ) ( C: -- false addr ) \ begin do-loop (immediate 2>r begin false)
            ['] 2>r call,
                    false \ no addresses to patch (initially)
-                   begin ; immediate
+          postpone begin ; immediate
 
 : ?do \ ( limit start -- ) ( C: -- false addr true addr )
           ['] 2dup call,
@@ -216,7 +218,7 @@ header, : ] header, ] ;
                    branch,
                    -rot true -rot ; immediate \ patch to loop (swap under if address)
 
-: loop, \ ( C: addr -- )
+: loop \ ( C: addr -- )
                  1 literal,
             ['] r> call,
              ['] + call,
@@ -224,10 +226,9 @@ header, : ] header, ] ;
           ['] over call,
             ['] >r call,
              ['] < call,
-                   [ if swap again then ]
-\                   if,
-\                   swap again,
-\                   then,
+                   postpone if ( if, -> if )
+                   swap postpone again ( again, -> again )
+                   postpone then ( then, -> then, )
                    begin while
                    patch,
                    repeat

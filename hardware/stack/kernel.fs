@@ -66,6 +66,9 @@ skip, \ skip dictionary
     dup, 10    literal, div, dup, 48 literal, add, emit,    10 literal, mul, sub,
                                   48 literal, add, emit, ret,
 
+\ (clear-data) empty return stack (non-standard) NOTE: not applicable
+\ (clear-return) empty return stack (non-standard) NOTE: not applicable
+
 \ @ ( addr -- ) fetch 16-bit value
 0 header, @
   ld16+, nip, ret,
@@ -94,7 +97,7 @@ skip, \ skip dictionary
 0 header, <>
   sub, ( zero if equal ) if, true literal, else, false literal, then, ret, \ TODO: seems "brute force"
 
-0 header, sign-bit \ sign bit of top of stack to 1s place (non-standard)
+0 header, sign-bit \ sign-bit ( x -- x ) sign bit of top of stack to 1s place (non-standard)
   15 literal, shr, ret,
 
 \ < ( y x -- b ) true if y less than x (- 0<) TODO: handle overflow (see bootstrap)!
@@ -136,9 +139,31 @@ skip, \ skip dictionary
 0 header, bl
   32 literal, ret,
 
+\ emit ( char -- ) write to console NOTE: using assembler emit, below instead
+
 \ cr ( -- ) cause newline (10 emit)
 0 header, cr
   10 literal, emit, ret,
+
+\ r> ( -- x ) ( R: x -- ) move x from return stack NOTE: using assembler r>, below instead
+\ >r ( x -- ) ( R: x -- ) move x to return stack NOTE: using assembler >r, below instead
+\ r@ ( -- x ) ( R: x -- x ) copy x from return stack NOTE: using assembler r@, below instead
+\ 2>r ( y x -- ) ( R: -- y x ) move y x pair to return stack NOTE: using assembler 2r>, below instead
+\ 2r> ( -- y x ) ( R: y x -- ) move x from return stack NOTE: using assembler 2r>, below instead
+\ 2r@ ( -- y x ) ( R: y x -- y x ) copy y x pair from return stack NOTE: using assembler 2r@, below instead
+\ 2dup ( y x -- y x y x ) duplicate top two stack values NOTE: using assembler 2dup, below instead
+\ + ( y x -- sum ) addition NOTE: using assembler +, below instead
+\ - ( y x -- differece ) subtraction NOTE: using assembler -, below instead
+\ * ( y x -- product ) subtraction NOTE: using assembler *, below instead
+\ over ( y x -- y x y ) copy second stack value to top NOTE: using assembler over, below instead
+\ swap ( y x -- x y ) swap top two stack values NOTE: using assembler swap, below instead
+\ dup ( x -- x x ) duplicate top stack value NOTE: using assembler dup, below instead
+\ drop ( x -- ) remove top stack value NOTE: using assembler drop, below instead
+\ 2drop ( y x -- ) remove top two stack values NOTE: using assembler 2drop, below instead
+\ nip ( y x -- x ) drop second stack value NOTE: using assembler nip, below instead
+\ tuck ( y x -- x y x ) copy top stack value under second value NOTE: using assembler tuck, below instead
+\ key ( -- char ) read from console NOTE: using assembler key, below instead
+\ and ( y x -- result ) logical/bitwise and NOTE: using assembler and, below instead
 
 ( --- memory ----------------------------------------------------------------- )
 
@@ -734,6 +759,8 @@ $80 header, literal, \ (used by interpreter)
               then,
               ret,
 
+( --- more interpreter ------------------------------------------------------- )
+
 \ interpret ( c-addr u -- ) (implementation defined)
 0 header, interpret
         ' >counted call,
@@ -853,6 +880,8 @@ $80 header, literal, \ (used by interpreter)
              then,
              ret,
 
+\ c, ( x -- ) append x chars in newly reserved space (here c! 1 chars allot) NOTE: using assembler c, instead
+
 \ header, ( "<spaces>name -- ) append header to dictionary (non-standard, note: no flag)
 0 header, header,
           ' align, call, \ aligned header + 6 bytes, code is even-aligned
@@ -906,6 +935,7 @@ $80 header, ;
                ' [ call,
             ' ret, call,
                    ret,
+
 
 0 header, swap \ (used by bootstrap)
   swap, ret,
