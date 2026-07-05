@@ -17,7 +17,7 @@ int main(void) {
             case 8: reg[x] = getc(stdin); break; // IN
             case 9: putc(reg[x], stdout); break; // OUT
             case 14: reg[x] = (signed char)NEXT; break; // LIT8
-            default: // instructions that need a second byte
+            default: { // instructions that need a second byte
                 unsigned char j = NEXT;
                 unsigned char y = HIGH(j);
                 unsigned char z = LOW(j);
@@ -40,6 +40,8 @@ int main(void) {
                     case 15: if (reg[x] == 0) reg[z] = reg[y]; break; // CP?
                     default: printf("Invalid instruction! (%i)\n", i); return 1;
                 }
+                break;
+            }
         }
     }
 }
